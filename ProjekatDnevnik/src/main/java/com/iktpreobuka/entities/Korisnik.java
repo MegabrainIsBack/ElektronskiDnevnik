@@ -10,6 +10,7 @@ import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
@@ -19,7 +20,8 @@ import com.iktpreobuka.enums.Role;
 
 @Entity
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-@Table(name = "Korisnici")
+@Table(name = "Korisnici"/*, uniqueConstraints={@UniqueConstraint(columnNames={"KorisnickoIme", 
+		"jmbg", "EmailAdresa", "PIN"})}*/)
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name="TipKorisnika", discriminatorType = DiscriminatorType.STRING)
 public class Korisnik {
@@ -27,7 +29,7 @@ public class Korisnik {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name="IdKorisnika")
-	private Integer Id;
+	private Integer id;
 	
 	@NotNull(message = "Morate unijeti ime.")
 	@Column(name="Ime")
@@ -39,11 +41,11 @@ public class Korisnik {
 	private String prezime;
 	
 	@NotNull(message = "Morate unijeti JMBG.")
-	@Column(name="JMBG")
+	@Column(name="JMBG", unique=true)
 	private String jmbg;
 	
 	@NotNull(message = "Morate unijeti korisnicko ime.")
-	@Column(name="KorisnickoIme")
+	@Column(name="KorisnickoIme", unique=true)
 	private String username;
 	
 	@NotNull(message = "Morate unijeti lozinku.")
@@ -53,13 +55,10 @@ public class Korisnik {
 	@NotNull(message = "Morate unijeti email adresu")
 	@Pattern(regexp = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"+ "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$",
 	message="Nepravilno unesena email adresa.")
-	@Column(name="EmailAdresa")
+	@Column(name="EmailAdresa", unique=true)
 	private String email;
 	
-	
-	@NotNull(message = "Morate unijeti PIN.")
-	@Pattern(regexp = "^[anru][0-9]{5,5}$", message="Nepravilno unesen PIN.")
-	@Column(name="PIN")
+	@Column(name="PIN", unique=true)
 	private String pin;
 	
 	@Column(name="Uloga")
@@ -70,11 +69,11 @@ public class Korisnik {
 	}
 
 	public Integer getId() {
-		return Id;
+		return id;
 	}
 
 	public void setId(Integer id) {
-		Id = id;
+		this.id = id;
 	}
 
 	public String getIme() {
