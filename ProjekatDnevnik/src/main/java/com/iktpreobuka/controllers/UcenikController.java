@@ -7,12 +7,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.iktpreobuka.controllers.utilities.PINGenerator;
+import com.iktpreobuka.entities.Nastavnik;
 import com.iktpreobuka.entities.RoditeljMajka;
 import com.iktpreobuka.entities.RoditeljOtac;
 import com.iktpreobuka.entities.Ucenik;
@@ -60,19 +62,53 @@ public class UcenikController {
 		otac.setIme(noviUcenik.getImeOca());
 		otac.setPrezime(noviUcenik.getPrezime());
 		otac.setUloga(Role.ROLE_FATHER);
+		otac.setBrojDjece((otac.getBrojDjece())+1);
+		otac.setPin(PINGenerator.PGenerator("roditelj"));
 		otacRepository.save(otac);
 		
 		RoditeljMajka majka= new RoditeljMajka();
 		majka.setIme(noviUcenik.getImeMajke());
 		majka.setPrezime(noviUcenik.getPrezime());
 		majka.setUloga(Role.ROLE_MOTHER);
+		majka.setBrojDjece((majka.getBrojDjece())+1);
+		majka.setPin(PINGenerator.PGenerator("roditelj"));
 		majkaRepository.save(majka);
+		
+		ucenik.setTata(otac);
+		ucenik.setMama(majka);
 		
 		if(result.hasErrors()) {
 			return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
 			}
 		ucenikRepository.save(ucenik);
 		return new ResponseEntity<>(ucenik, HttpStatus.OK);
+	}
+	
+	@RequestMapping(method= RequestMethod.GET, value="/pribaviSve")
+	public Iterable<Ucenik> sviUcenici() {
+		Iterable<Ucenik> ucenici = ucenikRepository.findAll();
+		return ucenici;
+	}
+	
+	
+	@RequestMapping(method = RequestMethod.PUT, value="/izmjeniUcenika/{pin}")
+	public	Ucenik izmjeniNastavnika(@PathVariable String pin,@RequestBody Ucenik noviUcenik) {
+		Ucenik ucenik= ucenikRepository.getByPin(pin);
+		ucenik.setIme(noviUcenik.getIme());
+		ucenik.setPrezime(noviUcenik.getPrezime());
+		ucenik.setUsername(noviUcenik.getUsername());
+		ucenik.setPassword(noviUcenik.getPassword());
+		ucenik.setEmail(noviUcenik.getEmail());
+		ucenik.setOdeljenje(noviUcenik.getOdeljenje());
+		ucenikRepository.save(ucenik);
+		return ucenik;
+	}
+	
+	@RequestMapping(method= RequestMethod.DELETE, value="/obrisiUcenika/{id}")
+	public	Ucenik obrisiNastavnika(@PathVariable Integer id) {
+		Ucenik ucenik=ucenikRepository.getById(id);
+		ucenikRepository.deleteById(id);
+		return  ucenik;
 	}
 
 }
