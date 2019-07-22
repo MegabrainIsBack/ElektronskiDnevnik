@@ -31,7 +31,7 @@ public class Korisnik {
 	@Column(name="IdKorisnika")
 	private Integer id;
 	
-	@NotNull(message = "Morate unijeti ime.")
+	//@NotNull(message = "Morate unijeti ime.")
 	@Column(name="Ime")
 	private String ime;
 	
@@ -40,19 +40,19 @@ public class Korisnik {
 	@Column(name="Prezime")
 	private String prezime;
 	
-	@NotNull(message = "Morate unijeti JMBG.")
+	//@NotNull(message = "Morate unijeti JMBG.")
 	@Column(name="JMBG", unique=true)
 	private String jmbg;
 	
-	@NotNull(message = "Morate unijeti korisnicko ime.")
+	//@NotNull(message = "Morate unijeti korisnicko ime.")
 	@Column(name="KorisnickoIme", unique=true)
 	private String username;
 	
-	@NotNull(message = "Morate unijeti lozinku.")
+	//@NotNull(message = "Morate unijeti lozinku.")
 	@Column(name="Lozinka")
 	private String password;
 	
-	@NotNull(message = "Morate unijeti email adresu")
+	//@NotNull(message = "Morate unijeti email adresu")
 	@Pattern(regexp = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"+ "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$",
 	message="Nepravilno unesena email adresa.")
 	@Column(name="EmailAdresa", unique=true)
