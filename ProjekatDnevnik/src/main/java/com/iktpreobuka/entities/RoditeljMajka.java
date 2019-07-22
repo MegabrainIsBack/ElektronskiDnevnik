@@ -1,14 +1,19 @@
 package com.iktpreobuka.entities;
 
+import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-@DiscriminatorValue("Majka")
+//@DiscriminatorValue("Majka")
 public class RoditeljMajka extends Korisnik{
+	
 	
 	private Integer brojDjece=0;
 	
