@@ -52,13 +52,13 @@ public class OtacController {
 		return otac;
 	}
 	
-	@RequestMapping(method= RequestMethod.GET, value="/TatinaDjeca/{pin}")
+	/*@RequestMapping(method= RequestMethod.GET, value="/TatinaDjeca/{pin}")
 	public Set<Ucenik> tatinaDjeca(@PathVariable String pin) {
 		RoditeljOtac otac = otacRepository.getByPin(pin);
 		//Set<Ucenik> djeca=new HashSet<>();
 		Set<Ucenik> djeca= otac.getTatinaDjeca();
 		return djeca;
-	}
+	}*/
 	
 	@RequestMapping(method= RequestMethod.DELETE, value="/obrisiOca/{id}")
 	public	RoditeljOtac obrisiOca(@PathVariable Integer id) {

@@ -6,4 +6,8 @@ import com.iktpreobuka.entities.RoditeljMajka;
 
 public interface MajkaRepository extends CrudRepository<RoditeljMajka, Integer>{
 
+	RoditeljMajka getByPin(String pin);
+
+	RoditeljMajka getById(Integer id);
+
 }
