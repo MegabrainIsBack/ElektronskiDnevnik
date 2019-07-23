@@ -13,10 +13,12 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-public class Ucenik extends Korisnik{
+public class Ucenik extends Korisnik {
 	
 	
-	@ManyToOne(cascade=CascadeType.REFRESH, fetch=FetchType.LAZY)
+	
+	
+	@ManyToOne(cascade=CascadeType.REFRESH, fetch=FetchType.EAGER)
 	@JoinColumn(name="IdOca")
 	private RoditeljOtac tata;
 	

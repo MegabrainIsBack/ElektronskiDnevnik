@@ -24,7 +24,7 @@ import com.iktpreobuka.repositories.OtacRepository;
 import com.iktpreobuka.repositories.UcenikRepository;
 
 @RestController
-@RequestMapping(value= "/ucenici")
+@RequestMapping(value= "/ucenik")
 public class UcenikController {
 	
 	@Autowired
@@ -58,12 +58,16 @@ public class UcenikController {
 		String user="ucenik";
 		ucenik.setPin(PINGenerator.PGenerator(user));
 		
+		
+		
 		RoditeljOtac otac= new RoditeljOtac();
 		otac.setIme(noviUcenik.getImeOca());
 		otac.setPrezime(noviUcenik.getPrezime());
 		otac.setUloga(Role.ROLE_FATHER);
 		otac.setBrojDjece((otac.getBrojDjece())+1);
 		otac.setPin(PINGenerator.PGenerator("roditelj"));
+		//otac.getTatinaDjeca().add(noviUcenik);
+		//otac.dodajDijete(noviUcenik);
 		otacRepository.save(otac);
 		
 		RoditeljMajka majka= new RoditeljMajka();
@@ -76,11 +80,13 @@ public class UcenikController {
 		
 		ucenik.setTata(otac);
 		ucenik.setMama(majka);
+		ucenikRepository.save(ucenik);
+		
 		
 		if(result.hasErrors()) {
 			return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
 			}
-		ucenikRepository.save(ucenik);
+		
 		return new ResponseEntity<>(ucenik, HttpStatus.OK);
 	}
 	

@@ -23,7 +23,7 @@ import com.iktpreobuka.repositories.KorisnikRepository;
 
 
 @RestController
-@RequestMapping(value= "/korisnici")
+@RequestMapping(value= "/korisnik")
 public class KorisnikController {
 	
 	@Autowired

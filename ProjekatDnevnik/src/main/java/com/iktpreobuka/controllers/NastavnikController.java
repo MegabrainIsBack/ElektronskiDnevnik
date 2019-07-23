@@ -21,7 +21,7 @@ import com.iktpreobuka.enums.Role;
 import com.iktpreobuka.repositories.NastavnikRepository;
 
 @RestController
-@RequestMapping(value= "/nastavnici")
+@RequestMapping(value= "/nastavnik")
 public class NastavnikController {
 	private final Logger logger = (Logger) LoggerFactory.getLogger(this.getClass());
 	

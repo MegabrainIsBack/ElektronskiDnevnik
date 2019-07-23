@@ -17,14 +17,19 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "tatinaDjeca"})
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class RoditeljOtac extends Korisnik{
 	
 	
 	@JsonIgnore
 	@JsonBackReference
-	@OneToMany(mappedBy="id", fetch=FetchType.LAZY, cascade=CascadeType.REFRESH)
+	@OneToMany(mappedBy="id", fetch=FetchType.EAGER, cascade=CascadeType.REFRESH)
 	private Set<Ucenik> tatinaDjeca= new HashSet<Ucenik>();
+	
+	/*public void dodajDijete(Ucenik ucenik) {
+	    this.tatinaDjeca.add(ucenik);
+	    //ucenik.setTata(this);
+	}*/
 	
 	public Set<Ucenik> getTatinaDjeca() {
 		return tatinaDjeca;

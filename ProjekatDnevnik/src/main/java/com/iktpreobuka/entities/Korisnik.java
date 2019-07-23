@@ -30,7 +30,7 @@ public class Korisnik {
 	private String ime;
 	
 	
-	@NotNull(message = "Morate unijeti prezime.")
+	//@NotNull(message = "Morate unijeti prezime.")
 	@Column(name="Prezime")
 	private String prezime;
 	
