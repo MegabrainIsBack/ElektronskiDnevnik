@@ -4,12 +4,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.OneToMany;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -26,10 +22,10 @@ public class RoditeljOtac extends Korisnik{
 	@OneToMany(mappedBy="id", fetch=FetchType.EAGER, cascade=CascadeType.REFRESH)
 	private Set<Ucenik> tatinaDjeca= new HashSet<Ucenik>();
 	
-	/*public void dodajDijete(Ucenik ucenik) {
+	public void dodajDijete(Ucenik ucenik) {
 	    this.tatinaDjeca.add(ucenik);
 	    //ucenik.setTata(this);
-	}*/
+	}
 	
 	public Set<Ucenik> getTatinaDjeca() {
 		return tatinaDjeca;

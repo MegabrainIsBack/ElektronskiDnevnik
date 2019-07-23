@@ -14,12 +14,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.iktpreobuka.controllers.utilities.PINGenerator;
-import com.iktpreobuka.entities.Nastavnik;
+import com.iktpreobuka.entities.Odeljenje;
 import com.iktpreobuka.entities.RoditeljMajka;
 import com.iktpreobuka.entities.RoditeljOtac;
 import com.iktpreobuka.entities.Ucenik;
 import com.iktpreobuka.enums.Role;
 import com.iktpreobuka.repositories.MajkaRepository;
+import com.iktpreobuka.repositories.OdeljenjeRepository;
 import com.iktpreobuka.repositories.OtacRepository;
 import com.iktpreobuka.repositories.UcenikRepository;
 
@@ -35,6 +36,9 @@ public class UcenikController {
 	
 	@Autowired
 	MajkaRepository majkaRepository;
+	
+	@Autowired
+	OdeljenjeRepository odeljenjeRepository;
 	
 	private String createErrorMessage(BindingResult result) {
 		return result.getAllErrors().stream().map(ObjectError::getDefaultMessage)
@@ -60,6 +64,7 @@ public class UcenikController {
 		
 		
 		
+		
 		RoditeljOtac otac= new RoditeljOtac();
 		otac.setIme(noviUcenik.getImeOca());
 		otac.setPrezime(noviUcenik.getPrezime());
@@ -67,7 +72,7 @@ public class UcenikController {
 		otac.setBrojDjece((otac.getBrojDjece())+1);
 		otac.setPin(PINGenerator.PGenerator("roditelj"));
 		//otac.getTatinaDjeca().add(noviUcenik);
-		//otac.dodajDijete(noviUcenik);
+		otac.dodajDijete(noviUcenik);
 		otacRepository.save(otac);
 		
 		RoditeljMajka majka= new RoditeljMajka();
@@ -82,6 +87,9 @@ public class UcenikController {
 		ucenik.setMama(majka);
 		ucenikRepository.save(ucenik);
 		
+		Odeljenje odeljenje = odeljenjeRepository.getByIme(noviUcenik.getOdeljenje());
+		odeljenje.getUcenici().add(ucenik);
+		odeljenjeRepository.save(odeljenje);
 		
 		if(result.hasErrors()) {
 			return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
