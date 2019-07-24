@@ -24,7 +24,7 @@ public class Uloga {
 	@Column(name="Uloga")
 	private Role ime;
 	
-	Uloga(){
+	public Uloga(){
 		
 	}
 

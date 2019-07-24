@@ -55,12 +55,10 @@ public class UcenikController {
 	@RequestMapping(method = RequestMethod.POST, value="/dodajUcenika/izFajla")
 	public ResponseEntity<?> dodajUcenikaIzFajla() throws IOException {
 	BufferedReader ulaz = null; 
-	BufferedWriter izlaz = null; 
 	ArrayList <Ucenik> ucenici= new ArrayList<Ucenik>();
 	
 	try { 
-			ulaz = new BufferedReader(new FileReader("..\\ProjekatDnevnik\\src\\main\\resources\\Ucenici")); 
-			izlaz = new BufferedWriter(new FileWriter("..\\ProjekatDnevnik\\src\\main\\resources\\IzlaznaUcenici")); 
+			ulaz = new BufferedReader(new FileReader("..\\ProjekatDnevnik\\src\\main\\resources\\Ucenici"));
 			String c;
 			
 			while ((c = ulaz.readLine()) != null) { 
@@ -70,39 +68,30 @@ public class UcenikController {
 				
 				String s1=s.next(); 
 				ucenik.setIme(s1);
-				izlaz.write(s1+", ");
 				
 				String s2=s.next();
 				ucenik.setPrezime(s2);
-				izlaz.write(s2+", ");
 				
 				String s3=s.next();
 				ucenik.setJmbg(s3);
-				izlaz.write(s3+", ");
 				
 				String s6=s.next();
 				ucenik.setEmail(s6);
-				izlaz.write(s6+", ");
 				
 				String s4=s.next();
 				ucenik.setUsername(s4);
-				izlaz.write(s4+", ");
 				
 				String s5=s.next();
 				ucenik.setPassword(s5);
-				izlaz.write(s5+", ");
 				
 				String s7=s.next();
 				ucenik.setOdeljenje(s7);
-				izlaz.write(s7+"\n");
 				
 				String s8=s.next();
 				ucenik.setImeOca(s8);
-				izlaz.write(s8+"\n");
 				
 				String s9=s.next();
 				ucenik.setImeMajke(s9);
-				izlaz.write(s9+"\n");
 				
 				ucenik.setUloga(Role.ROLE_STUDENT);
 				
@@ -152,9 +141,6 @@ public class UcenikController {
 	finally {
 		if (ulaz != null) { 
 			ulaz.close(); 
-		} 
-		if (izlaz != null) {
-			izlaz.close();
 		} 
 	}
 	return new ResponseEntity<>(ucenici, HttpStatus.OK);
