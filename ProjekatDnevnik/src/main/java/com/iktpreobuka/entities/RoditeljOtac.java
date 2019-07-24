@@ -19,7 +19,7 @@ public class RoditeljOtac extends Korisnik{
 	
 	@JsonIgnore
 	@JsonBackReference
-	@OneToMany(mappedBy="id", fetch=FetchType.EAGER, cascade=CascadeType.REFRESH)
+	@OneToMany(mappedBy="pin", fetch=FetchType.EAGER, cascade=CascadeType.REFRESH)
 	private Set<Ucenik> tatinaDjeca= new HashSet<Ucenik>();
 	
 	public void dodajDijete(Ucenik ucenik) {

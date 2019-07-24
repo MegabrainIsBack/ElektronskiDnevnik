@@ -1,14 +1,17 @@
 package com.iktpreobuka.entities;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.IdClass;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
-import javax.persistence.Transient;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -52,11 +55,13 @@ public class Korisnik {
 	@Column(name="EmailAdresa", unique=true)
 	private String email;
 	
+	
 	@Column(name="PIN", unique=true)
 	private String pin;
 	
+	@ElementCollection 
 	@Column(name="Uloga")
-	private Role uloga;
+	private List<Role> uloge= new ArrayList<Role>();
 	
 	public Korisnik() {
 		
@@ -126,12 +131,12 @@ public class Korisnik {
 		this.pin = pin;
 	}
 
-	public Role getUloga() {
-		return uloga;
+	public List<Role> getUloge() {
+		return uloge;
 	}
 
-	public void setUloga(Role uloga) {
-		this.uloga = uloga;
+	public void setUloge(List<Role> uloge) {
+		this.uloge = uloge;
 	}
 
 }

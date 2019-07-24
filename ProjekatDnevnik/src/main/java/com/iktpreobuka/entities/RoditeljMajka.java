@@ -24,7 +24,7 @@ public class RoditeljMajka extends Korisnik{
 	
 	@JsonIgnore
 	@JsonBackReference
-	@OneToMany(mappedBy="id", fetch=FetchType.LAZY, cascade=CascadeType.REFRESH)
+	@OneToMany(mappedBy="pin", fetch=FetchType.LAZY, cascade=CascadeType.REFRESH)
 	private Set<Ucenik> maminaDjeca= new HashSet<Ucenik>();
 	
 	

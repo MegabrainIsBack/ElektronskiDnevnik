@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -47,6 +49,8 @@ public class UcenikController {
 	@Autowired
 	OdeljenjeRepository odeljenjeRepository;
 	
+	private final Logger logger = (Logger) LoggerFactory.getLogger(this.getClass());
+	
 	private String createErrorMessage(BindingResult result) {
 		return result.getAllErrors().stream().map(ObjectError::getDefaultMessage)
 		.collect(Collectors.joining(" "));
@@ -54,6 +58,9 @@ public class UcenikController {
 	
 	@RequestMapping(method = RequestMethod.POST, value="/dodajUcenika/izFajla")
 	public ResponseEntity<?> dodajUcenikaIzFajla() throws IOException {
+		
+		logger.info("INFO: /dodajUcenika/izFajla zapocet.");
+		
 	BufferedReader ulaz = null; 
 	ArrayList <Ucenik> ucenici= new ArrayList<Ucenik>();
 	
@@ -68,64 +75,101 @@ public class UcenikController {
 				
 				String s1=s.next(); 
 				ucenik.setIme(s1);
+				logger.info("Ime: " +s1);
 				
 				String s2=s.next();
 				ucenik.setPrezime(s2);
+				logger.info("Prezime: " +s2);
 				
 				String s3=s.next();
 				ucenik.setJmbg(s3);
+				logger.info("JMBG: " +s3);
 				
 				String s6=s.next();
 				ucenik.setEmail(s6);
+				logger.info("Email: " +s6);
 				
 				String s4=s.next();
 				ucenik.setUsername(s4);
+				logger.info("Username: " +s4);
 				
 				String s5=s.next();
 				ucenik.setPassword(s5);
+				logger.info("Password: " +s5);
 				
 				String s7=s.next();
 				ucenik.setOdeljenje(s7);
+				logger.info("Odeljenje: " +s7);
 				
 				String s8=s.next();
 				ucenik.setImeOca(s8);
+				logger.info("Ime oca: " +s8);
 				
 				String s9=s.next();
 				ucenik.setImeMajke(s9);
+				logger.info("Ime majke: " +s9);
 				
-				ucenik.setUloga(Role.ROLE_STUDENT);
+				ucenik.getUloge().add(Role.ROLE_STUDENT);
+				logger.info("Uloga: Ucenik");
 				
 				String user="ucenik";
-				ucenik.setPin(PINGenerator.PGenerator(user));
+				String pin=PINGenerator.PGenerator(user);
+				ucenik.setPin(pin);
+				logger.info("PIN: "+ pin);
 				
 				//ucenikRepository.save(ucenik);
 				ucenici.add(ucenik);
+				logger.info("Ucenik dodan u listu ucenika");
 				
+				logger.info("Zapoceto setovanje oca");
 				RoditeljOtac otac= new RoditeljOtac();
 				otac.setIme(s8);
+				logger.info("Ime oca: " +s8);
 				otac.setPrezime(s2);
-				otac.setUloga(Role.ROLE_FATHER);
+				logger.info("Prezime oca: " +s2);
+				otac.getUloge().add(Role.ROLE_FATHER);
+				logger.info("Uloga: Otac");
 				otac.setBrojDjece((otac.getBrojDjece())+1);
-				otac.setPin(PINGenerator.PGenerator("roditelj"));
+				logger.info("Broj djece: PLACEHOLDER");
+				String pinO=PINGenerator.PGenerator("roditelj");
+				otac.setPin(pinO);
+				logger.info("PIN: "+ pin);
 				//otac.getTatinaDjeca().add(noviUcenik);
 				//otac.dodajDijete(noviUcenik);
 				otacRepository.save(otac);
+				logger.info("Podaci o ocu sacuvani.");
 				
+				logger.info("Zapoceto setovanje majke");
 				RoditeljMajka majka= new RoditeljMajka();
 				majka.setIme(s9);
+				logger.info("Ime majke: " +s9);
 				majka.setPrezime(s2);
-				majka.setUloga(Role.ROLE_MOTHER);
+				logger.info("Prezime majke: " +s2);
+				majka.getUloge().add(Role.ROLE_MOTHER);
+				logger.info("Uloga: Majka");
 				majka.setBrojDjece((majka.getBrojDjece())+1);
-				majka.setPin(PINGenerator.PGenerator("roditelj"));
+				logger.info("Broj djece: PLACEHOLDER");
+				String pinM=PINGenerator.PGenerator("roditelj");
+				majka.setPin(pinM);
+				logger.info("PIN: "+ pin);
 				majkaRepository.save(majka);
+				logger.info("Podaci o majci sacuvani.");
 				
+				logger.info("Zapoceto povezivanje roditelja i ucenika");
 				ucenik.setTata(otac);
+				logger.info("Setovan otac za ucenika");
 				ucenik.setMama(majka);
+				logger.info("Setovana majka za ucenika");
 				ucenikRepository.save(ucenik);
+				logger.info("Podaci o uceniku sacuvani.");
 				
+				logger.info("Zapoceto povezivanje ucenika i odeljenja");
 				Odeljenje odeljenje = odeljenjeRepository.getByIme(s7);
+				logger.info("Odeljenje: "+odeljenje);
 				odeljenje.getUcenici().add(ucenik);
+				logger.info("Ucenik dodan u odeljenje");
 				odeljenjeRepository.save(odeljenje);
+				logger.info("Podaci o vezi ucenika i odeljenja sacuvani.");
 				
 				s.close();
 			}
@@ -158,7 +202,7 @@ public class UcenikController {
 		ucenik.setOdeljenje(noviUcenik.getOdeljenje());
 		ucenik.setImeOca(noviUcenik.getImeOca());
 		ucenik.setImeMajke(noviUcenik.getImeMajke());
-		ucenik.setUloga(Role.ROLE_STUDENT);
+		ucenik.getUloge().add(Role.ROLE_STUDENT);
 		
 		String user="ucenik";
 		ucenik.setPin(PINGenerator.PGenerator(user));
@@ -169,7 +213,7 @@ public class UcenikController {
 		RoditeljOtac otac= new RoditeljOtac();
 		otac.setIme(noviUcenik.getImeOca());
 		otac.setPrezime(noviUcenik.getPrezime());
-		otac.setUloga(Role.ROLE_FATHER);
+		otac.getUloge().add(Role.ROLE_FATHER);;
 		otac.setBrojDjece((otac.getBrojDjece())+1);
 		otac.setPin(PINGenerator.PGenerator("roditelj"));
 		//otac.getTatinaDjeca().add(noviUcenik);
@@ -179,7 +223,7 @@ public class UcenikController {
 		RoditeljMajka majka= new RoditeljMajka();
 		majka.setIme(noviUcenik.getImeMajke());
 		majka.setPrezime(noviUcenik.getPrezime());
-		majka.setUloga(Role.ROLE_MOTHER);
+		majka.getUloge().add(Role.ROLE_MOTHER);
 		majka.setBrojDjece((majka.getBrojDjece())+1);
 		majka.setPin(PINGenerator.PGenerator("roditelj"));
 		majkaRepository.save(majka);
