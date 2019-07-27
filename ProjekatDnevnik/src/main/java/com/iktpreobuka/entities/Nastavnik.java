@@ -5,38 +5,44 @@ import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.iktpreobuka.compositeKeys.JoinTables.NPVezna;
 
 @Entity
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Nastavnik extends Korisnik{
+
+	@OneToMany(mappedBy = "nastavnik",
+            cascade = CascadeType.ALL,fetch = FetchType.EAGER)
+	private List<NPVezna> npVeza= new ArrayList<NPVezna>();
 	
-	//@JsonIgnore
-	//@NotNull(message = "Morate unijeti predmet.")
-	//@ElementCollection
-	
-	@JsonBackReference
-	@OneToMany(cascade=CascadeType.ALL)
-	/*@JoinTable(name = "PredmetiKojeNastavnikPredaje" ,joinColumns = {
-	        @JoinColumn(name = "IdNastavnika", unique=false) },
-	        inverseJoinColumns = { @JoinColumn(name = "IdPredmeta", referencedColumnName ="IdPredmeta", unique=false) })*/
-	private List<Predmet> predmeti= new ArrayList<Predmet>();
-	
+	private Boolean aktivan=true;
 	private String imePredmeta;
 	
+	
+
 	public Nastavnik() {
-		
+		super();
+		// TODO Auto-generated constructor stub
 	}
 
-	public List<Predmet> getPredmeti() {
-		return predmeti;
+	public List<NPVezna> getNpVeza() {
+		return npVeza;
 	}
 
-	public void setPredmeti(List<Predmet> predmeti) {
-		this.predmeti = predmeti;
+	public void setNpVeza(List<NPVezna> npVeza) {
+		this.npVeza = npVeza;
+	}
+
+	public Boolean getAktivan() {
+		return aktivan;
+	}
+
+	public void setAktivan(Boolean aktivan) {
+		this.aktivan = aktivan;
 	}
 
 	public String getImePredmeta() {
@@ -46,6 +52,8 @@ public class Nastavnik extends Korisnik{
 	public void setImePredmeta(String imePredmeta) {
 		this.imePredmeta = imePredmeta;
 	}
+
+	
 
 
 }

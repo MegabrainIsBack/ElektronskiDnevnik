@@ -1,6 +1,6 @@
 package com.iktpreobuka.compositeKeys.JoinTables;
 
-import javax.persistence.AssociationOverride;
+/*import javax.persistence.AssociationOverride;
 import javax.persistence.AssociationOverrides;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
@@ -17,10 +17,10 @@ import com.iktpreobuka.entities.Predmet;
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Table(name = "PredmetiKojeNastavnikPredaje")
 @AssociationOverrides({
-    @AssociationOverride(name = "IdNastavnika",
-        joinColumns = @JoinColumn(name = "IdKorisnika")),
-    @AssociationOverride(name = "IdPredmeta",
-        joinColumns = @JoinColumn(name = "IdPredmeta")) })
+    @AssociationOverride(name = "idPredmeta",
+        joinColumns = @JoinColumn(name = "idPredmeta")),
+    @AssociationOverride(name = "id",
+        joinColumns = @JoinColumn(name = "id")) })
 public class PredmetiKojeNastavnikPredaje {
     // composite-id key
 	@EmbeddedId
@@ -52,5 +52,5 @@ public class PredmetiKojeNastavnikPredaje {
         getPrimaryKey().setPredmet(predmet);
     }
 
-}
+}*/
 

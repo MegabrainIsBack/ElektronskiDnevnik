@@ -20,7 +20,7 @@ import com.iktpreobuka.enums.Role;
 
 @Entity
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
+@Inheritance(strategy = InheritanceType.JOINED)
 public class Korisnik {
 	
 	@Id

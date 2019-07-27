@@ -1,6 +1,6 @@
 package com.iktpreobuka.compositeKeys.Keys;
 
-import java.io.Serializable;
+/*import java.io.Serializable;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Embeddable;
@@ -16,12 +16,12 @@ import com.iktpreobuka.entities.Predmet;
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class PredmetiKojeNastavnikPredajeId implements Serializable{
 	
-	@JsonIgnore
+	//@JsonIgnore
 	@JsonManagedReference
     @ManyToOne(cascade = CascadeType.ALL)
 	private Nastavnik nastavnik;
 	
-	@JsonIgnore
+	//@JsonIgnore
 	@JsonManagedReference
     @ManyToOne(cascade = CascadeType.ALL)
     private Predmet predmet;
@@ -42,4 +42,4 @@ public class PredmetiKojeNastavnikPredajeId implements Serializable{
         this.predmet = predmet;
     }
 
-}
+}*/

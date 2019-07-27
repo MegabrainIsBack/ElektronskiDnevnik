@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
@@ -20,13 +21,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.iktpreobuka.compositeKeys.JoinTables.NPVezna;
 import com.iktpreobuka.controllers.utilities.PINGenerator;
 import com.iktpreobuka.entities.Nastavnik;
-import com.iktpreobuka.entities.Odeljenje;
 import com.iktpreobuka.entities.Predmet;
-import com.iktpreobuka.entities.RoditeljMajka;
-import com.iktpreobuka.entities.RoditeljOtac;
 import com.iktpreobuka.enums.Role;
+import com.iktpreobuka.repositories.NPVRepository;
 import com.iktpreobuka.repositories.NastavnikRepository;
 import com.iktpreobuka.repositories.PredmetRepository;
 
@@ -41,6 +41,9 @@ public class NastavnikController {
 	@Autowired
 	PredmetRepository predmetRepository;
 	
+	@Autowired
+	NPVRepository npvRepository;
+	
 	private String createErrorMessage(BindingResult result) {
 		return result.getAllErrors().stream().map(ObjectError::getDefaultMessage)
 		.collect(Collectors.joining(" "));
@@ -52,7 +55,7 @@ public class NastavnikController {
 		logger.info("INFO: /dodajNastavnika/izFajla zapocet.");
 		
 	BufferedReader ulaz = null; 
-	ArrayList <Nastavnik> nastavnici= new ArrayList<Nastavnik>();
+	ArrayList <Nastavnik> nastavnici1= new ArrayList<Nastavnik>();
 	
 	try { 
 			ulaz = new BufferedReader(new FileReader("..\\ProjekatDnevnik\\src\\main\\resources\\Nastavnici"));
@@ -89,7 +92,6 @@ public class NastavnikController {
 				
 				String s7=s.next();
 				Predmet predmet=predmetRepository.getByIme(s7);
-				nastavnik.getPredmeti().add(predmet);
 				nastavnik.setImePredmeta(s7);
 				logger.info("Predmet: " +s7);
 				
@@ -101,16 +103,17 @@ public class NastavnikController {
 				nastavnik.setPin(pin);
 				logger.info("PIN: "+ pin);
 				
-				nastavnici.add(nastavnik);
+				nastavnici1.add(nastavnik);
 				logger.info("Nastavnik dodan u listu nastavnika");
 				
 				nastavnikRepository.save(nastavnik);
 				logger.info("Nastavnik sacuvan");
 				
-				logger.info("Zapoceto povezivanje nastavnika i predmeta");
-				predmet.getNastavnici().add(nastavnik);
-				logger.info("Nastavnik dodan predmetu");
-				predmetRepository.save(predmet);
+				NPVezna npv = new NPVezna();
+				npv.setPredmet(predmet);
+				npv.setNastavnik(nastavnik);
+				npvRepository.save(npv);
+				
 				logger.info("Podaci o vezi nastavnika i predmeta sacuvani.");
 				
 				s.close();
@@ -129,7 +132,7 @@ public class NastavnikController {
 			ulaz.close(); 
 		} 
 	}
-	return new ResponseEntity<>(nastavnici, HttpStatus.OK);
+	return new ResponseEntity<>(nastavnici1, HttpStatus.OK);
 }
 	
 	@RequestMapping(method = RequestMethod.POST, value="/dodajNastavnika")
@@ -142,8 +145,6 @@ public class NastavnikController {
 		nastavnik.setPassword(noviNastavnik.getPassword());
 		nastavnik.setEmail(noviNastavnik.getEmail());
 		Predmet predmet=predmetRepository.getByIme(noviNastavnik.getImePredmeta());
-		nastavnik.getPredmeti().add(predmet);
-		logger.info("Predmet: " +noviNastavnik.getImePredmeta());
 		nastavnik.getUloge().add(Role.ROLE_TEACHER);
 		
 		String user="nastavnik";
@@ -152,7 +153,16 @@ public class NastavnikController {
 		if(result.hasErrors()) {
 			return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
 			}
+		
 		nastavnikRepository.save(nastavnik);
+		logger.info("Nastavnik sacuvan");
+		
+		NPVezna npv = new NPVezna();
+		npv.setPredmet(predmet);
+		npv.setNastavnik(nastavnik);
+		npvRepository.save(npv);
+		logger.info("Podaci o vezi nastavnika i predmeta sacuvani.");
+		
 		return new ResponseEntity<>(nastavnik, HttpStatus.OK);
 	}
 	
@@ -162,32 +172,50 @@ public class NastavnikController {
 		return nastavnici;
 	}
 	
-	/*@RequestMapping(method= RequestMethod.GET, value="/poPredmetu/{predmet}")
-	public Iterable<Nastavnik> poPredmetu(@PathVariable String predmet ) {
-		Iterable<Nastavnik> nastavnici = nastavnikRepository.getByPredmet(predmet);
-		return nastavnici;
-	}*/
 	
-	@RequestMapping(method = RequestMethod.PUT, value="/izmjeniNastavnika/{pin}")
-	public	Nastavnik izmjeniNastavnika(@PathVariable String pin,@RequestBody Nastavnik noviNastavnik) {
-		Nastavnik nastavnik= nastavnikRepository.getByPin(pin);
+	@RequestMapping(method= RequestMethod.GET, value="/poId/{id}")
+	public Nastavnik nastavnikPoId(@PathVariable Integer id) {
+		Nastavnik nastavnik = nastavnikRepository.getById(id);
+		return nastavnik;
+	}
+
+	
+	@RequestMapping(method= RequestMethod.GET, value="/poPredmetu/{predmetIme}")
+	public List<Nastavnik> poPredmetu(@PathVariable String predmetIme ) {
+		Predmet predmet=predmetRepository.getByIme(predmetIme);
+		List<Nastavnik> nastavnici=nastavnikRepository.nastavnikPoPredmetu(predmet);
+		return nastavnici;
+	}
+	
+	@RequestMapping(method = RequestMethod.PUT, value="/izmjeniNastavnika/{id}")
+	public	ResponseEntity<?> izmjeniNastavnika(@PathVariable Integer id,@RequestBody Nastavnik noviNastavnik, BindingResult result) {
+		Nastavnik nastavnik= nastavnikRepository.getById(id);
 		nastavnik.setIme(noviNastavnik.getIme());
 		nastavnik.setPrezime(noviNastavnik.getPrezime());
 		nastavnik.setUsername(noviNastavnik.getUsername());
 		nastavnik.setPassword(noviNastavnik.getPassword());
 		nastavnik.setEmail(noviNastavnik.getEmail());
 		Predmet predmet=predmetRepository.getByIme(noviNastavnik.getImePredmeta());
-		nastavnik.getPredmeti().add(predmet);
-		logger.info("Dodan novi predmet: " +noviNastavnik.getImePredmeta());
-		nastavnik.getUloge().add(Role.ROLE_TEACHER);
+		
+		if(result.hasErrors()) {
+			return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
+			}
 		nastavnikRepository.save(nastavnik);
-		return nastavnik;
+		logger.info("Sacuvane izmjene.");
+		
+		NPVezna npv = new NPVezna();
+		npv.setPredmet(predmet);
+		npv.setNastavnik(nastavnik);
+		npvRepository.save(npv);
+		logger.info("Podaci o vezi nastavnika i predmeta sacuvani.");
+		
+		return new ResponseEntity<>(nastavnik, HttpStatus.OK);
 	}
 	
 	@RequestMapping(method= RequestMethod.DELETE, value="/obrisiNastavnika/{id}")
 	public	Nastavnik obrisiNastavnika(@PathVariable Integer id) {
 		Nastavnik nastavnik=nastavnikRepository.getById(id);
-		nastavnikRepository.deleteById(id);
+		nastavnik.setAktivan(false);
 		return  nastavnik;
 	}
 
