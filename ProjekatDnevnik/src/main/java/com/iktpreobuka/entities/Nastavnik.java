@@ -19,7 +19,6 @@ public class Nastavnik extends Korisnik{
             cascade = CascadeType.ALL,fetch = FetchType.EAGER)
 	private List<NPVezna> npVeza= new ArrayList<NPVezna>();
 	
-	private Boolean aktivan=true;
 	private String imePredmeta;
 	
 	
@@ -35,14 +34,6 @@ public class Nastavnik extends Korisnik{
 
 	public void setNpVeza(List<NPVezna> npVeza) {
 		this.npVeza = npVeza;
-	}
-
-	public Boolean getAktivan() {
-		return aktivan;
-	}
-
-	public void setAktivan(Boolean aktivan) {
-		this.aktivan = aktivan;
 	}
 
 	public String getImePredmeta() {

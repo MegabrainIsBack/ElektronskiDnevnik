@@ -3,14 +3,18 @@ package com.iktpreobuka.entities;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.iktpreobuka.compositeKeys.JoinTables.OPVezna;
 
 @Entity
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
@@ -21,17 +25,18 @@ public class Odeljenje {
 	@Column(name="IdOdeljenja")
 	private Integer id;
 	
+	@Column(name="Razred")
+	private Integer godina;
+	
 	@Column(name="Odeljenje")
 	private String ime;
 	
-	@ElementCollection
-	@Column(name="ucenici")
-	private List<Ucenik> ucenici= new ArrayList<Ucenik>();
+	//@JsonIgnore
+	//@JsonBackReference
+	@OneToMany(mappedBy = "odeljenje",
+			cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+	private List<OPVezna> opVeza= new ArrayList<OPVezna>();
 	
-	@ElementCollection
-	@Column(name="predmeti")
-	private List<Predmet> predmeti= new ArrayList<Predmet>();
-
 	public Odeljenje() {
 		
 	}
@@ -44,6 +49,14 @@ public class Odeljenje {
 		this.id = id;
 	}
 
+	public Integer getGodina() {
+		return godina;
+	}
+
+	public void setGodina(Integer godina) {
+		this.godina = godina;
+	}
+
 	public String getIme() {
 		return ime;
 	}
@@ -52,19 +65,14 @@ public class Odeljenje {
 		this.ime = ime;
 	}
 
-	public List<Ucenik> getUcenici() {
-		return ucenici;
+	public List<OPVezna> getOpVeza() {
+		return opVeza;
 	}
 
-	public void setUcenici(List<Ucenik> ucenici) {
-		this.ucenici = ucenici;
+	public void setOpVeza(List<OPVezna> opVeza) {
+		this.opVeza = opVeza;
 	}
 
-	public List<Predmet> getPredmeti() {
-		return predmeti;
-	}
+	
 
-	public void setPredmeti(List<Predmet> predmeti) {
-		this.predmeti = predmeti;
-	}
 }

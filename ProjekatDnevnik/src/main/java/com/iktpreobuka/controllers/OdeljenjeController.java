@@ -17,11 +17,11 @@ public class OdeljenjeController {
 	@Autowired
 	OdeljenjeRepository odeljenjeRepository;
 	
-	@RequestMapping(method= RequestMethod.GET, value="/poOdeljenju/{odeljenje}")
+	/*@RequestMapping(method= RequestMethod.GET, value="/poOdeljenju/{odeljenje}")
 	public Iterable<Ucenik> sviUcenici(@PathVariable String odeljenje) {
 		Odeljenje od=odeljenjeRepository.getByIme(odeljenje);
 		Iterable<Ucenik> ucenici = od.getUcenici();
 		return ucenici;
-	}
+	}*/
 
 }

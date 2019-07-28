@@ -144,6 +144,7 @@ public class NastavnikController {
 		nastavnik.setUsername(noviNastavnik.getUsername());
 		nastavnik.setPassword(noviNastavnik.getPassword());
 		nastavnik.setEmail(noviNastavnik.getEmail());
+		nastavnik.setEmail(noviNastavnik.getEmail());
 		Predmet predmet=predmetRepository.getByIme(noviNastavnik.getImePredmeta());
 		nastavnik.getUloge().add(Role.ROLE_TEACHER);
 		

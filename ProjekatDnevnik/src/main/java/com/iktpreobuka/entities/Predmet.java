@@ -15,6 +15,7 @@ import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.iktpreobuka.compositeKeys.JoinTables.NPVezna;
+import com.iktpreobuka.compositeKeys.JoinTables.OPVezna;
 
 @Entity
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
@@ -34,28 +35,22 @@ public class Predmet {
 	@Column(name="CasovaNedeljno")
 	private Integer casovaNedeljno;
 	
+	@Column(name ="Razred")
+	private Integer godina;
 	
+	private Boolean aktivan=true;
 	
-	//-----------------------------------
-	/*@JsonBackReference
-	@OneToMany(cascade=CascadeType.ALL)  
-	@JoinTable(name="NastavniciKojiPredajuPredmete", joinColumns={@JoinColumn(name ="IdPredmeta", referencedColumnName ="IdPredmeta",unique=false)},
-	          inverseJoinColumns={@JoinColumn(name ="IdNastavnika", referencedColumnName ="IdKorisnika",unique=false)})
-	private List<Nastavnik> nastavnici= new ArrayList<Nastavnik>();*/
-	
-	//---------------------------------------------
-	
-	//@ElementCollection
-	//private List<Nastavnik> nastavnici= new ArrayList<Nastavnik>();
-	
-	//-----------------------------------------------
 	//@JsonIgnore
 	//@JsonBackReference
 	@OneToMany(mappedBy = "predmet",
             cascade = CascadeType.ALL,fetch = FetchType.LAZY)
 	private List<NPVezna> npVeza= new ArrayList<NPVezna>();
 	
-	//-----------------------------------------------
+	//@JsonIgnore
+	//@JsonBackReference
+	@OneToMany(mappedBy = "predmet",
+			cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+		private List<OPVezna> opVeza= new ArrayList<OPVezna>();
 	
 	public Predmet(){
 		
@@ -85,12 +80,36 @@ public class Predmet {
 		this.casovaNedeljno = casovaNedeljno;
 	}
 
+	public Integer getGodina() {
+		return godina;
+	}
+
+	public void setGodina(Integer godina) {
+		this.godina = godina;
+	}
+
+	public Boolean getAktivan() {
+		return aktivan;
+	}
+
+	public void setAktivan(Boolean aktivan) {
+		this.aktivan = aktivan;
+	}
+
 	public List<NPVezna> getNpVeza() {
 		return npVeza;
 	}
 
 	public void setNpVeza(List<NPVezna> npVeza) {
 		this.npVeza = npVeza;
+	}
+
+	public List<OPVezna> getOpVeza() {
+		return opVeza;
+	}
+
+	public void setOpVeza(List<OPVezna> opVeza) {
+		this.opVeza = opVeza;
 	}
 
 	

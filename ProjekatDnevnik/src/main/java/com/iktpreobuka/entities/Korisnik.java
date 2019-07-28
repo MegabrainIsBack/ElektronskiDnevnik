@@ -55,6 +55,8 @@ public class Korisnik {
 	@Column(name="EmailAdresa", unique=true)
 	private String email;
 	
+	private Boolean aktivan=true;
+	
 	
 	@Column(name="PIN", unique=true)
 	private String pin;
@@ -121,6 +123,14 @@ public class Korisnik {
 
 	public void setEmail(String email) {
 		this.email = email;
+	}
+
+	public Boolean getAktivan() {
+		return aktivan;
+	}
+
+	public void setAktivan(Boolean aktivan) {
+		this.aktivan = aktivan;
 	}
 
 	public String getPin() {
