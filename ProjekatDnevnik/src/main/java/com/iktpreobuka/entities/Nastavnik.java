@@ -9,31 +9,30 @@ import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.iktpreobuka.compositeKeys.JoinTables.NPVezna;
+import com.iktpreobuka.JoinTables.ONP;
 
 @Entity
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Nastavnik extends Korisnik{
-
-	@OneToMany(mappedBy = "nastavnik",
-            cascade = CascadeType.ALL,fetch = FetchType.EAGER)
-	private List<NPVezna> npVeza= new ArrayList<NPVezna>();
 	
+
 	private String imePredmeta;
 	
-	
+	@OneToMany(mappedBy = "nastavnik",
+    cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+	private List<ONP> onp= new ArrayList<ONP>();
+
+	public List<ONP> getOnp() {
+		return onp;
+	}
+
+	public void setOnp(List<ONP> onp) {
+		this.onp = onp;
+	}
 
 	public Nastavnik() {
 		super();
 		// TODO Auto-generated constructor stub
-	}
-
-	public List<NPVezna> getNpVeza() {
-		return npVeza;
-	}
-
-	public void setNpVeza(List<NPVezna> npVeza) {
-		this.npVeza = npVeza;
 	}
 
 	public String getImePredmeta() {

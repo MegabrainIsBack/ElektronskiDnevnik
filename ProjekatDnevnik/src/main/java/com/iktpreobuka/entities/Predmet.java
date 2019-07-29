@@ -14,8 +14,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.iktpreobuka.compositeKeys.JoinTables.NPVezna;
-import com.iktpreobuka.compositeKeys.JoinTables.OPVezna;
+import com.iktpreobuka.JoinTables.ONP;
 
 @Entity
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
@@ -40,17 +39,19 @@ public class Predmet {
 	
 	private Boolean aktivan=true;
 	
-	//@JsonIgnore
-	//@JsonBackReference
-	@OneToMany(mappedBy = "predmet",
-            cascade = CascadeType.ALL,fetch = FetchType.LAZY)
-	private List<NPVezna> npVeza= new ArrayList<NPVezna>();
 	
-	//@JsonIgnore
-	//@JsonBackReference
+	
 	@OneToMany(mappedBy = "predmet",
-			cascade = CascadeType.ALL,fetch = FetchType.LAZY)
-		private List<OPVezna> opVeza= new ArrayList<OPVezna>();
+		    cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+	private List<ONP> onp= new ArrayList<ONP>();
+
+	public List<ONP> getOnp() {
+				return onp;
+	}
+
+	public void setOnp(List<ONP> onp) {
+				this.onp = onp;
+	}
 	
 	public Predmet(){
 		
@@ -96,7 +97,7 @@ public class Predmet {
 		this.aktivan = aktivan;
 	}
 
-	public List<NPVezna> getNpVeza() {
+	/*public List<NPVezna> getNpVeza() {
 		return npVeza;
 	}
 
@@ -110,7 +111,7 @@ public class Predmet {
 
 	public void setOpVeza(List<OPVezna> opVeza) {
 		this.opVeza = opVeza;
-	}
+	}*/
 
 	
 }

@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
@@ -21,12 +20,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.iktpreobuka.compositeKeys.JoinTables.NPVezna;
-import com.iktpreobuka.compositeKeys.JoinTables.OPVezna;
-import com.iktpreobuka.entities.Nastavnik;
+import com.iktpreobuka.JoinTables.ONP;
 import com.iktpreobuka.entities.Odeljenje;
 import com.iktpreobuka.entities.Predmet;
-import com.iktpreobuka.repositories.OPVRepository;
+import com.iktpreobuka.repositories.ONPRepository;
 import com.iktpreobuka.repositories.OdeljenjeRepository;
 import com.iktpreobuka.repositories.PredmetRepository;
 
@@ -38,7 +35,7 @@ public class PredmetControler {
 	PredmetRepository predmetRepository;
 	
 	@Autowired
-	OPVRepository opvRepository;
+	ONPRepository onpRepository;
 	
 	@Autowired
 	OdeljenjeRepository odeljenjeRepository;
@@ -91,10 +88,12 @@ public class PredmetControler {
 			for(int i=0; i<((ArrayList<Odeljenje>) odeljenja).size();i++) {
 			Odeljenje odeljenje=((ArrayList<Odeljenje>) odeljenja).get(i);
 			if(s3<=odeljenje.getGodina()) {
-			OPVezna opv = new OPVezna();
-			opv.setPredmet(predmet);
-			opv.setOdeljenje(odeljenje);
-			opvRepository.save(opv);
+			ONP onp = new ONP();
+			onp.setPredmet(predmet);
+			onp.setOdeljenje(odeljenje);
+			onpRepository.save(onp);
+			
+			onpRepository.save(onp);
 			logger.info("Podaci o vezi odeljenja i predmeta sacuvani.");
 			}
 			}
@@ -139,10 +138,10 @@ public class PredmetControler {
 		Iterable<Odeljenje> odeljenja=odeljenjeRepository.getByGodina(noviPredmet.getGodina());
 		for(int i=0; i<((ArrayList<Odeljenje>) odeljenja).size();i++) {
 		Odeljenje odeljenje=((ArrayList<Odeljenje>) odeljenja).get(i);
-		OPVezna opv = new OPVezna();
-		opv.setPredmet(predmet);
-		opv.setOdeljenje(odeljenje);
-		opvRepository.save(opv);
+		ONP onp = new ONP();
+		onp.setPredmet(predmet);
+		onp.setOdeljenje(odeljenje);
+		onpRepository.save(onp);
 		logger.info("Podaci o vezi odeljenja i predmeta sacuvani.");
 		}
 		

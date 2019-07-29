@@ -1,4 +1,4 @@
-package com.iktpreobuka.compositeKeys.JoinTables;
+package com.iktpreobuka.JoinTables;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -12,11 +12,12 @@ import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.iktpreobuka.entities.Nastavnik;
+import com.iktpreobuka.entities.Odeljenje;
 import com.iktpreobuka.entities.Predmet;
 
 @Entity
-@Table(name = "NPVezna")
-public class NPVezna {
+@Table(name = "ONP")
+public class ONP {
 	
 	@Id
 	@GeneratedValue
@@ -24,7 +25,12 @@ public class NPVezna {
 	private Integer idVezna;
 	
 	@JsonIgnore
-	@ManyToOne(cascade = CascadeType.ALL, fetch=FetchType.EAGER)
+	@ManyToOne(cascade = CascadeType.ALL, fetch=FetchType.LAZY)
+    @JoinColumn(name = "IdOdeljenja")
+    private Odeljenje odeljenje;
+	
+	@JsonIgnore
+	@ManyToOne(cascade = CascadeType.ALL, fetch=FetchType.LAZY)
     @JoinColumn(name = "IdNastavnika")
     private Nastavnik nastavnik;
 	
@@ -32,6 +38,10 @@ public class NPVezna {
 	@ManyToOne(cascade = CascadeType.ALL, fetch=FetchType.LAZY)
     @JoinColumn(name = "IdPredmeta")
     private Predmet predmet;
+	
+	public ONP() {
+		
+	}
 
 	public Integer getIdVezna() {
 		return idVezna;
@@ -39,6 +49,14 @@ public class NPVezna {
 
 	public void setIdVezna(Integer idVezna) {
 		this.idVezna = idVezna;
+	}
+
+	public Odeljenje getOdeljenje() {
+		return odeljenje;
+	}
+
+	public void setOdeljenje(Odeljenje odeljenje) {
+		this.odeljenje = odeljenje;
 	}
 
 	public Nastavnik getNastavnik() {
@@ -56,5 +74,6 @@ public class NPVezna {
 	public void setPredmet(Predmet predmet) {
 		this.predmet = predmet;
 	}
+
 
 }

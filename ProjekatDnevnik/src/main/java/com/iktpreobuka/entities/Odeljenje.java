@@ -5,7 +5,6 @@ import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -14,7 +13,7 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.iktpreobuka.compositeKeys.JoinTables.OPVezna;
+import com.iktpreobuka.JoinTables.ONP;
 
 @Entity
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
@@ -31,11 +30,20 @@ public class Odeljenje {
 	@Column(name="Odeljenje")
 	private String ime;
 	
-	//@JsonIgnore
-	//@JsonBackReference
+	@Column(name = "Aktivno")
+	private Boolean aktivan;
+	
 	@OneToMany(mappedBy = "odeljenje",
-			cascade = CascadeType.ALL,fetch = FetchType.LAZY)
-	private List<OPVezna> opVeza= new ArrayList<OPVezna>();
+		    cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+	private List<ONP> onp= new ArrayList<ONP>();
+
+	public List<ONP> getOnp() {
+				return onp;
+	}
+
+	public void setOnp(List<ONP> onp) {
+				this.onp = onp;
+	}
 	
 	public Odeljenje() {
 		
@@ -65,14 +73,11 @@ public class Odeljenje {
 		this.ime = ime;
 	}
 
-	public List<OPVezna> getOpVeza() {
-		return opVeza;
+	public Boolean getAktivan() {
+		return aktivan;
 	}
 
-	public void setOpVeza(List<OPVezna> opVeza) {
-		this.opVeza = opVeza;
+	public void setAktivan(Boolean aktivan) {
+		this.aktivan = aktivan;
 	}
-
-	
-
 }
