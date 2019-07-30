@@ -9,6 +9,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
@@ -16,9 +17,22 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class Ucenik extends Korisnik {
 	
 	
+
+	@ManyToOne(cascade = CascadeType.ALL, fetch=FetchType.LAZY)
+    @JoinColumn(name = "IdOdeljenja")
+    private Odeljenje odeljenjeU;
 	
-	
-	@ManyToOne(cascade=CascadeType.REFRESH, fetch=FetchType.EAGER)
+	public Odeljenje getOdeljenjeU() {
+		return odeljenjeU;
+	}
+
+	public void setOdeljenjeU(Odeljenje odeljenjeU) {
+		this.odeljenjeU = odeljenjeU;
+	}
+
+
+
+	@ManyToOne(cascade=CascadeType.REFRESH, fetch=FetchType.LAZY)
 	@JoinColumn(name="IdOca")
 	private RoditeljOtac tata;
 	
@@ -53,7 +67,7 @@ public class Ucenik extends Korisnik {
 	@Column(name="ImeMajke")
 	private String imeMajke;
 	
-	@NotNull(message = "Morate unijeti odeljenje.")
+	//@NotNull(message = "Morate unijeti odeljenje.")
 	@Column(name="Odeljenje")
 	private String odeljenje;
 	

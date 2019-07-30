@@ -12,6 +12,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.iktpreobuka.JoinTables.ONP;
 
@@ -31,7 +32,7 @@ public class Odeljenje {
 	private String ime;
 	
 	@Column(name = "Aktivno")
-	private Boolean aktivan;
+	private Boolean aktivan=true;
 	
 	@OneToMany(mappedBy = "odeljenje",
 		    cascade = CascadeType.ALL,fetch = FetchType.LAZY)
@@ -44,7 +45,20 @@ public class Odeljenje {
 	public void setOnp(List<ONP> onp) {
 				this.onp = onp;
 	}
+	//@JsonIgnore
+	@JsonBackReference
+	@OneToMany(mappedBy = "odeljenjeU",
+		    cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+	private List<Ucenik> ucenici= new ArrayList<Ucenik>();
 	
+	public List<Ucenik> getUcenici() {
+		return ucenici;
+	}
+
+	public void setUcenici(List<Ucenik> ucenici) {
+		this.ucenici = ucenici;
+	}
+
 	public Odeljenje() {
 		
 	}

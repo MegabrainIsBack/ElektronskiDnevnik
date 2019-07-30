@@ -231,6 +231,7 @@ public class NastavnikController {
 	public	Nastavnik obrisiNastavnika(@PathVariable Integer id) {
 		Nastavnik nastavnik=nastavnikRepository.getById(id);
 		nastavnik.setAktivan(false);
+		nastavnikRepository.save(nastavnik);
 		return  nastavnik;
 	}
 

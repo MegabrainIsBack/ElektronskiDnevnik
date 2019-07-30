@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.iktpreobuka.controllers.utilities.PINGenerator;
+import com.iktpreobuka.entities.Nastavnik;
 import com.iktpreobuka.entities.Odeljenje;
 import com.iktpreobuka.entities.RoditeljMajka;
 import com.iktpreobuka.entities.RoditeljOtac;
@@ -59,7 +61,7 @@ public class UcenikController {
 	@RequestMapping(method = RequestMethod.POST, value="/dodajUcenika/izFajla")
 	public ResponseEntity<?> dodajUcenikaIzFajla() throws IOException {
 		
-		logger.info("INFO: /dodajUcenika/izFajla zapocet.");
+	logger.info("INFO: /dodajUcenika/izFajla zapocet.");
 		
 	BufferedReader ulaz = null; 
 	ArrayList <Ucenik> ucenici= new ArrayList<Ucenik>();
@@ -134,8 +136,7 @@ public class UcenikController {
 				String pinO=PINGenerator.PGenerator("roditelj");
 				otac.setPin(pinO);
 				logger.info("PIN: "+ pin);
-				//otac.getTatinaDjeca().add(noviUcenik);
-				//otac.dodajDijete(noviUcenik);
+	
 				otacRepository.save(otac);
 				logger.info("Podaci o ocu sacuvani.");
 				
@@ -164,12 +165,17 @@ public class UcenikController {
 				logger.info("Podaci o uceniku sacuvani.");
 				
 				logger.info("Zapoceto povezivanje ucenika i odeljenja");
-				Odeljenje odeljenje = odeljenjeRepository.getByIme(s7);
+				Integer godinaO= Character.getNumericValue(s7.charAt(0));
+				String imeO=Character.toString(s7.charAt(1));
+				Odeljenje odeljenje = odeljenjeRepository.getByGodinaAndIme(godinaO,imeO);
+				ucenik.setOdeljenjeU(odeljenje);
 				logger.info("Odeljenje: "+odeljenje);
 				odeljenje.getUcenici().add(ucenik);
 				logger.info("Ucenik dodan u odeljenje");
 				odeljenjeRepository.save(odeljenje);
 				logger.info("Podaci o vezi ucenika i odeljenja sacuvani.");
+				
+				ucenikRepository.save(ucenik);
 				
 				s.close();
 			}
@@ -216,7 +222,6 @@ public class UcenikController {
 		otac.getUloge().add(Role.ROLE_FATHER);;
 		otac.setBrojDjece((otac.getBrojDjece())+1);
 		otac.setPin(PINGenerator.PGenerator("roditelj"));
-		//otac.getTatinaDjeca().add(noviUcenik);
 		otac.dodajDijete(noviUcenik);
 		otacRepository.save(otac);
 		
@@ -230,11 +235,21 @@ public class UcenikController {
 		
 		ucenik.setTata(otac);
 		ucenik.setMama(majka);
-		ucenikRepository.save(ucenik);
+		//ucenikRepository.save(ucenik);
 		
-		Odeljenje odeljenje = odeljenjeRepository.getByIme(noviUcenik.getOdeljenje());
+		logger.info("Zapoceto povezivanje ucenika i odeljenja");
+		Integer godinaO= Character.getNumericValue(noviUcenik.getOdeljenje().charAt(0));
+		String imeO=Character.toString(noviUcenik.getOdeljenje().charAt(1));
+		Odeljenje odeljenje = odeljenjeRepository.getByGodinaAndIme(godinaO,imeO);
+		ucenik.setOdeljenjeU(odeljenje);
+		ucenikRepository.save(ucenik);
+		logger.info("Odeljenje: "+odeljenje);
 		odeljenje.getUcenici().add(ucenik);
+		logger.info("Ucenik dodan u odeljenje");
 		odeljenjeRepository.save(odeljenje);
+		logger.info("Podaci o vezi ucenika i odeljenja sacuvani.");
+		
+	
 		
 		if(result.hasErrors()) {
 			return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
@@ -249,24 +264,46 @@ public class UcenikController {
 		return ucenici;
 	}
 	
-	
-	@RequestMapping(method = RequestMethod.PUT, value="/izmjeniUcenika/{pin}")
-	public	Ucenik izmjeniNastavnika(@PathVariable String pin,@RequestBody Ucenik noviUcenik) {
-		Ucenik ucenik= ucenikRepository.getByPin(pin);
+	@RequestMapping(method = RequestMethod.PUT, value="/izmjeniUcenika/{id}")
+	public	ResponseEntity<?> izmjeniUcenika(@PathVariable Integer id,@RequestBody Ucenik noviUcenik, BindingResult result) {
+		Ucenik ucenik= ucenikRepository.getById(id);
 		ucenik.setIme(noviUcenik.getIme());
 		ucenik.setPrezime(noviUcenik.getPrezime());
 		ucenik.setUsername(noviUcenik.getUsername());
 		ucenik.setPassword(noviUcenik.getPassword());
 		ucenik.setEmail(noviUcenik.getEmail());
 		ucenik.setOdeljenje(noviUcenik.getOdeljenje());
+		
+		if(result.hasErrors()) {
+			return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
+			}
+		
+		logger.info("Zapoceto povezivanje ucenika i odeljenja");
+		Integer godinaO= Character.getNumericValue(noviUcenik.getOdeljenje().charAt(0));
+		String imeO=Character.toString(noviUcenik.getOdeljenje().charAt(1));
+		Odeljenje odeljenje = odeljenjeRepository.getByGodinaAndIme(godinaO,imeO);
+		ucenik.setOdeljenjeU(odeljenje);
+		
 		ucenikRepository.save(ucenik);
-		return ucenik;
+		logger.info("Sacuvane izmjene.");
+		
+		return new ResponseEntity<>(ucenik, HttpStatus.OK);
+	}
+	
+	@RequestMapping(method= RequestMethod.GET, value="/poOdeljenju/{odeljenjeI}")
+	public List<Ucenik> poOdeljenju(@PathVariable String odeljenjeI ) {
+		Integer godinaO= Character.getNumericValue(odeljenjeI.charAt(0));
+		String imeO=Character.toString(odeljenjeI.charAt(1));
+		Odeljenje odeljenje = odeljenjeRepository.getByGodinaAndIme(godinaO,imeO);
+		List<Ucenik> ucenici=ucenikRepository.getByOdeljenjeU(odeljenje);
+		return ucenici;
 	}
 	
 	@RequestMapping(method= RequestMethod.DELETE, value="/obrisiUcenika/{id}")
 	public	Ucenik obrisiNastavnika(@PathVariable Integer id) {
 		Ucenik ucenik=ucenikRepository.getById(id);
-		ucenikRepository.deleteById(id);
+		ucenik.setAktivan(false);
+		ucenikRepository.save(ucenik);
 		return  ucenik;
 	}
 

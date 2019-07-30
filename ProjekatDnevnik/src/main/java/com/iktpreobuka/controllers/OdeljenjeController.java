@@ -92,6 +92,7 @@ public class OdeljenjeController {
 	public	Odeljenje obrisiOdeljenje(@PathVariable Integer godina, @PathVariable String imeOdeljenja) {
 		Odeljenje odeljenje=odeljenjeRepository.getByGodinaAndIme(godina, imeOdeljenja);
 		odeljenje.setAktivan(false);
+		odeljenjeRepository.save(odeljenje);
 		return  odeljenje;
 	}
 

@@ -185,6 +185,7 @@ public class PredmetControler {
 	public	Predmet obrisiPredmet(@PathVariable String imePredmeta) {
 		Predmet predmet= predmetRepository.getByIme(imePredmeta);
 		predmet.setAktivan(false);
+		predmetRepository.save(predmet);
 		return  predmet;
 	}
 	
