@@ -3,6 +3,8 @@ package com.iktpreobuka.controllers;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
+import javax.validation.Valid;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +46,7 @@ public class OdeljenjeController {
 	ONPRepository onpRepository;
 	
 	@RequestMapping(method = RequestMethod.POST, value="/dodajOdeljenje")
-	public	ResponseEntity<?> dodajOdeljenje(@RequestBody Odeljenje novoOdeljenje, BindingResult result) {
+	public	ResponseEntity<?> dodajOdeljenje(@Valid @RequestBody Odeljenje novoOdeljenje, BindingResult result) {
 		Odeljenje odeljenje = new Odeljenje();
 		odeljenje.setIme(novoOdeljenje.getIme());
 		odeljenje.setGodina(novoOdeljenje.getGodina());

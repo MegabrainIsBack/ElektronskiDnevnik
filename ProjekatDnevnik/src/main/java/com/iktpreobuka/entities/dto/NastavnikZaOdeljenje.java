@@ -1,42 +1,29 @@
 package com.iktpreobuka.entities.dto;
 
+import javax.validation.constraints.NotNull;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class NastavnikZaOdeljenje {
 	
-	@JsonProperty("Ime")
-	private String ime;
+	@NotNull(message = "Morate unijeti JMBG.")
+	@JsonProperty("JMBG")
+	private String jmbg;
 	
-	@JsonProperty("Prezime")
-	private String prezime;
-	
+	@NotNull(message = "Morate unijeti predmet.")
 	@JsonProperty("Predmet")
 	private String predmet;
 	
+	@NotNull(message = "Morate unijeti razred.")
 	@JsonProperty("Razred")
 	private Integer godina;
 	
+	@NotNull(message = "Morate unijeti odeljenje.")
 	@JsonProperty("Odeljenje")
 	private String odeljenje;
 	
-	NastavnikZaOdeljenje(){
+	public NastavnikZaOdeljenje(){
 		
-	}
-
-	public String getIme() {
-		return ime;
-	}
-
-	public void setIme(String ime) {
-		this.ime = ime;
-	}
-
-	public String getPrezime() {
-		return prezime;
-	}
-
-	public void setPrezime(String prezime) {
-		this.prezime = prezime;
 	}
 
 	public String getPredmet() {
@@ -62,5 +49,15 @@ public class NastavnikZaOdeljenje {
 	public void setOdeljenje(String odeljenje) {
 		this.odeljenje = odeljenje;
 	}
+
+	public String getJmbg() {
+		return jmbg;
+	}
+
+	public void setJmbg(String jmbg) {
+		this.jmbg = jmbg;
+	}
+
+	
 
 }

@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
+import javax.validation.Valid;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,21 +23,26 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.iktpreobuka.JoinTables.KU;
 import com.iktpreobuka.JoinTables.ONP;
 import com.iktpreobuka.controllers.utilities.PINGenerator;
 import com.iktpreobuka.entities.Nastavnik;
 import com.iktpreobuka.entities.Odeljenje;
 import com.iktpreobuka.entities.Predmet;
+import com.iktpreobuka.entities.Uloga;
 import com.iktpreobuka.entities.dto.NastavnikZaOdeljenje;
 import com.iktpreobuka.enums.Role;
+import com.iktpreobuka.repositories.KURepository;
 import com.iktpreobuka.repositories.NastavnikRepository;
 import com.iktpreobuka.repositories.ONPRepository;
 import com.iktpreobuka.repositories.OdeljenjeRepository;
 import com.iktpreobuka.repositories.PredmetRepository;
+import com.iktpreobuka.repositories.UlogaRepository;
 
 @RestController
 @RequestMapping(value= "/nastavnik")
 public class NastavnikController {
+	
 	private final Logger logger = (Logger) LoggerFactory.getLogger(this.getClass());
 	
 	@Autowired
@@ -49,6 +56,12 @@ public class NastavnikController {
 	
 	@Autowired
 	ONPRepository onpRepository;
+	
+	@Autowired
+	UlogaRepository ulogaRepository;
+	
+	@Autowired
+	KURepository kuRepository;
 	
 	private String createErrorMessage(BindingResult result) {
 		return result.getAllErrors().stream().map(ObjectError::getDefaultMessage)
@@ -100,9 +113,6 @@ public class NastavnikController {
 				nastavnik.setImePredmeta(s7);
 				logger.info("Predmet: " +s7);
 				
-				nastavnik.getUloge().add(Role.ROLE_TEACHER);
-				logger.info("Uloga: Nastavnik");
-				
 				String user="nastavnik";
 				String pin=PINGenerator.PGenerator(user);
 				nastavnik.setPin(pin);
@@ -113,6 +123,14 @@ public class NastavnikController {
 				
 				nastavnikRepository.save(nastavnik);
 				logger.info("Nastavnik sacuvan");
+				
+				Uloga uloga=new Uloga();
+				uloga=ulogaRepository.getByIme(Role.ROLE_TEACHER);
+				
+				KU ku=new KU();
+				ku.setKorisnik(nastavnik);
+				ku.setUloga(uloga);
+				kuRepository.save(ku);
 				
 				s.close();
 			}
@@ -134,7 +152,10 @@ public class NastavnikController {
 }
 	
 	@RequestMapping(method = RequestMethod.POST, value="/dodajNastavnika")
-	public	ResponseEntity<?> dodajNastavnika(@RequestBody Nastavnik noviNastavnik, BindingResult result) {
+	public	ResponseEntity<?> dodajNastavnika(@Valid @RequestBody Nastavnik noviNastavnik, BindingResult result) {
+		if (nastavnikRepository.getByJmbg(noviNastavnik.getJmbg())!=null) {
+			return new ResponseEntity<>("Nastavnik vec postoji", HttpStatus.BAD_REQUEST);
+		}
 		Nastavnik nastavnik = new Nastavnik();
 		nastavnik.setIme(noviNastavnik.getIme());
 		nastavnik.setPrezime(noviNastavnik.getPrezime());
@@ -142,7 +163,6 @@ public class NastavnikController {
 		nastavnik.setUsername(noviNastavnik.getUsername());
 		nastavnik.setPassword(noviNastavnik.getPassword());
 		nastavnik.setEmail(noviNastavnik.getEmail());
-		nastavnik.getUloge().add(Role.ROLE_TEACHER);
 		
 		String user="nastavnik";
 		nastavnik.setPin(PINGenerator.PGenerator(user));
@@ -154,14 +174,21 @@ public class NastavnikController {
 		nastavnikRepository.save(nastavnik);
 		logger.info("Nastavnik sacuvan");
 		
+		Uloga uloga=new Uloga();
+		uloga=ulogaRepository.getByIme(Role.ROLE_TEACHER);
+		
+		KU ku=new KU();
+		ku.setKorisnik(nastavnik);
+		ku.setUloga(uloga);
+		kuRepository.save(ku);
+		
 		return new ResponseEntity<>(nastavnik, HttpStatus.OK);
 	}
 	
 	@RequestMapping(method = RequestMethod.PUT, value="/dodajNastavnikaOdeljenju")
-	public	ResponseEntity<?> dodajNastavnikaOdeljenju(@RequestBody NastavnikZaOdeljenje noviNastavnik, BindingResult result) {
-		String ime=noviNastavnik.getIme();
-		String prezime=noviNastavnik.getPrezime();
-		Nastavnik nastavnik = nastavnikRepository.getByImeAndPrezime(ime, prezime);
+	public	ResponseEntity<?> dodajNastavnikaOdeljenju(@Valid @RequestBody NastavnikZaOdeljenje noviNastavnik, BindingResult result) {
+		String jmbg=noviNastavnik.getJmbg();
+		Nastavnik nastavnik = nastavnikRepository.getByJmbg(jmbg);
 		Predmet predmet=predmetRepository.getByIme(noviNastavnik.getPredmet());
 		String imeO=noviNastavnik.getOdeljenje();
 		Integer godina=noviNastavnik.getGodina();
@@ -209,7 +236,7 @@ public class NastavnikController {
 	}
 	
 	@RequestMapping(method = RequestMethod.PUT, value="/izmjeniNastavnika/{id}")
-	public	ResponseEntity<?> izmjeniNastavnika(@PathVariable Integer id,@RequestBody Nastavnik noviNastavnik, BindingResult result) {
+	public	ResponseEntity<?> izmjeniNastavnika(@Valid @PathVariable Integer id,@RequestBody Nastavnik noviNastavnik, BindingResult result) {
 		Nastavnik nastavnik= nastavnikRepository.getById(id);
 		nastavnik.setIme(noviNastavnik.getIme());
 		nastavnik.setPrezime(noviNastavnik.getPrezime());

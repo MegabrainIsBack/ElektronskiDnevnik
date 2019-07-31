@@ -3,19 +3,21 @@ package com.iktpreobuka.entities;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.IdClass;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
+import javax.persistence.OneToMany;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.iktpreobuka.enums.Role;
+import com.iktpreobuka.JoinTables.KU;
 
 
 @Entity
@@ -28,28 +30,28 @@ public class Korisnik {
 	@Column(name="IdKorisnika")
 	private Integer id;
 	
-	//@NotNull(message = "Morate unijeti ime.")
+	@NotNull(message = "Morate unijeti ime.")
 	@Column(name="Ime")
 	private String ime;
 	
 	
-	//@NotNull(message = "Morate unijeti prezime.")
+	@NotNull(message = "Morate unijeti prezime.")
 	@Column(name="Prezime")
 	private String prezime;
 	
-	//@NotNull(message = "Morate unijeti JMBG.")
+	@NotNull(message = "Morate unijeti JMBG.")
 	@Column(name="JMBG", unique=true)
 	private String jmbg;
 	
-	//@NotNull(message = "Morate unijeti korisnicko ime.")
+	@NotNull(message = "Morate unijeti korisnicko ime.")
 	@Column(name="KorisnickoIme", unique=true)
 	private String username;
 	
-	//@NotNull(message = "Morate unijeti lozinku.")
+	@NotNull(message = "Morate unijeti lozinku.")
 	@Column(name="Lozinka")
 	private String password;
 	
-	//@NotNull(message = "Morate unijeti email adresu")
+	@NotNull(message = "Morate unijeti email adresu")
 	@Pattern(regexp = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"+ "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$",
 	message="Nepravilno unesena email adresa.")
 	@Column(name="EmailAdresa", unique=true)
@@ -61,10 +63,18 @@ public class Korisnik {
 	@Column(name="PIN", unique=true)
 	private String pin;
 	
-	@ElementCollection 
-	@Column(name="Uloga")
-	private List<Role> uloge= new ArrayList<Role>();
+	@OneToMany(mappedBy = "korisnik",
+		    cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+			private List<KU> ku= new ArrayList<KU>();
 	
+	public List<KU> getKu() {
+		return ku;
+	}
+
+	public void setKu(List<KU> ku) {
+		this.ku = ku;
+	}
+
 	public Korisnik() {
 		
 	}
@@ -139,14 +149,6 @@ public class Korisnik {
 
 	public void setPin(String pin) {
 		this.pin = pin;
-	}
-
-	public List<Role> getUloge() {
-		return uloge;
-	}
-
-	public void setUloge(List<Role> uloge) {
-		this.uloge = uloge;
 	}
 
 }

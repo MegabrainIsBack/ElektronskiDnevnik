@@ -32,7 +32,6 @@ public class Nastavnik extends Korisnik{
 
 	public Nastavnik() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	public String getImePredmeta() {

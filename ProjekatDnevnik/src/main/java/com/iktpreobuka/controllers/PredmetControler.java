@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
+import javax.validation.Valid;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -121,12 +123,14 @@ public class PredmetControler {
 	}
 	
 	@RequestMapping(method = RequestMethod.POST, value="/dodajPredmet")
-	public	ResponseEntity<?> dodajPredmet(@RequestBody Predmet noviPredmet, BindingResult result) {
-		Predmet predmet = new Predmet();
-		predmet.setIme(noviPredmet.getIme());
-		predmet.setCasovaNedeljno(noviPredmet.getCasovaNedeljno());
-		predmet.setGodina(noviPredmet.getGodina());
-		
+	public	ResponseEntity<?> dodajPredmet(@Valid @RequestBody Predmet noviPredmet, BindingResult result) {
+		if (predmetRepository.getByIme(noviPredmet.getIme())!=null) {
+			return new ResponseEntity<>("Predmet vec postoji", HttpStatus.BAD_REQUEST);
+		}
+			Predmet predmet = new Predmet();
+			predmet.setIme(noviPredmet.getIme());
+			predmet.setCasovaNedeljno(noviPredmet.getCasovaNedeljno());
+			predmet.setGodina(noviPredmet.getGodina());
 		
 		if(result.hasErrors()) {
 			return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
@@ -167,7 +171,7 @@ public class PredmetControler {
 	}
 	
 	@RequestMapping(method = RequestMethod.PUT, value="/izmjeniPredmet/{imePredmeta}")
-	public	ResponseEntity<?> izmjeniPredmet(@PathVariable String imePredmeta,@RequestBody Predmet noviPredmet, BindingResult result) {
+	public	ResponseEntity<?> izmjeniPredmet(@Valid @PathVariable String imePredmeta,@RequestBody Predmet noviPredmet, BindingResult result) {
 		Predmet predmet= predmetRepository.getByIme(imePredmeta);
 		predmet.setCasovaNedeljno(noviPredmet.getCasovaNedeljno());
 		predmet.setAktivan(noviPredmet.getAktivan());

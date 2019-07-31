@@ -11,6 +11,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -25,9 +26,11 @@ public class Odeljenje {
 	@Column(name="IdOdeljenja")
 	private Integer id;
 	
+	@NotNull(message = "Morate unijeti razred.")
 	@Column(name="Razred")
 	private Integer godina;
 	
+	@NotNull(message = "Morate unijeti odeljenje.")
 	@Column(name="Odeljenje")
 	private String ime;
 	
@@ -45,7 +48,7 @@ public class Odeljenje {
 	public void setOnp(List<ONP> onp) {
 				this.onp = onp;
 	}
-	//@JsonIgnore
+	
 	@JsonBackReference
 	@OneToMany(mappedBy = "odeljenjeU",
 		    cascade = CascadeType.ALL,fetch = FetchType.LAZY)

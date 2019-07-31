@@ -12,6 +12,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.iktpreobuka.JoinTables.ONP;
@@ -26,14 +27,15 @@ public class Predmet {
 	@Column(name="IdPredmeta")
 	private Integer idPredmeta;
 	
-	//@NotNull(message = "Morate unijeti naziv predmeta.")
+	@NotNull(message = "Morate unijeti naziv predmeta.")
 	@Column(name="nazivPredmeta")
 	private String ime;
 	
-	//@NotNull(message = "Morate unijeti brioj nedeljnih casova.")
+	@NotNull(message = "Morate unijeti broj nedeljnih casova.")
 	@Column(name="CasovaNedeljno")
 	private Integer casovaNedeljno;
 	
+	@NotNull(message = "Morate unijeti razred u kome se predmet slusa.")
 	@Column(name ="Razred")
 	private Integer godina;
 	

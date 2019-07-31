@@ -30,4 +30,6 @@ public interface NastavnikRepository extends CrudRepository<Nastavnik, Integer> 
 	@Query("select n from Nastavnik n join n.onp np where np.odeljenje=:odeljenjeT")
 	List<Nastavnik> nastavnikPoOdeljenju(Odeljenje odeljenjeT);
 
+	Nastavnik getByJmbg(String jmbg);
+
 }

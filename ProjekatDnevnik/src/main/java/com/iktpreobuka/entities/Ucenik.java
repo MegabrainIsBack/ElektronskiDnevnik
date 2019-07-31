@@ -6,10 +6,9 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
@@ -31,12 +30,12 @@ public class Ucenik extends Korisnik {
 	}
 
 
-
+	@JsonBackReference
 	@ManyToOne(cascade=CascadeType.REFRESH, fetch=FetchType.LAZY)
 	@JoinColumn(name="IdOca")
 	private RoditeljOtac tata;
 	
-	
+	@JsonBackReference
 	@ManyToOne(cascade=CascadeType.REFRESH, fetch=FetchType.LAZY)
 	@JoinColumn(name="IdMajke")
 	private RoditeljMajka mama;
@@ -67,7 +66,7 @@ public class Ucenik extends Korisnik {
 	@Column(name="ImeMajke")
 	private String imeMajke;
 	
-	//@NotNull(message = "Morate unijeti odeljenje.")
+	@NotNull(message = "Morate unijeti odeljenje.")
 	@Column(name="Odeljenje")
 	private String odeljenje;
 	

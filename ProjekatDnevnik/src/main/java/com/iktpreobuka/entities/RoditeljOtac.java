@@ -1,16 +1,16 @@
 package com.iktpreobuka.entities;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
@@ -18,35 +18,25 @@ public class RoditeljOtac extends Korisnik{
 	
 	
 	@JsonIgnore
-	@JsonBackReference
-	@OneToMany(mappedBy="pin", fetch=FetchType.EAGER, cascade=CascadeType.REFRESH)
-	private Set<Ucenik> tatinaDjeca= new HashSet<Ucenik>();
+	@JsonManagedReference
+	@OneToMany(mappedBy="tata", fetch=FetchType.LAZY, cascade=CascadeType.REFRESH)
+	private List<Ucenik> tatinaDjeca= new ArrayList<Ucenik>();
 	
 	public void dodajDijete(Ucenik ucenik) {
 	    this.tatinaDjeca.add(ucenik);
-	    //ucenik.setTata(this);
+	    ucenik.setTata(this);
 	}
 	
-	public Set<Ucenik> getTatinaDjeca() {
+	public List<Ucenik> getTatinaDjeca() {
 		return tatinaDjeca;
 	}
 
-	public void setTatinaDjeca(Set<Ucenik> tatinaDjeca) {
+	public void setTatinaDjeca(List<Ucenik> tatinaDjeca) {
 		this.tatinaDjeca = tatinaDjeca;
 	}
 	
-	private Integer brojDjece=0;
-	
 	public RoditeljOtac() {
 		
-	}
-
-	public Integer getBrojDjece() {
-		return brojDjece;
-	}
-
-	public void setBrojDjece(Integer brojDjece) {
-		this.brojDjece = brojDjece;
 	}
 
 }
