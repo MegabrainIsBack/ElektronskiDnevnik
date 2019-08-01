@@ -18,6 +18,7 @@ import javax.validation.constraints.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.iktpreobuka.JoinTables.KU;
+import com.iktpreobuka.enums.Role;
 
 
 @Entity
@@ -56,6 +57,8 @@ public class Korisnik {
 	message="Nepravilno unesena email adresa.")
 	@Column(name="EmailAdresa", unique=true)
 	private String email;
+	
+	private String osnovnaUloga;
 	
 	private Boolean aktivan=true;
 	
@@ -133,6 +136,14 @@ public class Korisnik {
 
 	public void setEmail(String email) {
 		this.email = email;
+	}
+
+	public String getOsnovnaUloga() {
+		return osnovnaUloga;
+	}
+
+	public void setOsnovnaUloga(String osnovnaUloga) {
+		this.osnovnaUloga = osnovnaUloga;
 	}
 
 	public Boolean getAktivan() {

@@ -5,11 +5,13 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,7 +29,7 @@ public class UlogaController {
 	
 	private final Logger logger = (Logger) LoggerFactory.getLogger(this.getClass());
 	
-	
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.POST, value="/dodajUlogu/izFajla")
 	public ResponseEntity<?> dodajUloguIzFajla() throws IOException {
 		

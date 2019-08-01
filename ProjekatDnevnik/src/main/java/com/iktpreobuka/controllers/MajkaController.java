@@ -14,6 +14,7 @@ import com.iktpreobuka.entities.RoditeljOtac;
 import com.iktpreobuka.entities.Ucenik;
 import com.iktpreobuka.repositories.MajkaRepository;
 import com.iktpreobuka.repositories.UcenikRepository;
+import com.iktpreobuka.security.util.Encryption;
 
 @RestController
 @RequestMapping(value= "/Majka")
@@ -32,7 +33,8 @@ public class MajkaController {
 		majka.setIme(novaMajka.getIme());
 		majka.setPrezime(novaMajka.getPrezime());
 		majka.setUsername(novaMajka.getUsername());
-		majka.setPassword(novaMajka.getPassword());
+		String kodiraniPassword=Encryption.getPassEncoded(novaMajka.getPassword());
+		majka.setPassword(kodiraniPassword);
 		majka.setEmail(novaMajka.getEmail());
 		majka.setJmbg(novaMajka.getJmbg());
 		majkaRepository.save(majka);

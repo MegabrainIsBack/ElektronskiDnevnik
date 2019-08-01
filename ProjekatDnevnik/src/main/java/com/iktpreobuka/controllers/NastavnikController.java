@@ -38,6 +38,7 @@ import com.iktpreobuka.repositories.ONPRepository;
 import com.iktpreobuka.repositories.OdeljenjeRepository;
 import com.iktpreobuka.repositories.PredmetRepository;
 import com.iktpreobuka.repositories.UlogaRepository;
+import com.iktpreobuka.security.util.Encryption;
 
 @RestController
 @RequestMapping(value= "/nastavnik")
@@ -102,7 +103,8 @@ public class NastavnikController {
 				logger.info("Username: " +s4);
 				
 				String s5=s.next();
-				nastavnik.setPassword(s5);
+				String kodiraniPassword=Encryption.getPassEncoded(s5);
+				nastavnik.setPassword(kodiraniPassword);
 				logger.info("Password: " +s5);
 				
 				String s6=s.next();
@@ -161,7 +163,8 @@ public class NastavnikController {
 		nastavnik.setPrezime(noviNastavnik.getPrezime());
 		nastavnik.setJmbg(noviNastavnik.getJmbg());
 		nastavnik.setUsername(noviNastavnik.getUsername());
-		nastavnik.setPassword(noviNastavnik.getPassword());
+		String kodiraniPassword=Encryption.getPassEncoded(noviNastavnik.getPassword());
+		nastavnik.setPassword(kodiraniPassword);
 		nastavnik.setEmail(noviNastavnik.getEmail());
 		
 		String user="nastavnik";

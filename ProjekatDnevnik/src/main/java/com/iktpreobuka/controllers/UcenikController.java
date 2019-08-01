@@ -38,6 +38,7 @@ import com.iktpreobuka.repositories.OdeljenjeRepository;
 import com.iktpreobuka.repositories.OtacRepository;
 import com.iktpreobuka.repositories.UcenikRepository;
 import com.iktpreobuka.repositories.UlogaRepository;
+import com.iktpreobuka.security.util.Encryption;
 
 @RestController
 @RequestMapping(value= "/ucenik")
@@ -106,7 +107,8 @@ public class UcenikController {
 				logger.info("Username: " +s4);
 				
 				String s5=s.next();
-				ucenik.setPassword(s5);
+				String kodiraniPassword=Encryption.getPassEncoded(s5);
+				ucenik.setPassword(kodiraniPassword);
 				logger.info("Password: " +s5);
 				
 				String s7=s.next();
@@ -240,7 +242,8 @@ public class UcenikController {
 		ucenik.setPrezime(noviUcenik.getPrezime());
 		ucenik.setJmbg(noviUcenik.getJmbg());
 		ucenik.setUsername(noviUcenik.getUsername());
-		ucenik.setPassword(noviUcenik.getPassword());
+		String kodiraniPassword=Encryption.getPassEncoded(noviUcenik.getPassword());
+		ucenik.setPassword(kodiraniPassword);
 		ucenik.setEmail(noviUcenik.getEmail());
 		ucenik.setOdeljenje(noviUcenik.getOdeljenje());
 		ucenik.setImeOca(noviUcenik.getImeOca());

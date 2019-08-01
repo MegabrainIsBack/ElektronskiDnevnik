@@ -19,6 +19,7 @@ import com.iktpreobuka.entities.Nastavnik;
 import com.iktpreobuka.entities.Uloga;
 import com.iktpreobuka.enums.Role;
 import com.iktpreobuka.repositories.KorisnikRepository;
+import com.iktpreobuka.security.util.Encryption;
 
 
 
@@ -40,7 +41,8 @@ public class KorisnikController {
 		korisnik.setPrezime(noviKorisnik.getPrezime());
 		korisnik.setJmbg(noviKorisnik.getJmbg());
 		korisnik.setUsername(noviKorisnik.getUsername());
-		korisnik.setPassword(noviKorisnik.getPassword());
+		String kodiraniPassword=Encryption.getPassEncoded(noviKorisnik.getPassword());
+		korisnik.setPassword(kodiraniPassword);
 		korisnik.setEmail(noviKorisnik.getEmail());
 		korisnik.setPin(noviKorisnik.getPin());
 		

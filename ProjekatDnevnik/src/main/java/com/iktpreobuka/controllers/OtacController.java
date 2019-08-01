@@ -11,6 +11,7 @@ import com.iktpreobuka.entities.RoditeljOtac;
 import com.iktpreobuka.entities.Ucenik;
 import com.iktpreobuka.repositories.OtacRepository;
 import com.iktpreobuka.repositories.UcenikRepository;
+import com.iktpreobuka.security.util.Encryption;
 
 @RestController
 @RequestMapping(value= "/otac")
@@ -36,7 +37,8 @@ public class OtacController {
 		otac.setIme(noviOtac.getIme());
 		otac.setPrezime(noviOtac.getPrezime());
 		otac.setUsername(noviOtac.getUsername());
-		otac.setPassword(noviOtac.getPassword());
+		String kodiraniPassword=Encryption.getPassEncoded(noviOtac.getPassword());
+		otac.setPassword(kodiraniPassword);
 		otac.setEmail(noviOtac.getEmail());
 		otac.setJmbg(noviOtac.getJmbg());
 		otacRepository.save(otac);

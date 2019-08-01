@@ -18,9 +18,6 @@ public interface NastavnikRepository extends CrudRepository<Nastavnik, Integer> 
 	Nastavnik getById(Integer id);
 
 	Iterable<Nastavnik> getByImePredmeta(String predmetIme);
-	
-	@Query("Select ime from Nastavnik where imePredmeta='Srpski_jezik'")
-	Iterable<String> findAllByProba();
 
 	Nastavnik getByImeAndPrezime(String ime, String prezime);
 
