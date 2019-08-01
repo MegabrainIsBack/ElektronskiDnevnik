@@ -10,4 +10,8 @@ public interface OtacRepository extends CrudRepository<RoditeljOtac, Integer>{
 
 	RoditeljOtac getByPin(String pin);
 
+	boolean existsByJmbg(String jmbg);
+
+	RoditeljOtac getByJmbg(String jmbg);
+
 }

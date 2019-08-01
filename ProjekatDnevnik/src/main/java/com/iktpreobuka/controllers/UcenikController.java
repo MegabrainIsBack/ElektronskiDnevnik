@@ -30,6 +30,7 @@ import com.iktpreobuka.entities.RoditeljMajka;
 import com.iktpreobuka.entities.RoditeljOtac;
 import com.iktpreobuka.entities.Ucenik;
 import com.iktpreobuka.entities.Uloga;
+import com.iktpreobuka.entities.dto.UcenikDTO;
 import com.iktpreobuka.enums.Role;
 import com.iktpreobuka.repositories.KURepository;
 import com.iktpreobuka.repositories.MajkaRepository;
@@ -321,9 +322,15 @@ public class UcenikController {
 	}
 	
 	@RequestMapping(method= RequestMethod.GET, value="/poId/{id}")
-	public Ucenik poId(@PathVariable Integer id) {
+	public UcenikDTO poId(@PathVariable Integer id) {
 		Ucenik ucenik = ucenikRepository.getById(id);
-		return ucenik;
+		UcenikDTO ucenikDTO=new UcenikDTO();
+		ucenikDTO.setIme(ucenik.getIme());
+		ucenikDTO.setPrezime(ucenik.getPrezime());
+		ucenikDTO.setOdeljenje(ucenik.getOdeljenje());
+		ucenikDTO.setTata(ucenik.getTata());
+		ucenikDTO.setMama(ucenik.getMama());
+		return ucenikDTO;
 	}
 	
 	@RequestMapping(method = RequestMethod.PUT, value="/izmjeniUcenika/{id}")

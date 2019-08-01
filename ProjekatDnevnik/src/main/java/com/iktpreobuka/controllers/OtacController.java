@@ -1,8 +1,5 @@
 package com.iktpreobuka.controllers;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,9 +22,16 @@ public class OtacController {
 	@Autowired
 	OtacRepository otacRepository;
 	
-	@RequestMapping(method = RequestMethod.PUT, value="/izmjeniOca/{pinDjeteta}")
-	public	RoditeljOtac izmjeniOca(@PathVariable String pinDjeteta, @RequestBody RoditeljOtac noviOtac) {
-		Ucenik ucenik= ucenikRepository.getByPin(pinDjeteta);
+	@RequestMapping(method = RequestMethod.PUT, value="/izmjeniOca/{idDjeteta}")
+	public	RoditeljOtac izmjeniOca(@PathVariable Integer idDjeteta, @RequestBody RoditeljOtac noviOtac) {
+		
+		if(otacRepository.existsByJmbg(noviOtac.getJmbg())) {
+			RoditeljOtac postojeciOtac=otacRepository.getByJmbg(noviOtac.getJmbg());
+			Ucenik ucenik=ucenikRepository.getById(idDjeteta);
+			postojeciOtac.dodajDijete(ucenik);
+			return postojeciOtac;
+		}
+		Ucenik ucenik= ucenikRepository.getById(idDjeteta);
 		RoditeljOtac otac=ucenik.getTata();
 		otac.setIme(noviOtac.getIme());
 		otac.setPrezime(noviOtac.getPrezime());

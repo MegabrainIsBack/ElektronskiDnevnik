@@ -16,10 +16,11 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.iktpreobuka.JoinTables.ONP;
+import com.iktpreobuka.JoinTables.UPO;
 
 @Entity
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-@Table(name = "Predmeti")
+@Table(name = "Predmet")
 public class Predmet {
 	
 	@Id
@@ -55,6 +56,18 @@ public class Predmet {
 				this.onp = onp;
 	}
 	
+	@OneToMany(mappedBy = "predmet",
+		    cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+	private List<UPO> upo= new ArrayList<UPO>();
+	
+	public List<UPO> getUpo() {
+		return upo;
+	}
+
+	public void setUpo(List<UPO> upo) {
+		this.upo = upo;
+	}
+
 	public Predmet(){
 		
 	}
