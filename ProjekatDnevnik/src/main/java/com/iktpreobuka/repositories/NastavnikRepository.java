@@ -29,4 +29,6 @@ public interface NastavnikRepository extends CrudRepository<Nastavnik, Integer> 
 
 	Nastavnik getByJmbg(String jmbg);
 
+	Boolean existsByJmbg(String jmbg);
+
 }

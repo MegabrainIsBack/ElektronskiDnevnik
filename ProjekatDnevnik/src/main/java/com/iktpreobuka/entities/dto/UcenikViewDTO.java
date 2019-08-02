@@ -3,7 +3,7 @@ package com.iktpreobuka.entities.dto;
 import com.iktpreobuka.entities.RoditeljMajka;
 import com.iktpreobuka.entities.RoditeljOtac;
 
-public class UcenikDTO {
+public class UcenikViewDTO {
 
 	private String ime;
 	private String prezime;
@@ -11,7 +11,7 @@ public class UcenikDTO {
 	private RoditeljOtac tata;
 	private RoditeljMajka mama;
 	
-	public UcenikDTO() {
+	public UcenikViewDTO() {
 		
 	}
 

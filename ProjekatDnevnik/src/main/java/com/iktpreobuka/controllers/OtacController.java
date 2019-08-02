@@ -55,9 +55,9 @@ public class OtacController {
 	}
 	
 	@Secured("ROLE_ADMIN")
-	@RequestMapping(method= RequestMethod.GET, value="/pribaviPoPin/{pin}")
-	public RoditeljOtac otacPoPin(@PathVariable String pin) {
-		RoditeljOtac otac = otacRepository.getByPin(pin);
+	@RequestMapping(method= RequestMethod.GET, value="/pribaviPoId/{id}")
+	public RoditeljOtac otacPoPin(@PathVariable Integer id) {
+		RoditeljOtac otac = otacRepository.getById(id);
 		otac.getTatinaDjeca();
 		return otac;
 	}

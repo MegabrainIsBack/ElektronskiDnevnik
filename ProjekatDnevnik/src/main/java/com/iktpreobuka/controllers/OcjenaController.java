@@ -3,6 +3,7 @@ package com.iktpreobuka.controllers;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -32,13 +33,15 @@ public class OcjenaController {
 	
 	@Autowired
 	UPORepository upoRepository;
-
+	
+	
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.POST, value="/oceniUcenika/{id}/izPredmeta/{imePredmeta}/ocjenom/{ocj}")
 	public String ocjenaIzPredmeta(@Valid @PathVariable Integer id, @PathVariable String imePredmeta, @PathVariable Integer ocj) {
 		Ucenik ucenik=ucenikRepository.getById(id);
 		Predmet predmet=predmetRepository.getByIme(imePredmeta);
 		Ocjena ocjena = ocjenaRepository.getByIdOcjene(ocj);
-		
+		ocjena.setOcjenaBrojcana(ocj);
 		UPO upo=new UPO();
 		upo.setUcenik(ucenik);
 		upo.setPredmet(predmet);
@@ -46,7 +49,7 @@ public class OcjenaController {
 		upoRepository.save(upo);
 		
 		return "Ucenik "+ucenik.getIme()+" "+ucenik.getPrezime()+
-				" dobio je ocjenu "+ocjena.getOcjenaOpisna()+" "+ ocj+" iz predmeta "+imePredmeta;
+				" dobio je ocjenu "+ocjena.getOcjenaOpisna()+" "+ ocjena.getOcjenaBrojcana()+" iz predmeta "+imePredmeta;
 	}
 	
 }

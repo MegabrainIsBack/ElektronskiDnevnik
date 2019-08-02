@@ -24,22 +24,23 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.iktpreobuka.JoinTables.KU;
 import com.iktpreobuka.controllers.utilities.PINGenerator;
 import com.iktpreobuka.entities.Odeljenje;
+import com.iktpreobuka.entities.Predmet;
 import com.iktpreobuka.entities.RoditeljMajka;
 import com.iktpreobuka.entities.RoditeljOtac;
 import com.iktpreobuka.entities.Ucenik;
-import com.iktpreobuka.entities.Uloga;
-import com.iktpreobuka.entities.dto.UcenikDTO;
-import com.iktpreobuka.enums.Role;
+import com.iktpreobuka.entities.dto.UcenikViewDTO;
+import com.iktpreobuka.entities.dto.ucenik.OcjeneIzPredmetaDTO;
 import com.iktpreobuka.repositories.KURepository;
 import com.iktpreobuka.repositories.MajkaRepository;
 import com.iktpreobuka.repositories.OdeljenjeRepository;
 import com.iktpreobuka.repositories.OtacRepository;
+import com.iktpreobuka.repositories.PredmetRepository;
 import com.iktpreobuka.repositories.UcenikRepository;
 import com.iktpreobuka.repositories.UlogaRepository;
 import com.iktpreobuka.security.util.Encryption;
+import com.iktpreobuka.services.UcenikDAO;
 
 @RestController
 @RequestMapping(value= "/ucenik")
@@ -59,6 +60,12 @@ public class UcenikController {
 	
 	@Autowired
 	UlogaRepository ulogaRepository;
+	
+	@Autowired
+	PredmetRepository predmetRepository;
+	
+	@Autowired
+	private UcenikDAO ucenikDao;
 	
 	@Autowired
 	KURepository kuRepository;
@@ -125,6 +132,9 @@ public class UcenikController {
 				ucenik.setImeMajke(s9);
 				logger.info("Ime majke: " +s9);
 				
+				ucenik.setAktivan(true);
+				ucenik.setOsnovnaUloga("ROLE_STUDENT");
+				
 				String user="ucenik";
 				String pin=PINGenerator.PGenerator(user);
 				ucenik.setPin(pin);
@@ -148,17 +158,19 @@ public class UcenikController {
 				otac.setUsername(pinO);
 				otac.setPassword(pinO);
 				otac.setEmail(pinO+"place@holder.com");
-	
+				otac.setAktivan(true);
+				otac.setOsnovnaUloga("ROLE_PARENT");
+				logger.info("Uloga: Otac");
 				otacRepository.save(otac);
+				logger.info("Podaci o ocu sacuvani.");
 				
-				Uloga ulogaO=new Uloga();
+				/*Uloga ulogaO=new Uloga();
 				ulogaO=ulogaRepository.getByIme(Role.ROLE_PARENT);
 				KU ko=new KU();
 				ko.setKorisnik(otac);
 				ko.setUloga(ulogaO);
-				kuRepository.save(ko);
-				logger.info("Uloga: Otac");
-				logger.info("Podaci o ocu sacuvani.");
+				kuRepository.save(ko);*/
+			
 				
 				logger.info("Zapoceto setovanje majke");
 				RoditeljMajka majka= new RoditeljMajka();
@@ -174,17 +186,18 @@ public class UcenikController {
 				majka.setUsername(pinM);
 				majka.setPassword(pinM);
 				majka.setEmail(pinM+"place@holder.com");
-				
+				majka.setAktivan(true);
+				majka.setOsnovnaUloga("ROLE_PARENT");
+				logger.info("Uloga: Majka");
+				logger.info("Podaci o majci sacuvani.");
 				majkaRepository.save(majka);
 				
-				Uloga ulogaM=new Uloga();
+				/*Uloga ulogaM=new Uloga();
 				ulogaM=ulogaRepository.getByIme(Role.ROLE_PARENT);
 				KU km=new KU();
 				km.setKorisnik(majka);
 				km.setUloga(ulogaM);
-				kuRepository.save(km);
-				logger.info("Uloga: Majka");
-				logger.info("Podaci o majci sacuvani.");
+				kuRepository.save(km);*/
 				
 				logger.info("Zapoceto povezivanje roditelja i ucenika");
 				/*ucenik.setTata(otac);
@@ -209,14 +222,14 @@ public class UcenikController {
 				
 				ucenikRepository.save(ucenik);
 				
-				Uloga uloga=new Uloga();
+				/*Uloga uloga=new Uloga();
 				uloga=ulogaRepository.getByIme(Role.ROLE_STUDENT);
 				
 				KU ku=new KU();
 				ku.setKorisnik(ucenik);
 				ku.setUloga(uloga);
 				kuRepository.save(ku);
-				logger.info("Uloga: Ucenik");
+				logger.info("Uloga: Ucenik");*/
 				
 				s.close();
 			}
@@ -251,6 +264,8 @@ public class UcenikController {
 		ucenik.setOdeljenje(noviUcenik.getOdeljenje());
 		ucenik.setImeOca(noviUcenik.getImeOca());
 		ucenik.setImeMajke(noviUcenik.getImeMajke());
+		ucenik.setAktivan(true);
+		ucenik.setOsnovnaUloga("ROLE_STUDENT");
 		String user="ucenik";
 		ucenik.setPin(PINGenerator.PGenerator(user));
 		
@@ -264,13 +279,15 @@ public class UcenikController {
 		otac.setEmail(pinO+"place@holder.com");
 		otac.setPin(PINGenerator.PGenerator("roditelj"));
 		otac.dodajDijete(noviUcenik);
+		otac.setAktivan(true);
+		otac.setOsnovnaUloga("ROLE_PARENT");
 		otacRepository.save(otac);
-		Uloga ulogaO=new Uloga();
+		/*Uloga ulogaO=new Uloga();
 		ulogaO=ulogaRepository.getByIme(Role.ROLE_PARENT);
 		KU ko=new KU();
 		ko.setKorisnik(otac);
 		ko.setUloga(ulogaO);
-		kuRepository.save(ko);
+		kuRepository.save(ko);*/
 		
 		RoditeljMajka majka= new RoditeljMajka();
 		majka.setIme(noviUcenik.getImeMajke());
@@ -280,14 +297,16 @@ public class UcenikController {
 		majka.setUsername(pinM);
 		majka.setPassword(pinM);
 		majka.setEmail(pinM+"place@holder.com");
+		majka.setAktivan(true);
+		majka.setOsnovnaUloga("ROLE_PARENT");
 		majka.setPin(PINGenerator.PGenerator("roditelj"));
 		majkaRepository.save(majka);
-		Uloga ulogaM=new Uloga();
+		/*Uloga ulogaM=new Uloga();
 		ulogaM=ulogaRepository.getByIme(Role.ROLE_PARENT);
 		KU km=new KU();
 		km.setKorisnik(majka);
 		km.setUloga(ulogaM);
-		kuRepository.save(km);
+		kuRepository.save(km);*/
 		
 		ucenik.setTata(otac);
 		ucenik.setMama(majka);
@@ -305,12 +324,12 @@ public class UcenikController {
 		odeljenjeRepository.save(odeljenje);
 		logger.info("Podaci o vezi ucenika i odeljenja sacuvani.");
 		
-		Uloga uloga=new Uloga();
+		/*Uloga uloga=new Uloga();
 		uloga=ulogaRepository.getByIme(Role.ROLE_STUDENT);
 		KU ku=new KU();
 		ku.setKorisnik(ucenik);
 		ku.setUloga(uloga);
-		kuRepository.save(ku);
+		kuRepository.save(ku);*/
 		
 	
 		
@@ -330,9 +349,9 @@ public class UcenikController {
 	
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method= RequestMethod.GET, value="/poId/{id}")
-	public UcenikDTO poId(@PathVariable Integer id) {
+	public UcenikViewDTO poId(@PathVariable Integer id) {
 		Ucenik ucenik = ucenikRepository.getById(id);
-		UcenikDTO ucenikDTO=new UcenikDTO();
+		UcenikViewDTO ucenikDTO=new UcenikViewDTO();
 		ucenikDTO.setIme(ucenik.getIme());
 		ucenikDTO.setPrezime(ucenik.getPrezime());
 		ucenikDTO.setOdeljenje(ucenik.getOdeljenje());
@@ -385,6 +404,17 @@ public class UcenikController {
 		ucenik.setAktivan(false);
 		ucenikRepository.save(ucenik);
 		return  ucenik;
+	}
+	
+	@Secured("ROLE_ADMIN")
+	@RequestMapping (method=RequestMethod.GET, value="/{idUcenika}/OcjeneIzPredmeta/{imeP}")
+	public OcjeneIzPredmetaDTO ocjeneIzPredmeta(@PathVariable Integer idUcenika, @PathVariable String imeP) {
+		OcjeneIzPredmetaDTO oIP=new OcjeneIzPredmetaDTO();
+		oIP.setImePredmeta(imeP);
+		Predmet predmet=predmetRepository.getByIme(imeP);
+		Ucenik ucenik=ucenikRepository.getById(idUcenika);
+		oIP.setOcjene(ucenikDao.ocjeneIzPredmeta(predmet,ucenik));
+		return oIP;
 	}
 
 }

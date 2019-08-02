@@ -10,4 +10,8 @@ public interface MajkaRepository extends CrudRepository<RoditeljMajka, Integer>{
 
 	RoditeljMajka getById(Integer id);
 
+	boolean existsByJmbg(String jmbg);
+
+	RoditeljMajka getByJmbg(String jmbg);
+
 }

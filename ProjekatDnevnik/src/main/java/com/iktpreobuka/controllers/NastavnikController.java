@@ -3,6 +3,7 @@ package com.iktpreobuka.controllers;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -122,19 +123,21 @@ public class NastavnikController {
 				nastavnik.setPin(pin);
 				logger.info("PIN: "+ pin);
 				
+				nastavnik.setOsnovnaUloga("ROLE_TEACHER");
+				
 				nastavnici1.add(nastavnik);
 				logger.info("Nastavnik dodan u listu nastavnika");
 				
 				nastavnikRepository.save(nastavnik);
 				logger.info("Nastavnik sacuvan");
 				
-				Uloga uloga=new Uloga();
+				/*Uloga uloga=new Uloga();
 				uloga=ulogaRepository.getByIme(Role.ROLE_TEACHER);
 				
 				KU ku=new KU();
 				ku.setKorisnik(nastavnik);
 				ku.setUloga(uloga);
-				kuRepository.save(ku);
+				kuRepository.save(ku);*/
 				
 				s.close();
 			}
@@ -157,7 +160,7 @@ public class NastavnikController {
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.POST, value="/dodajNastavnika")
 	public	ResponseEntity<?> dodajNastavnika(@Valid @RequestBody Nastavnik noviNastavnik, BindingResult result) {
-		if (nastavnikRepository.getByJmbg(noviNastavnik.getJmbg())!=null) {
+		if (nastavnikRepository.existsByJmbg(noviNastavnik.getJmbg())) {
 			return new ResponseEntity<>("Nastavnik vec postoji", HttpStatus.BAD_REQUEST);
 		}
 		Nastavnik nastavnik = new Nastavnik();
@@ -168,6 +171,7 @@ public class NastavnikController {
 		String kodiraniPassword=Encryption.getPassEncoded(noviNastavnik.getPassword());
 		nastavnik.setPassword(kodiraniPassword);
 		nastavnik.setEmail(noviNastavnik.getEmail());
+		nastavnik.setOsnovnaUloga("ROLE_TEACHER");
 		
 		String user="nastavnik";
 		nastavnik.setPin(PINGenerator.PGenerator(user));
@@ -179,13 +183,13 @@ public class NastavnikController {
 		nastavnikRepository.save(nastavnik);
 		logger.info("Nastavnik sacuvan");
 		
-		Uloga uloga=new Uloga();
+		/*Uloga uloga=new Uloga();
 		uloga=ulogaRepository.getByIme(Role.ROLE_TEACHER);
 		
 		KU ku=new KU();
 		ku.setKorisnik(nastavnik);
 		ku.setUloga(uloga);
-		kuRepository.save(ku);
+		kuRepository.save(ku);*/
 		
 		return new ResponseEntity<>(nastavnik, HttpStatus.OK);
 	}
@@ -221,7 +225,9 @@ public class NastavnikController {
 	
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method= RequestMethod.GET, value="/poId/{id}")
-	public Nastavnik nastavnikPoId(@PathVariable Integer id) {
+	public Nastavnik nastavnikPoId(@PathVariable Integer id, Principal principal) {
+		String ulogovaniKorisnik = principal.getName();
+		logger.info("UlogovaniKorisnik: " +ulogovaniKorisnik);
 		Nastavnik nastavnik = nastavnikRepository.getById(id);
 		return nastavnik;
 	}

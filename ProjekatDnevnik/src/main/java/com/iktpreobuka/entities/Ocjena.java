@@ -30,7 +30,7 @@ public class Ocjena {
 	
 	@Min(value=1, message="Ocjena mora biti izmedju 1 i 5.")
 	@Max(value=5, message="Ocjena mora biti izmedju 1 i 5.")
-	private Integer ocjena;
+	private Integer ocjenaBrojcana;
 	
 	private String ocjenaOpisna;
 	
@@ -58,12 +58,12 @@ public class Ocjena {
 		this.idOcjene = idOcjene;
 	}
 
-	public Integer getOcjena() {
-		return ocjena;
+	public Integer getOcjenaBrojcana() {
+		return ocjenaBrojcana;
 	}
 
-	public void setOcjena(Integer ocjena) {
-		this.ocjena = ocjena;
+	public void setOcjenaBrojcana(Integer ocjenaBrojcana) {
+		this.ocjenaBrojcana = ocjenaBrojcana;
 	}
 
 	public String getOcjenaOpisna() {
