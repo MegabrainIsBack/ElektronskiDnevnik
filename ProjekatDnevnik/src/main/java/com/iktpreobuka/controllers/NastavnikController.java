@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -69,6 +70,7 @@ public class NastavnikController {
 		.collect(Collectors.joining(" "));
 		}
 	
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.POST, value="/dodajNastavnika/izFajla")
 	public ResponseEntity<?> dodajNastavnikaIzFajla() throws IOException {
 		
@@ -152,7 +154,7 @@ public class NastavnikController {
 	}
 	return new ResponseEntity<>(nastavnici1, HttpStatus.OK);
 }
-	
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.POST, value="/dodajNastavnika")
 	public	ResponseEntity<?> dodajNastavnika(@Valid @RequestBody Nastavnik noviNastavnik, BindingResult result) {
 		if (nastavnikRepository.getByJmbg(noviNastavnik.getJmbg())!=null) {
@@ -188,6 +190,7 @@ public class NastavnikController {
 		return new ResponseEntity<>(nastavnik, HttpStatus.OK);
 	}
 	
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.PUT, value="/dodajNastavnikaOdeljenju")
 	public	ResponseEntity<?> dodajNastavnikaOdeljenju(@Valid @RequestBody NastavnikZaOdeljenje noviNastavnik, BindingResult result) {
 		String jmbg=noviNastavnik.getJmbg();
@@ -209,21 +212,21 @@ public class NastavnikController {
 	}
 	
 	
-	
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(method= RequestMethod.GET, value="/pribaviSve")
 	public Iterable<Nastavnik> sviNastavnici() {
 		Iterable<Nastavnik> nastavnici = nastavnikRepository.findAll();
 		return nastavnici;
 	}
 	
-	
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(method= RequestMethod.GET, value="/poId/{id}")
 	public Nastavnik nastavnikPoId(@PathVariable Integer id) {
 		Nastavnik nastavnik = nastavnikRepository.getById(id);
 		return nastavnik;
 	}
 
-	
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(method= RequestMethod.GET, value="/poOdeljenju/{razred}/{odeljenje}")
 	public List<Nastavnik> poOdeljenju(@PathVariable Integer razred, @PathVariable String odeljenje ) {
 		Odeljenje odeljenjeT=odeljenjeRepository.getByGodinaAndIme(razred,odeljenje);
@@ -231,6 +234,7 @@ public class NastavnikController {
 		return nastavnici;
 	}
 	
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(method= RequestMethod.GET, value="/poPredmetu/{predmetIme}")
 	public List<Nastavnik> poPredmetu(@PathVariable String predmetIme ) {
 		Predmet predmet=predmetRepository.getByIme(predmetIme);
@@ -238,6 +242,7 @@ public class NastavnikController {
 		return nastavnici;
 	}
 	
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.PUT, value="/izmjeniNastavnika/{id}")
 	public	ResponseEntity<?> izmjeniNastavnika(@Valid @PathVariable Integer id,@RequestBody Nastavnik noviNastavnik, BindingResult result) {
 		Nastavnik nastavnik= nastavnikRepository.getById(id);
@@ -257,6 +262,7 @@ public class NastavnikController {
 		return new ResponseEntity<>(nastavnik, HttpStatus.OK);
 	}
 	
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(method= RequestMethod.DELETE, value="/obrisiNastavnika/{id}")
 	public	Nastavnik obrisiNastavnika(@PathVariable Integer id) {
 		Nastavnik nastavnik=nastavnikRepository.getById(id);

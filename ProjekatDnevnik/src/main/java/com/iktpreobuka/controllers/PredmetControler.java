@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -49,7 +50,7 @@ public class PredmetControler {
 	
 	private final Logger logger = (Logger) LoggerFactory.getLogger(this.getClass());
 	
-	
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.POST, value="/dodajPredmet/izFajla")
 	public ResponseEntity<?> dodajUloguIzFajla() throws IOException {
 		
@@ -122,6 +123,7 @@ public class PredmetControler {
 	return new ResponseEntity<>(predmeti, HttpStatus.OK);
 	}
 	
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.POST, value="/dodajPredmet")
 	public	ResponseEntity<?> dodajPredmet(@Valid @RequestBody Predmet noviPredmet, BindingResult result) {
 		if (predmetRepository.getByIme(noviPredmet.getIme())!=null) {
@@ -152,24 +154,28 @@ public class PredmetControler {
 		return new ResponseEntity<>(predmet, HttpStatus.OK);
 	}
 	
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(method= RequestMethod.GET, value="/pribaviSve")
 	public Iterable<Predmet> sviPredmeti() {
 		Iterable<Predmet> predmeti = predmetRepository.findAll();
 		return predmeti;
 	}
 	
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(method= RequestMethod.GET, value="/poImenu/{predmetIme}")
 	public Predmet poImenu(@PathVariable String predmetIme ) {
 		Predmet predmet=predmetRepository.getByIme(predmetIme);
 		return predmet;
 	}
 	
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(method= RequestMethod.GET, value="/poRazredu/{godina}")
 	public Iterable<Predmet> poOdeljenju(@PathVariable Integer godina) {
 		Iterable<Predmet> predmeti =predmetRepository.predmetiPoRazredu(godina);
 		return predmeti;
 	}
 	
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.PUT, value="/izmjeniPredmet/{imePredmeta}")
 	public	ResponseEntity<?> izmjeniPredmet(@Valid @PathVariable String imePredmeta,@RequestBody Predmet noviPredmet, BindingResult result) {
 		Predmet predmet= predmetRepository.getByIme(imePredmeta);
@@ -185,6 +191,7 @@ public class PredmetControler {
 		return new ResponseEntity<>(predmet, HttpStatus.OK);
 	}
 	
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(method= RequestMethod.DELETE, value="/obrisiPredmet/{imePredmeta}")
 	public	Predmet obrisiPredmet(@PathVariable String imePredmeta) {
 		Predmet predmet= predmetRepository.getByIme(imePredmeta);

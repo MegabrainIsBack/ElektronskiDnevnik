@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -45,6 +46,7 @@ public class OdeljenjeController {
 	@Autowired
 	ONPRepository onpRepository;
 	
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.POST, value="/dodajOdeljenje")
 	public	ResponseEntity<?> dodajOdeljenje(@Valid @RequestBody Odeljenje novoOdeljenje, BindingResult result) {
 		Odeljenje odeljenje = new Odeljenje();
@@ -78,18 +80,21 @@ public class OdeljenjeController {
 		return new ResponseEntity<>(odeljenje, HttpStatus.OK);
 	}
 	
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(method= RequestMethod.GET, value="/pribaviSve")
 	public Iterable<Odeljenje> svaOdeljenja() {
 		Iterable<Odeljenje> odeljenja = odeljenjeRepository.findAll();
 		return odeljenja;
 	}
 	
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(method= RequestMethod.GET, value="/poImenu/{godina}/{imeOdeljenja}")
 	public Odeljenje poImenu(@PathVariable Integer godina,@PathVariable String imeOdeljenja ) {
 		Odeljenje odeljenje=odeljenjeRepository.getByGodinaAndIme(godina, imeOdeljenja);
 		return odeljenje;
 	}
 	
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(method= RequestMethod.DELETE, value="/obrisiOdeljenje/{godina}/{imeOdeljenja}")
 	public	Odeljenje obrisiOdeljenje(@PathVariable Integer godina, @PathVariable String imeOdeljenja) {
 		Odeljenje odeljenje=odeljenjeRepository.getByGodinaAndIme(godina, imeOdeljenja);

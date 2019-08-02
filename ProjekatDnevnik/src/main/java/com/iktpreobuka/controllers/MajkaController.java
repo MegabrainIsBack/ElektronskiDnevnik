@@ -3,6 +3,7 @@ package com.iktpreobuka.controllers;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,6 +27,7 @@ public class MajkaController {
 	@Autowired
 	MajkaRepository majkaRepository;
 	
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.PUT, value="/izmjeniMajku/{pinDjeteta}")
 	public	RoditeljMajka izmjeniMajku(@PathVariable String pinDjeteta, @RequestBody RoditeljMajka novaMajka) {
 		Ucenik ucenik= ucenikRepository.getByPin(pinDjeteta);
@@ -40,28 +42,22 @@ public class MajkaController {
 		majkaRepository.save(majka);
 		return majka;
 	}
-
+	
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(method= RequestMethod.GET, value="/pribaviSve")
 	public Iterable<RoditeljMajka> sveMajke() {
 		Iterable<RoditeljMajka> majke = majkaRepository.findAll();
 		return majke;
 	}
 	
-	@RequestMapping(method= RequestMethod.GET, value="/pribaviPoPin/{pin}")
-	public RoditeljMajka majkaPoPin(@PathVariable String pin) {
-		RoditeljMajka majka = majkaRepository.getByPin(pin);
-		//majka.getMaminaDjeca();
+	@Secured("ROLE_ADMIN")
+	@RequestMapping(method= RequestMethod.GET, value="/pribaviPoId/{id}")
+	public RoditeljMajka majkaPoId(@PathVariable Integer id) {
+		RoditeljMajka majka = majkaRepository.getById(id);
 		return majka;
 	}
 	
-	/*@RequestMapping(method= RequestMethod.GET, value="/TatinaDjeca/{pin}")
-	public Set<Ucenik> tatinaDjeca(@PathVariable String pin) {
-		RoditeljOtac otac = otacRepository.getByPin(pin);
-		//Set<Ucenik> djeca=new HashSet<>();
-		Set<Ucenik> djeca= otac.getTatinaDjeca();
-		return djeca;
-	}*/
-	
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(method= RequestMethod.DELETE, value="/obrisiMajku/{id}")
 	public	RoditeljMajka obrisiMajku(@PathVariable Integer id) {
 		RoditeljMajka majka=majkaRepository.getById(id);

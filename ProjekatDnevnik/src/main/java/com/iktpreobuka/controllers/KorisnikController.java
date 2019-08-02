@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -35,6 +36,7 @@ public class KorisnikController {
 		.collect(Collectors.joining(" "));
 		}
 	
+	@Secured("ROLE_ADMIN")
 	public static Korisnik kreirajKorisnika(Korisnik noviKorisnik) {
 		Korisnik korisnik= new Korisnik();
 		korisnik.setIme(noviKorisnik.getIme());

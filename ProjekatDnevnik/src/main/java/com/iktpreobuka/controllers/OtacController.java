@@ -1,6 +1,7 @@
 package com.iktpreobuka.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,6 +24,7 @@ public class OtacController {
 	@Autowired
 	OtacRepository otacRepository;
 	
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.PUT, value="/izmjeniOca/{idDjeteta}")
 	public	RoditeljOtac izmjeniOca(@PathVariable Integer idDjeteta, @RequestBody RoditeljOtac noviOtac) {
 		
@@ -45,12 +47,14 @@ public class OtacController {
 		return otac;
 	}
 
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(method= RequestMethod.GET, value="/pribaviSve")
 	public Iterable<RoditeljOtac> sviOcevi() {
 		Iterable<RoditeljOtac> ocevi = otacRepository.findAll();
 		return ocevi;
 	}
 	
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(method= RequestMethod.GET, value="/pribaviPoPin/{pin}")
 	public RoditeljOtac otacPoPin(@PathVariable String pin) {
 		RoditeljOtac otac = otacRepository.getByPin(pin);
@@ -58,18 +62,12 @@ public class OtacController {
 		return otac;
 	}
 	
-	/*@RequestMapping(method= RequestMethod.GET, value="/TatinaDjeca/{pin}")
-	public Set<Ucenik> tatinaDjeca(@PathVariable String pin) {
-		RoditeljOtac otac = otacRepository.getByPin(pin);
-		//Set<Ucenik> djeca=new HashSet<>();
-		Set<Ucenik> djeca= otac.getTatinaDjeca();
-		return djeca;
-	}*/
-	
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(method= RequestMethod.DELETE, value="/obrisiOca/{id}")
 	public	RoditeljOtac obrisiOca(@PathVariable Integer id) {
 		RoditeljOtac otac=otacRepository.getById(id);
-		otacRepository.deleteById(id);
+		otac.setAktivan(false);
+		otacRepository.save(otac);
 		return  otac;
 	}
 }

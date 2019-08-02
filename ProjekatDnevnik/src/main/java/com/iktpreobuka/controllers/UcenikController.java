@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -69,6 +70,7 @@ public class UcenikController {
 		.collect(Collectors.joining(" "));
 		}
 	
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.POST, value="/dodajUcenika/izFajla")
 	public ResponseEntity<?> dodajUcenikaIzFajla() throws IOException {
 		
@@ -235,6 +237,7 @@ public class UcenikController {
 	return new ResponseEntity<>(ucenici, HttpStatus.OK);
 }
 	
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.POST, value="/dodajUcenika")
 	public	ResponseEntity<?> dodajUcenika(@Valid @RequestBody Ucenik noviUcenik, BindingResult result) {
 		Ucenik ucenik = new Ucenik();
@@ -318,12 +321,14 @@ public class UcenikController {
 		return new ResponseEntity<>(ucenik, HttpStatus.OK);
 	}
 	
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(method= RequestMethod.GET, value="/pribaviSve")
 	public Iterable<Ucenik> sviUcenici() {
 		Iterable<Ucenik> ucenici = ucenikRepository.findAll();
 		return ucenici;
 	}
 	
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(method= RequestMethod.GET, value="/poId/{id}")
 	public UcenikDTO poId(@PathVariable Integer id) {
 		Ucenik ucenik = ucenikRepository.getById(id);
@@ -336,6 +341,7 @@ public class UcenikController {
 		return ucenikDTO;
 	}
 	
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.PUT, value="/izmjeniUcenika/{id}")
 	public	ResponseEntity<?> izmjeniUcenika(@Valid @PathVariable Integer id,@RequestBody Ucenik noviUcenik, BindingResult result) {
 		Ucenik ucenik= ucenikRepository.getById(id);
@@ -362,6 +368,7 @@ public class UcenikController {
 		return new ResponseEntity<>(ucenik, HttpStatus.OK);
 	}
 	
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(method= RequestMethod.GET, value="/poOdeljenju/{odeljenjeI}")
 	public List<Ucenik> poOdeljenju(@PathVariable String odeljenjeI ) {
 		Integer godinaO= Character.getNumericValue(odeljenjeI.charAt(0));
@@ -371,6 +378,7 @@ public class UcenikController {
 		return ucenici;
 	}
 	
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(method= RequestMethod.DELETE, value="/obrisiUcenika/{id}")
 	public	Ucenik obrisiNastavnika(@PathVariable Integer id) {
 		Ucenik ucenik=ucenikRepository.getById(id);
