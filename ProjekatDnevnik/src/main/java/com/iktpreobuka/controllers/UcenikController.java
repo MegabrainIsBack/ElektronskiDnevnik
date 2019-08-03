@@ -3,6 +3,7 @@ package com.iktpreobuka.controllers;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.iktpreobuka.controllers.utilities.PINGenerator;
+import com.iktpreobuka.entities.Korisnik;
 import com.iktpreobuka.entities.Odeljenje;
 import com.iktpreobuka.entities.Predmet;
 import com.iktpreobuka.entities.RoditeljMajka;
@@ -32,7 +34,9 @@ import com.iktpreobuka.entities.RoditeljOtac;
 import com.iktpreobuka.entities.Ucenik;
 import com.iktpreobuka.entities.dto.UcenikViewDTO;
 import com.iktpreobuka.entities.dto.ucenik.OcjeneIzPredmetaDTO;
+import com.iktpreobuka.entities.dto.ucenik.SamoOcjeneIzPredmetaDTO;
 import com.iktpreobuka.repositories.KURepository;
+import com.iktpreobuka.repositories.KorisnikRepository;
 import com.iktpreobuka.repositories.MajkaRepository;
 import com.iktpreobuka.repositories.OdeljenjeRepository;
 import com.iktpreobuka.repositories.OtacRepository;
@@ -65,7 +69,10 @@ public class UcenikController {
 	PredmetRepository predmetRepository;
 	
 	@Autowired
-	private UcenikDAO ucenikDao;
+	KorisnikRepository korisnikRepository;
+	
+	@Autowired
+	private UcenikDAO ucenikDAO;
 	
 	@Autowired
 	KURepository kuRepository;
@@ -406,15 +413,46 @@ public class UcenikController {
 		return  ucenik;
 	}
 	
-	@Secured("ROLE_ADMIN")
+	
 	@RequestMapping (method=RequestMethod.GET, value="/{idUcenika}/OcjeneIzPredmeta/{imeP}")
-	public OcjeneIzPredmetaDTO ocjeneIzPredmeta(@PathVariable Integer idUcenika, @PathVariable String imeP) {
+	public ResponseEntity<?> ocjeneIzPredmeta(@PathVariable Integer idUcenika, 
+			@PathVariable String imeP, Principal principal) {
+		String ulogovaniKorisnik=principal.getName();
+		logger.info("Ulogovani korisnik-Username: " +ulogovaniKorisnik);
+		Korisnik ucenik=korisnikRepository.getByUsername(ulogovaniKorisnik);
+		logger.info("Ulogovani korisnik-Id: " +ucenik.getId());
+		if(ucenik.getId()!=idUcenika) {
+			return new ResponseEntity<>("Neautorizovani pristup", HttpStatus.UNAUTHORIZED);
+		}
 		OcjeneIzPredmetaDTO oIP=new OcjeneIzPredmetaDTO();
+		oIP.setImeIPrezime(ucenik.getIme()+" "+ucenik.getPrezime());
+		oIP.setOdeljenje(((Ucenik) ucenik).getOdeljenje());
 		oIP.setImePredmeta(imeP);
 		Predmet predmet=predmetRepository.getByIme(imeP);
-		Ucenik ucenik=ucenikRepository.getById(idUcenika);
-		oIP.setOcjene(ucenikDao.ocjeneIzPredmeta(predmet,ucenik));
-		return oIP;
+		oIP.setOcjene(ucenikDAO.ocjeneIzPredmeta(predmet,ucenik));
+		return new ResponseEntity<>(oIP, HttpStatus.OK);
 	}
+	
+	@RequestMapping (method=RequestMethod.GET, value="/{idUcenika}/OcjeneIzSvihPredmeta")
+	public ResponseEntity<?> ocjeneIzSvihPredmeta(@PathVariable Integer idUcenika, Principal principal){
+		String ulogovaniKorisnik=principal.getName();
+		logger.info("Ulogovani korisnik-Username: " +ulogovaniKorisnik);
+		Korisnik ucenik=korisnikRepository.getByUsername(ulogovaniKorisnik);
+		logger.info("Ulogovani korisnik-Id: " +ucenik.getId());
+		if(ucenik.getId()!=idUcenika) {
+			return new ResponseEntity<>("Neautorizovani pristup", HttpStatus.UNAUTHORIZED);
+		}
+		Integer godina =Character.getNumericValue(((Ucenik) ucenik).getOdeljenje().charAt(0));
+		List<Predmet> predmeti=predmetRepository.predmetiPoRazredu(godina);
+		List<SamoOcjeneIzPredmetaDTO> ocjene = new ArrayList<SamoOcjeneIzPredmetaDTO>();
+		for(Predmet pred: predmeti) {
+			SamoOcjeneIzPredmetaDTO oIP=new SamoOcjeneIzPredmetaDTO();
+			oIP.setImePredmeta(pred.getIme());
+			oIP.setOcjene(ucenikDAO.ocjeneIzPredmeta(pred,ucenik));
+			ocjene.add(oIP);
+		}
+		return new ResponseEntity<>(ocjene, HttpStatus.OK);
+		}
+	
 
 }

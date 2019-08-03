@@ -6,4 +6,6 @@ import com.iktpreobuka.entities.Korisnik;
 
 public interface KorisnikRepository extends CrudRepository<Korisnik, Integer>{
 
+	Korisnik getByUsername(String ulogovaniKorisnik);
+
 }

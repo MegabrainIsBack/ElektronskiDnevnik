@@ -9,9 +9,9 @@ import javax.persistence.Query;
 
 import org.springframework.stereotype.Service;
 
+import com.iktpreobuka.entities.Korisnik;
 import com.iktpreobuka.entities.Ocjena;
 import com.iktpreobuka.entities.Predmet;
-import com.iktpreobuka.entities.Ucenik;
 
 @Service
 public class UcenikDAOImpl implements UcenikDAO{
@@ -21,7 +21,7 @@ public class UcenikDAOImpl implements UcenikDAO{
 	private EntityManager em;
 	
 	@Override
-	public ArrayList<Integer> ocjeneIzPredmeta(Predmet predmet, Ucenik ucenik) {
+	public ArrayList<Integer> ocjeneIzPredmeta(Predmet predmet, Korisnik ucenik) {
 		String sql = "select ocjena from UPO upo "
 				+ "where upo.predmet=:predmet and upo.ucenik=:ucenik";
 		Query query = em.createQuery(sql);

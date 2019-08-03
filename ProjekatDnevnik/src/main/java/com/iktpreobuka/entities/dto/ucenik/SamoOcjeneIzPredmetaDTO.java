@@ -2,34 +2,14 @@ package com.iktpreobuka.entities.dto.ucenik;
 
 import java.util.ArrayList;
 
-public class OcjeneIzPredmetaDTO {
-	
-	private String imeIPrezime;
-	
-	private String Odeljenje;
+public class SamoOcjeneIzPredmetaDTO {
 	
 	private String imePredmeta;
 	
 	private ArrayList<Integer> ocjene;
 
-	public OcjeneIzPredmetaDTO() {
+	public SamoOcjeneIzPredmetaDTO() {
 		super();
-	}
-
-	public String getImeIPrezime() {
-		return imeIPrezime;
-	}
-
-	public void setImeIPrezime(String imeIPrezime) {
-		this.imeIPrezime = imeIPrezime;
-	}
-
-	public String getOdeljenje() {
-		return Odeljenje;
-	}
-
-	public void setOdeljenje(String odeljenje) {
-		Odeljenje = odeljenje;
 	}
 
 	public String getImePredmeta() {
@@ -47,7 +27,5 @@ public class OcjeneIzPredmetaDTO {
 	public void setOcjene(ArrayList<Integer> ocjene) {
 		this.ocjene = ocjene;
 	}
-	
-	
 
 }

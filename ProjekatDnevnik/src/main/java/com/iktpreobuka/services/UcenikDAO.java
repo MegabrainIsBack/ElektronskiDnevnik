@@ -2,11 +2,12 @@ package com.iktpreobuka.services;
 
 import java.util.ArrayList;
 
+import com.iktpreobuka.entities.Korisnik;
 import com.iktpreobuka.entities.Predmet;
-import com.iktpreobuka.entities.Ucenik;
+
 
 public interface UcenikDAO {
 
-	ArrayList<Integer> ocjeneIzPredmeta(Predmet predmet, Ucenik ucenik);
+	ArrayList<Integer> ocjeneIzPredmeta(Predmet predmet, Korisnik ucenik);
 
 }

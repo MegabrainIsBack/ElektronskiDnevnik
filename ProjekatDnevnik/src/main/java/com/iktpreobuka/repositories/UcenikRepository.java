@@ -18,9 +18,7 @@ public interface UcenikRepository extends CrudRepository<Ucenik, Integer>{
 	Ucenik getById(Integer id);
 
 	List<Ucenik> getByOdeljenjeU(Odeljenje odeljenje);
-	
-	/*@Query("select ocjena from UPO upo "
-			+ "where upo.predmet=:predmet and upo.ucenik=:ucenik")
-	ArrayList <Ocjena> ocjeneIzPredmeta(Predmet predmet, Ucenik ucenik);*/
+
+	Ucenik getByUsername(String ulogovaniKorisnik);
 
 }
