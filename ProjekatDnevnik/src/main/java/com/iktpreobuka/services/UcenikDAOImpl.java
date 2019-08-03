@@ -7,19 +7,63 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
 import com.iktpreobuka.entities.Korisnik;
 import com.iktpreobuka.entities.Ocjena;
 import com.iktpreobuka.entities.Predmet;
+import com.iktpreobuka.entities.Ucenik;
+import com.iktpreobuka.entities.dto.ucenik.OcjeneIzJednogPredmetaDTO;
+import com.iktpreobuka.entities.dto.ucenik.OcjeneIzSvihPredmetaDTO;
+import com.iktpreobuka.repositories.KURepository;
+import com.iktpreobuka.repositories.KorisnikRepository;
+import com.iktpreobuka.repositories.MajkaRepository;
+import com.iktpreobuka.repositories.OdeljenjeRepository;
+import com.iktpreobuka.repositories.OtacRepository;
+import com.iktpreobuka.repositories.PredmetRepository;
+import com.iktpreobuka.repositories.UcenikRepository;
+import com.iktpreobuka.repositories.UlogaRepository;
 
 @Service
 public class UcenikDAOImpl implements UcenikDAO{
+	private final Logger logger = (Logger) LoggerFactory.getLogger(this.getClass());
+	
+	@Autowired
+	UcenikRepository ucenikRepository;
+	
+	@Autowired
+	OtacRepository otacRepository;
+	
+	@Autowired
+	MajkaRepository majkaRepository;
+	
+	@Autowired
+	OdeljenjeRepository odeljenjeRepository;
+	
+	@Autowired
+	UlogaRepository ulogaRepository;
+	
+	@Autowired
+	PredmetRepository predmetRepository;
+	
+	@Autowired
+	KorisnikRepository korisnikRepository;
+	
+	@Autowired
+	private UcenikDAO ucenikDAO;
+	
+	@Autowired
+	KURepository kuRepository;
 	
 	
 	@PersistenceContext
 	private EntityManager em;
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public ArrayList<Integer> ocjeneIzPredmeta(Predmet predmet, Korisnik ucenik) {
 		String sql = "select ocjena from UPO upo "
@@ -35,6 +79,40 @@ public class UcenikDAOImpl implements UcenikDAO{
 		}
 		return ocjene;
 		}
+	
+	
+	@Override
+	public ResponseEntity<?> ocjeneIzSvihPredmetaDAO(Integer idUcenika){
+		logger.info("Pristup dozvoljen.");
+		Ucenik ucenik=ucenikRepository.getById(idUcenika);
+		Integer godina =Character.getNumericValue(ucenik.getOdeljenje().charAt(0));
+		List<Predmet> predmeti=predmetRepository.predmetiPoRazredu(godina);
+		List<OcjeneIzSvihPredmetaDTO> ocjene = new ArrayList<OcjeneIzSvihPredmetaDTO>();
+		for(Predmet pred: predmeti) {
+			OcjeneIzSvihPredmetaDTO oIP=new OcjeneIzSvihPredmetaDTO();
+			oIP.setImePredmeta(pred.getIme());
+			oIP.setOcjene(ucenikDAO.ocjeneIzPredmeta(pred,ucenik));
+			ocjene.add(oIP);
+		}
+		logger.info("Citanje ocjena uspjesno zavrseno");
+		return new ResponseEntity<>(ocjene, HttpStatus.OK);
+		}
+	
+	@Override
+	public ResponseEntity<?> ocjeneIzJednogPredmetaDAO(Integer idUcenika, String imeP){
+		logger.info("Pristup dozvoljen.");
+		Ucenik ucenik=ucenikRepository.getById(idUcenika);
+		OcjeneIzJednogPredmetaDTO oIP=new OcjeneIzJednogPredmetaDTO();
+		oIP.setImeIPrezime(ucenik.getIme()+" "+ucenik.getPrezime());
+		oIP.setOdeljenje(((Ucenik) ucenik).getOdeljenje());
+		oIP.setImePredmeta(imeP);
+		Predmet predmet=predmetRepository.getByIme(imeP);
+		oIP.setOcjene(ucenikDAO.ocjeneIzPredmeta(predmet,ucenik));
+		logger.info("Citanje ocjena uspjesno zavrseno");
+		return new ResponseEntity<>(oIP, HttpStatus.OK);
+	}
+
+	
 	}
 
 

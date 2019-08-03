@@ -420,22 +420,14 @@ public class UcenikController {
 		String ulogovaniKorisnik=principal.getName();
 		logger.info("Ulogovani korisnik-Username: " +ulogovaniKorisnik);
 		Korisnik korisnik = korisnikRepository.getByUsername(ulogovaniKorisnik);
-		Ucenik ucenik=ucenikRepository.getById(idUcenika);
 		logger.info("Ulogovani korisnik-Id: " +korisnik.getId());
 		logger.info("Ulogovani korisnik-Uloga: " +korisnik.getOsnovnaUloga());
 		if(!(korisnik.getId()==idUcenika || (korisnik.getOsnovnaUloga().equals("ROLE_ADMIN")))) {
 			logger.info("Pokusaj neautorizovanog pristupa - Id Korisnika: " +korisnik.getId());
 			return new ResponseEntity<>("Neautorizovani pristup", HttpStatus.UNAUTHORIZED);
 		}
-		logger.info("Pristup dozvoljen - Id Korisnika: " +korisnik.getId());
-		OcjeneIzJednogPredmetaDTO oIP=new OcjeneIzJednogPredmetaDTO();
-		oIP.setImeIPrezime(ucenik.getIme()+" "+ucenik.getPrezime());
-		oIP.setOdeljenje(((Ucenik) ucenik).getOdeljenje());
-		oIP.setImePredmeta(imeP);
-		Predmet predmet=predmetRepository.getByIme(imeP);
-		oIP.setOcjene(ucenikDAO.ocjeneIzPredmeta(predmet,ucenik));
-		logger.info("Citanje ocjena uspjesno zavrseno");
-		return new ResponseEntity<>(oIP, HttpStatus.OK);
+		ResponseEntity<?> ocjene = ucenikDAO.ocjeneIzJednogPredmetaDAO(idUcenika, imeP);
+		return ocjene;
 	}
 	
 	@RequestMapping (method=RequestMethod.GET, value="/{idUcenika}/OcjeneIzSvihPredmeta")
@@ -443,26 +435,13 @@ public class UcenikController {
 		String ulogovaniKorisnik=principal.getName();
 		logger.info("Ulogovani korisnik-Username: " +ulogovaniKorisnik);
 		Korisnik korisnik = korisnikRepository.getByUsername(ulogovaniKorisnik);
-		Ucenik ucenik=ucenikRepository.getById(idUcenika);
 		logger.info("Ulogovani korisnik-Id: " +korisnik.getId());
 		logger.info("Ulogovani korisnik-Uloga: " +korisnik.getOsnovnaUloga());
 		if(!(korisnik.getId()==idUcenika || (korisnik.getOsnovnaUloga().equals("ROLE_ADMIN")))) {
 			logger.info("Pokusaj neautorizovanog pristupa - Id Korisnika: " +korisnik.getId());
 			return new ResponseEntity<>("Neautorizovani pristup", HttpStatus.UNAUTHORIZED);
 		}
-		logger.info("Pristup dozvoljen - Id Korisnika: " +korisnik.getId());
-		Integer godina =Character.getNumericValue(ucenik.getOdeljenje().charAt(0));
-		List<Predmet> predmeti=predmetRepository.predmetiPoRazredu(godina);
-		List<OcjeneIzSvihPredmetaDTO> ocjene = new ArrayList<OcjeneIzSvihPredmetaDTO>();
-		for(Predmet pred: predmeti) {
-			OcjeneIzSvihPredmetaDTO oIP=new OcjeneIzSvihPredmetaDTO();
-			oIP.setImePredmeta(pred.getIme());
-			oIP.setOcjene(ucenikDAO.ocjeneIzPredmeta(pred,ucenik));
-			ocjene.add(oIP);
+		ResponseEntity<?> ocjene = ucenikDAO.ocjeneIzSvihPredmetaDAO(idUcenika);
+		return ocjene;
 		}
-		logger.info("Citanje ocjena uspjesno zavrseno");
-		return new ResponseEntity<>(ocjene, HttpStatus.OK);
-		}
-	
-
 }
