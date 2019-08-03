@@ -2,13 +2,13 @@ package com.iktpreobuka.entities.dto.ucenik;
 
 import java.util.ArrayList;
 
-public class SamoOcjeneIzPredmetaDTO {
+public class OcjeneIzSvihPredmetaDTO {
 	
 	private String imePredmeta;
 	
 	private ArrayList<Integer> ocjene;
 
-	public SamoOcjeneIzPredmetaDTO() {
+	public OcjeneIzSvihPredmetaDTO() {
 		super();
 	}
 

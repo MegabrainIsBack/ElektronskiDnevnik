@@ -2,7 +2,7 @@ package com.iktpreobuka.entities.dto.ucenik;
 
 import java.util.ArrayList;
 
-public class OcjeneIzPredmetaDTO {
+public class OcjeneIzJednogPredmetaDTO {
 	
 	private String imeIPrezime;
 	
@@ -12,7 +12,7 @@ public class OcjeneIzPredmetaDTO {
 	
 	private ArrayList<Integer> ocjene;
 
-	public OcjeneIzPredmetaDTO() {
+	public OcjeneIzJednogPredmetaDTO() {
 		super();
 	}
 

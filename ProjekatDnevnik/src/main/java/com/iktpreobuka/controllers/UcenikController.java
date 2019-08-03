@@ -33,8 +33,8 @@ import com.iktpreobuka.entities.RoditeljMajka;
 import com.iktpreobuka.entities.RoditeljOtac;
 import com.iktpreobuka.entities.Ucenik;
 import com.iktpreobuka.entities.dto.UcenikViewDTO;
-import com.iktpreobuka.entities.dto.ucenik.OcjeneIzPredmetaDTO;
-import com.iktpreobuka.entities.dto.ucenik.SamoOcjeneIzPredmetaDTO;
+import com.iktpreobuka.entities.dto.ucenik.OcjeneIzJednogPredmetaDTO;
+import com.iktpreobuka.entities.dto.ucenik.OcjeneIzSvihPredmetaDTO;
 import com.iktpreobuka.repositories.KURepository;
 import com.iktpreobuka.repositories.KorisnikRepository;
 import com.iktpreobuka.repositories.MajkaRepository;
@@ -419,17 +419,22 @@ public class UcenikController {
 			@PathVariable String imeP, Principal principal) {
 		String ulogovaniKorisnik=principal.getName();
 		logger.info("Ulogovani korisnik-Username: " +ulogovaniKorisnik);
-		Korisnik ucenik=korisnikRepository.getByUsername(ulogovaniKorisnik);
-		logger.info("Ulogovani korisnik-Id: " +ucenik.getId());
-		if(ucenik.getId()!=idUcenika) {
+		Korisnik korisnik = korisnikRepository.getByUsername(ulogovaniKorisnik);
+		Ucenik ucenik=ucenikRepository.getById(idUcenika);
+		logger.info("Ulogovani korisnik-Id: " +korisnik.getId());
+		logger.info("Ulogovani korisnik-Uloga: " +korisnik.getOsnovnaUloga());
+		if(!(korisnik.getId()==idUcenika || (korisnik.getOsnovnaUloga().equals("ROLE_ADMIN")))) {
+			logger.info("Pokusaj neautorizovanog pristupa - Id Korisnika: " +korisnik.getId());
 			return new ResponseEntity<>("Neautorizovani pristup", HttpStatus.UNAUTHORIZED);
 		}
-		OcjeneIzPredmetaDTO oIP=new OcjeneIzPredmetaDTO();
+		logger.info("Pristup dozvoljen - Id Korisnika: " +korisnik.getId());
+		OcjeneIzJednogPredmetaDTO oIP=new OcjeneIzJednogPredmetaDTO();
 		oIP.setImeIPrezime(ucenik.getIme()+" "+ucenik.getPrezime());
 		oIP.setOdeljenje(((Ucenik) ucenik).getOdeljenje());
 		oIP.setImePredmeta(imeP);
 		Predmet predmet=predmetRepository.getByIme(imeP);
 		oIP.setOcjene(ucenikDAO.ocjeneIzPredmeta(predmet,ucenik));
+		logger.info("Citanje ocjena uspjesno zavrseno");
 		return new ResponseEntity<>(oIP, HttpStatus.OK);
 	}
 	
@@ -437,20 +442,25 @@ public class UcenikController {
 	public ResponseEntity<?> ocjeneIzSvihPredmeta(@PathVariable Integer idUcenika, Principal principal){
 		String ulogovaniKorisnik=principal.getName();
 		logger.info("Ulogovani korisnik-Username: " +ulogovaniKorisnik);
-		Korisnik ucenik=korisnikRepository.getByUsername(ulogovaniKorisnik);
-		logger.info("Ulogovani korisnik-Id: " +ucenik.getId());
-		if(ucenik.getId()!=idUcenika) {
+		Korisnik korisnik = korisnikRepository.getByUsername(ulogovaniKorisnik);
+		Ucenik ucenik=ucenikRepository.getById(idUcenika);
+		logger.info("Ulogovani korisnik-Id: " +korisnik.getId());
+		logger.info("Ulogovani korisnik-Uloga: " +korisnik.getOsnovnaUloga());
+		if(!(korisnik.getId()==idUcenika || (korisnik.getOsnovnaUloga().equals("ROLE_ADMIN")))) {
+			logger.info("Pokusaj neautorizovanog pristupa - Id Korisnika: " +korisnik.getId());
 			return new ResponseEntity<>("Neautorizovani pristup", HttpStatus.UNAUTHORIZED);
 		}
-		Integer godina =Character.getNumericValue(((Ucenik) ucenik).getOdeljenje().charAt(0));
+		logger.info("Pristup dozvoljen - Id Korisnika: " +korisnik.getId());
+		Integer godina =Character.getNumericValue(ucenik.getOdeljenje().charAt(0));
 		List<Predmet> predmeti=predmetRepository.predmetiPoRazredu(godina);
-		List<SamoOcjeneIzPredmetaDTO> ocjene = new ArrayList<SamoOcjeneIzPredmetaDTO>();
+		List<OcjeneIzSvihPredmetaDTO> ocjene = new ArrayList<OcjeneIzSvihPredmetaDTO>();
 		for(Predmet pred: predmeti) {
-			SamoOcjeneIzPredmetaDTO oIP=new SamoOcjeneIzPredmetaDTO();
+			OcjeneIzSvihPredmetaDTO oIP=new OcjeneIzSvihPredmetaDTO();
 			oIP.setImePredmeta(pred.getIme());
 			oIP.setOcjene(ucenikDAO.ocjeneIzPredmeta(pred,ucenik));
 			ocjene.add(oIP);
 		}
+		logger.info("Citanje ocjena uspjesno zavrseno");
 		return new ResponseEntity<>(ocjene, HttpStatus.OK);
 		}
 	
