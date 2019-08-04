@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
+import com.iktpreobuka.entities.Korisnik;
 import com.iktpreobuka.entities.Nastavnik;
 import com.iktpreobuka.entities.Odeljenje;
 import com.iktpreobuka.entities.Predmet;
@@ -30,5 +31,8 @@ public interface NastavnikRepository extends CrudRepository<Nastavnik, Integer> 
 	Nastavnik getByJmbg(String jmbg);
 
 	Boolean existsByJmbg(String jmbg);
+	
+	@Query("select odeljenje from ONP onp where onp.nastavnik=:nastavnik and onp.predmet=:predmet")
+	List<Odeljenje> odeljenja (Predmet predmet, Korisnik nastavnik);
 
 }

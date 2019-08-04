@@ -1,11 +1,14 @@
 package com.iktpreobuka.repositories;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
+import com.iktpreobuka.entities.Nastavnik;
 import com.iktpreobuka.entities.Odeljenje;
+import com.iktpreobuka.entities.Predmet;
 
 public interface OdeljenjeRepository extends CrudRepository<Odeljenje, Integer>{
 
@@ -20,5 +23,7 @@ public interface OdeljenjeRepository extends CrudRepository<Odeljenje, Integer>{
 	
 	@Query("select distinct ime from Odeljenje o where o.ime=:imeP")
 	String isIme(String imeP);
+	
+	
 
 }
