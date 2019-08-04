@@ -23,6 +23,7 @@ import com.iktpreobuka.repositories.OcjenaRepository;
 import com.iktpreobuka.repositories.PredmetRepository;
 import com.iktpreobuka.repositories.UPORepository;
 import com.iktpreobuka.repositories.UcenikRepository;
+import com.iktpreobuka.services.EmailService;
 import com.iktpreobuka.services.NastavnikDAO;
 
 @RestController
@@ -45,10 +46,10 @@ public class OcjenaController {
 	UPORepository upoRepository;
 	
 	@Autowired
-	ONPRepository onpRepository;
+	private NastavnikDAO nastavnikDAO;
 	
 	@Autowired
-	private NastavnikDAO nastavnikDAO;
+	private EmailService emailService;
 	
 	
 	
@@ -71,9 +72,17 @@ public class OcjenaController {
 		upo.setOcjena(ocjena);
 		upoRepository.save(upo);
 		
-		return new ResponseEntity<>("Ucenik "+ucenik.getIme()+" "+ucenik.getPrezime()+
+		
+		
+		String poruka="Ucenik "+ucenik.getIme()+" "+ucenik.getPrezime()+
 				" dobio je ocjenu "+ocjena.getOcjenaOpisna()+" "
-				+ ocjena.getOcjenaBrojcana()+" iz predmeta "+imePredmeta, HttpStatus.OK);
+				+ ocjena.getOcjenaBrojcana()+" iz predmeta "+imePredmeta;
+		String tataEmail=ucenik.getTata().getEmail();
+		emailService.posaljiEmail(tataEmail, poruka);
+		String mamaEmail=ucenik.getMama().getEmail();
+		emailService.posaljiEmail(mamaEmail, poruka);
+		
+		return new ResponseEntity<>(poruka+"\nEmail poslan na adresu roditelja.", HttpStatus.OK);
 	}
 	
 }
