@@ -83,7 +83,7 @@ public class UcenikDAOImpl implements UcenikDAO{
 	
 	@Override
 	public ResponseEntity<?> ocjeneIzSvihPredmetaDAO(Integer idUcenika){
-		logger.info("Pristup dozvoljen.");
+		logger.info("Pristup citanju ocjena iz svih predmeta dozvoljen.");
 		Ucenik ucenik=ucenikRepository.getById(idUcenika);
 		Integer godina =Character.getNumericValue(ucenik.getOdeljenje().charAt(0));
 		List<Predmet> predmeti=predmetRepository.predmetiPoRazredu(godina);
@@ -100,7 +100,7 @@ public class UcenikDAOImpl implements UcenikDAO{
 	
 	@Override
 	public ResponseEntity<?> ocjeneIzJednogPredmetaDAO(Integer idUcenika, String imeP){
-		logger.info("Pristup dozvoljen.");
+		logger.info("Pristup citanju ocjena iz predmeta "+imeP +" dozvoljen.");
 		Ucenik ucenik=ucenikRepository.getById(idUcenika);
 		OcjeneIzJednogPredmetaDTO oIP=new OcjeneIzJednogPredmetaDTO();
 		oIP.setImeIPrezime(ucenik.getIme()+" "+ucenik.getPrezime());
@@ -111,6 +111,22 @@ public class UcenikDAOImpl implements UcenikDAO{
 		logger.info("Citanje ocjena uspjesno zavrseno");
 		return new ResponseEntity<>(oIP, HttpStatus.OK);
 	}
+	
+	@Override
+	public Boolean dozvolaPristupa(Integer idUcenika, Korisnik korisnik) {
+		Boolean dozvolaPristupa=false;
+		String uloga =korisnik.getOsnovnaUloga();
+		Boolean temp=false;
+		if (uloga.equals("ROLE_ADMIN") || uloga.equals("ROLE_TEACHER") 
+				|| uloga.equals("ROLE_PARENT")) {
+			temp=true;	
+		}
+		if((korisnik.getId()==idUcenika) || temp) {
+			dozvolaPristupa=true;
+			logger.info("Pristup citanju ocjena iz predmeta dozvoljen.");
+		}
+		return dozvolaPristupa;
+		}
 
 	
 	}

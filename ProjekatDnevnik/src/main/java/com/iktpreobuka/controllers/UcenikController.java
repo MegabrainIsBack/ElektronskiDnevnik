@@ -28,14 +28,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.iktpreobuka.controllers.utilities.PINGenerator;
 import com.iktpreobuka.entities.Korisnik;
 import com.iktpreobuka.entities.Odeljenje;
-import com.iktpreobuka.entities.Predmet;
 import com.iktpreobuka.entities.RoditeljMajka;
 import com.iktpreobuka.entities.RoditeljOtac;
 import com.iktpreobuka.entities.Ucenik;
-import com.iktpreobuka.entities.dto.UcenikViewDTO;
-import com.iktpreobuka.entities.dto.ucenik.OcjeneIzJednogPredmetaDTO;
-import com.iktpreobuka.entities.dto.ucenik.OcjeneIzSvihPredmetaDTO;
-import com.iktpreobuka.repositories.KURepository;
+import com.iktpreobuka.entities.dto.UcenikBasicDTO;
 import com.iktpreobuka.repositories.KorisnikRepository;
 import com.iktpreobuka.repositories.MajkaRepository;
 import com.iktpreobuka.repositories.OdeljenjeRepository;
@@ -45,6 +41,7 @@ import com.iktpreobuka.repositories.UcenikRepository;
 import com.iktpreobuka.repositories.UlogaRepository;
 import com.iktpreobuka.security.util.Encryption;
 import com.iktpreobuka.services.UcenikDAO;
+import com.iktpreobuka.services.UlogovaniKorisnikDAO;
 
 @RestController
 @RequestMapping(value= "/ucenik")
@@ -75,7 +72,7 @@ public class UcenikController {
 	private UcenikDAO ucenikDAO;
 	
 	@Autowired
-	KURepository kuRepository;
+	private UlogovaniKorisnikDAO ulogovaniKorisnikDAO;
 	
 	private final Logger logger = (Logger) LoggerFactory.getLogger(this.getClass());
 	
@@ -147,7 +144,6 @@ public class UcenikController {
 				ucenik.setPin(pin);
 				logger.info("PIN: "+ pin);
 				
-				//ucenikRepository.save(ucenik);
 				ucenici.add(ucenik);
 				logger.info("Ucenik dodan u listu ucenika");
 				
@@ -160,24 +156,20 @@ public class UcenikController {
 				String pinO=PINGenerator.PGenerator("roditelj");
 				otac.setPin(pinO);
 				logger.info("PIN: "+ pin);
+				otac.setAktivan(true);
+				otac.setOsnovnaUloga("ROLE_PARENT");
+				logger.info("Uloga: Otac");
 				
+				logger.info("Zapoceto dodavanje placeholder podataka za oca");
 				otac.setJmbg(pinO);
 				otac.setUsername(pinO);
 				otac.setPassword(pinO);
 				otac.setEmail(pinO+"place@holder.com");
-				otac.setAktivan(true);
-				otac.setOsnovnaUloga("ROLE_PARENT");
-				logger.info("Uloga: Otac");
+				logger.info("Zavrseno dodavanje placeholder podataka za oca");
+				
 				otacRepository.save(otac);
 				logger.info("Podaci o ocu sacuvani.");
 				
-				/*Uloga ulogaO=new Uloga();
-				ulogaO=ulogaRepository.getByIme(Role.ROLE_PARENT);
-				KU ko=new KU();
-				ko.setKorisnik(otac);
-				ko.setUloga(ulogaO);
-				kuRepository.save(ko);*/
-			
 				
 				logger.info("Zapoceto setovanje majke");
 				RoditeljMajka majka= new RoditeljMajka();
@@ -188,23 +180,19 @@ public class UcenikController {
 				String pinM=PINGenerator.PGenerator("roditelj");
 				majka.setPin(pinM);
 				logger.info("PIN: "+ pin);
+				majka.setAktivan(true);
+				majka.setOsnovnaUloga("ROLE_PARENT");
+				logger.info("Uloga: Majka");
 				
+				logger.info("Zapoceto dodavanje placeholder podataka za majku");
 				majka.setJmbg(pinM);
 				majka.setUsername(pinM);
 				majka.setPassword(pinM);
 				majka.setEmail(pinM+"place@holder.com");
-				majka.setAktivan(true);
-				majka.setOsnovnaUloga("ROLE_PARENT");
-				logger.info("Uloga: Majka");
-				logger.info("Podaci o majci sacuvani.");
-				majkaRepository.save(majka);
+				logger.info("Zavrseno dodavanje placeholder podataka za majku");
 				
-				/*Uloga ulogaM=new Uloga();
-				ulogaM=ulogaRepository.getByIme(Role.ROLE_PARENT);
-				KU km=new KU();
-				km.setKorisnik(majka);
-				km.setUloga(ulogaM);
-				kuRepository.save(km);*/
+				majkaRepository.save(majka);
+				logger.info("Podaci o majci sacuvani.");
 				
 				logger.info("Zapoceto povezivanje roditelja i ucenika");
 				/*ucenik.setTata(otac);
@@ -229,15 +217,6 @@ public class UcenikController {
 				
 				ucenikRepository.save(ucenik);
 				
-				/*Uloga uloga=new Uloga();
-				uloga=ulogaRepository.getByIme(Role.ROLE_STUDENT);
-				
-				KU ku=new KU();
-				ku.setKorisnik(ucenik);
-				ku.setUloga(uloga);
-				kuRepository.save(ku);
-				logger.info("Uloga: Ucenik");*/
-				
 				s.close();
 			}
 			
@@ -260,6 +239,7 @@ public class UcenikController {
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.POST, value="/dodajUcenika")
 	public	ResponseEntity<?> dodajUcenika(@Valid @RequestBody Ucenik noviUcenik, BindingResult result) {
+		logger.info("Zapoceto dodavanje novog ucenika.");
 		Ucenik ucenik = new Ucenik();
 		ucenik.setIme(noviUcenik.getIme());
 		ucenik.setPrezime(noviUcenik.getPrezime());
@@ -275,51 +255,45 @@ public class UcenikController {
 		ucenik.setOsnovnaUloga("ROLE_STUDENT");
 		String user="ucenik";
 		ucenik.setPin(PINGenerator.PGenerator(user));
+		logger.info("Podaci o novom uceniku dodani.");
 		
+		logger.info("Zapoceto setovanje oca");
 		RoditeljOtac otac= new RoditeljOtac();
 		otac.setIme(noviUcenik.getImeOca());
 		otac.setPrezime(noviUcenik.getPrezime());
 		String pinO=PINGenerator.PGenerator("roditelj");
+		otac.setAktivan(true);
+		otac.setOsnovnaUloga("ROLE_PARENT");
+		logger.info("Zapoceto dodavanje placeholder podataka za oca");
 		otac.setJmbg(pinO);
 		otac.setUsername(pinO);
 		otac.setPassword(pinO);
 		otac.setEmail(pinO+"place@holder.com");
+		logger.info("Zavrseno dodavanje placeholder podataka za oca");
 		otac.setPin(PINGenerator.PGenerator("roditelj"));
 		otac.dodajDijete(noviUcenik);
-		otac.setAktivan(true);
-		otac.setOsnovnaUloga("ROLE_PARENT");
 		otacRepository.save(otac);
-		/*Uloga ulogaO=new Uloga();
-		ulogaO=ulogaRepository.getByIme(Role.ROLE_PARENT);
-		KU ko=new KU();
-		ko.setKorisnik(otac);
-		ko.setUloga(ulogaO);
-		kuRepository.save(ko);*/
+		logger.info("Podaci o ocu sacuvani.");
 		
+		logger.info("Zapoceto setovanje majke.");
 		RoditeljMajka majka= new RoditeljMajka();
 		majka.setIme(noviUcenik.getImeMajke());
 		majka.setPrezime(noviUcenik.getPrezime());
+		majka.setAktivan(true);
+		majka.setOsnovnaUloga("ROLE_PARENT");
 		String pinM=PINGenerator.PGenerator("roditelj");
+		logger.info("Zapoceto dodavanje placeholder podataka za majku.");
 		majka.setJmbg(pinM);
 		majka.setUsername(pinM);
 		majka.setPassword(pinM);
 		majka.setEmail(pinM+"place@holder.com");
-		majka.setAktivan(true);
-		majka.setOsnovnaUloga("ROLE_PARENT");
+		logger.info("Zavrseno dodavanje placeholder podataka za majku.");
 		majka.setPin(PINGenerator.PGenerator("roditelj"));
+		majka.dodajDijete(noviUcenik);
 		majkaRepository.save(majka);
-		/*Uloga ulogaM=new Uloga();
-		ulogaM=ulogaRepository.getByIme(Role.ROLE_PARENT);
-		KU km=new KU();
-		km.setKorisnik(majka);
-		km.setUloga(ulogaM);
-		kuRepository.save(km);*/
+		logger.info("Podaci o majci sacuvani.");
 		
-		ucenik.setTata(otac);
-		ucenik.setMama(majka);
-		//ucenikRepository.save(ucenik);
-		
-		logger.info("Zapoceto povezivanje ucenika i odeljenja");
+		logger.info("Zapoceto smestanje ucenika u odeljenja.");
 		Integer godinaO= Character.getNumericValue(noviUcenik.getOdeljenje().charAt(0));
 		String imeO=Character.toString(noviUcenik.getOdeljenje().charAt(1));
 		Odeljenje odeljenje = odeljenjeRepository.getByGodinaAndIme(godinaO,imeO);
@@ -329,17 +303,8 @@ public class UcenikController {
 		odeljenje.getUcenici().add(ucenik);
 		logger.info("Ucenik dodan u odeljenje");
 		odeljenjeRepository.save(odeljenje);
-		logger.info("Podaci o vezi ucenika i odeljenja sacuvani.");
-		
-		/*Uloga uloga=new Uloga();
-		uloga=ulogaRepository.getByIme(Role.ROLE_STUDENT);
-		KU ku=new KU();
-		ku.setKorisnik(ucenik);
-		ku.setUloga(uloga);
-		kuRepository.save(ku);*/
-		
+		logger.info("Zavrseno smestanje ucenika u odeljenja.");
 	
-		
 		if(result.hasErrors()) {
 			return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
 			}
@@ -349,21 +314,39 @@ public class UcenikController {
 	
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method= RequestMethod.GET, value="/pribaviSve")
-	public Iterable<Ucenik> sviUcenici() {
+	public ArrayList<UcenikBasicDTO> sviUcenici() {
 		Iterable<Ucenik> ucenici = ucenikRepository.findAll();
-		return ucenici;
+		ArrayList <UcenikBasicDTO> uceniciDTO= new ArrayList<UcenikBasicDTO>();
+		for(Ucenik ucenik: ucenici) {
+			UcenikBasicDTO ucenikDTO=new UcenikBasicDTO();
+			Integer idOca=ucenik.getTata().getId();
+			Integer idMajke=ucenik.getMama().getId();
+			ucenikDTO.setId(ucenik.getId());
+			ucenikDTO.setIme(ucenik.getIme());
+			ucenikDTO.setPrezime(ucenik.getPrezime());
+			ucenikDTO.setOdeljenje(ucenik.getOdeljenje());
+			ucenikDTO.setIdOca(idOca);
+			ucenikDTO.setIdMajke(idMajke);
+			uceniciDTO.add(ucenikDTO);
+		}
+		logger.info("Pribavljanje svih ucenika uspjesno.");
+		return uceniciDTO;
 	}
 	
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method= RequestMethod.GET, value="/poId/{id}")
-	public UcenikViewDTO poId(@PathVariable Integer id) {
+	public UcenikBasicDTO poId(@PathVariable Integer id) {
 		Ucenik ucenik = ucenikRepository.getById(id);
-		UcenikViewDTO ucenikDTO=new UcenikViewDTO();
+		UcenikBasicDTO ucenikDTO=new UcenikBasicDTO();
+		Integer idOca=ucenik.getTata().getId();
+		Integer idMajke=ucenik.getMama().getId();
+		ucenikDTO.setId(ucenik.getId());
 		ucenikDTO.setIme(ucenik.getIme());
 		ucenikDTO.setPrezime(ucenik.getPrezime());
 		ucenikDTO.setOdeljenje(ucenik.getOdeljenje());
-		ucenikDTO.setTata(ucenik.getTata());
-		ucenikDTO.setMama(ucenik.getMama());
+		ucenikDTO.setIdOca(idOca);
+		ucenikDTO.setIdMajke(idMajke);
+		logger.info("Pribavljanje ucenika po id uspjesno.");
 		return ucenikDTO;
 	}
 	
@@ -371,45 +354,61 @@ public class UcenikController {
 	@RequestMapping(method = RequestMethod.PUT, value="/izmjeniUcenika/{id}")
 	public	ResponseEntity<?> izmjeniUcenika(@Valid @PathVariable Integer id,@RequestBody Ucenik noviUcenik, BindingResult result) {
 		Ucenik ucenik= ucenikRepository.getById(id);
+		logger.info("Proces izmjene podataka o postojecem uceniku id: "+id+" - zapocet");
 		ucenik.setIme(noviUcenik.getIme());
 		ucenik.setPrezime(noviUcenik.getPrezime());
 		ucenik.setUsername(noviUcenik.getUsername());
 		ucenik.setPassword(noviUcenik.getPassword());
 		ucenik.setEmail(noviUcenik.getEmail());
 		ucenik.setOdeljenje(noviUcenik.getOdeljenje());
+		logger.info("Proces izmjene podataka o postojecem uceniku id: "+id+" - zavrsen");
 		
 		if(result.hasErrors()) {
 			return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
 			}
 		
-		logger.info("Zapoceto povezivanje ucenika i odeljenja");
+		logger.info("Zapoceto smestanje ucenika u odeljenje.");
 		Integer godinaO= Character.getNumericValue(noviUcenik.getOdeljenje().charAt(0));
 		String imeO=Character.toString(noviUcenik.getOdeljenje().charAt(1));
 		Odeljenje odeljenje = odeljenjeRepository.getByGodinaAndIme(godinaO,imeO);
 		ucenik.setOdeljenjeU(odeljenje);
-		
 		ucenikRepository.save(ucenik);
-		logger.info("Sacuvane izmjene.");
-		
+		logger.info("Zavrseno smestanje ucenika u odeljenje.");
 		return new ResponseEntity<>(ucenik, HttpStatus.OK);
 	}
 	
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method= RequestMethod.GET, value="/poOdeljenju/{odeljenjeI}")
-	public List<Ucenik> poOdeljenju(@PathVariable String odeljenjeI ) {
+	public List<UcenikBasicDTO> poOdeljenju(@PathVariable String odeljenjeI ) {
 		Integer godinaO= Character.getNumericValue(odeljenjeI.charAt(0));
 		String imeO=Character.toString(odeljenjeI.charAt(1));
 		Odeljenje odeljenje = odeljenjeRepository.getByGodinaAndIme(godinaO,imeO);
 		List<Ucenik> ucenici=ucenikRepository.getByOdeljenjeU(odeljenje);
-		return ucenici;
+		ArrayList <UcenikBasicDTO> uceniciDTO= new ArrayList<UcenikBasicDTO>();
+		for(Ucenik ucenik: ucenici) {
+			UcenikBasicDTO ucenikDTO=new UcenikBasicDTO();
+			Integer idOca=ucenik.getTata().getId();
+			Integer idMajke=ucenik.getMama().getId();
+			ucenikDTO.setId(ucenik.getId());
+			ucenikDTO.setIme(ucenik.getIme());
+			ucenikDTO.setPrezime(ucenik.getPrezime());
+			ucenikDTO.setOdeljenje(ucenik.getOdeljenje());
+			ucenikDTO.setIdOca(idOca);
+			ucenikDTO.setIdMajke(idMajke);
+			uceniciDTO.add(ucenikDTO);
+		}
+		logger.info("Pribavljanje ucenika odeljenja: "+godinaO+imeO+" uspjesno.");
+		return uceniciDTO;
 	}
 	
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method= RequestMethod.DELETE, value="/obrisiUcenika/{id}")
 	public	Ucenik obrisiNastavnika(@PathVariable Integer id) {
+		logger.info("Proces deaktivacije ucenika id: "+id+" - zapocet.");
 		Ucenik ucenik=ucenikRepository.getById(id);
 		ucenik.setAktivan(false);
 		ucenikRepository.save(ucenik);
+		logger.info("Ucenik id: "+id+" deaktiviran.");
 		return  ucenik;
 	}
 	
@@ -417,12 +416,8 @@ public class UcenikController {
 	@RequestMapping (method=RequestMethod.GET, value="/{idUcenika}/OcjeneIzPredmeta/{imeP}")
 	public ResponseEntity<?> ocjeneIzPredmeta(@PathVariable Integer idUcenika, 
 			@PathVariable String imeP, Principal principal) {
-		String ulogovaniKorisnik=principal.getName();
-		logger.info("Ulogovani korisnik-Username: " +ulogovaniKorisnik);
-		Korisnik korisnik = korisnikRepository.getByUsername(ulogovaniKorisnik);
-		logger.info("Ulogovani korisnik-Id: " +korisnik.getId());
-		logger.info("Ulogovani korisnik-Uloga: " +korisnik.getOsnovnaUloga());
-		if(!(korisnik.getId()==idUcenika || (korisnik.getOsnovnaUloga().equals("ROLE_ADMIN")))) {
+		Korisnik korisnik=ulogovaniKorisnikDAO.ulogovaniKorisnik(principal);
+		if(!(ucenikDAO.dozvolaPristupa(idUcenika, korisnik))) {
 			logger.info("Pokusaj neautorizovanog pristupa - Id Korisnika: " +korisnik.getId());
 			return new ResponseEntity<>("Neautorizovani pristup", HttpStatus.UNAUTHORIZED);
 		}
@@ -432,12 +427,8 @@ public class UcenikController {
 	
 	@RequestMapping (method=RequestMethod.GET, value="/{idUcenika}/OcjeneIzSvihPredmeta")
 	public ResponseEntity<?> ocjeneIzSvihPredmeta(@PathVariable Integer idUcenika, Principal principal){
-		String ulogovaniKorisnik=principal.getName();
-		logger.info("Ulogovani korisnik-Username: " +ulogovaniKorisnik);
-		Korisnik korisnik = korisnikRepository.getByUsername(ulogovaniKorisnik);
-		logger.info("Ulogovani korisnik-Id: " +korisnik.getId());
-		logger.info("Ulogovani korisnik-Uloga: " +korisnik.getOsnovnaUloga());
-		if(!(korisnik.getId()==idUcenika || (korisnik.getOsnovnaUloga().equals("ROLE_ADMIN")))) {
+		Korisnik korisnik=ulogovaniKorisnikDAO.ulogovaniKorisnik(principal);
+		if(!(ucenikDAO.dozvolaPristupa(idUcenika, korisnik))) {
 			logger.info("Pokusaj neautorizovanog pristupa - Id Korisnika: " +korisnik.getId());
 			return new ResponseEntity<>("Neautorizovani pristup", HttpStatus.UNAUTHORIZED);
 		}

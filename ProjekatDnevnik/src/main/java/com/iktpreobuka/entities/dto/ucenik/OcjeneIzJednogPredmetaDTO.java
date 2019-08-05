@@ -2,14 +2,24 @@ package com.iktpreobuka.entities.dto.ucenik;
 
 import java.util.ArrayList;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.JsonRootName;
+
+@JsonPropertyOrder({"Ime i prezime","Odeljenje","Predmet","Ocjene"})
+@JsonRootName(value = "Ocjene ucenika")
 public class OcjeneIzJednogPredmetaDTO {
 	
+	@JsonProperty ("Ime i prezime")
 	private String imeIPrezime;
 	
-	private String Odeljenje;
+	@JsonProperty ("Odeljenje")
+	private String odeljenje;
 	
+	@JsonProperty ("Predmet")
 	private String imePredmeta;
 	
+	@JsonProperty ("Ocjene")
 	private ArrayList<Integer> ocjene;
 
 	public OcjeneIzJednogPredmetaDTO() {
@@ -25,11 +35,11 @@ public class OcjeneIzJednogPredmetaDTO {
 	}
 
 	public String getOdeljenje() {
-		return Odeljenje;
+		return odeljenje;
 	}
 
 	public void setOdeljenje(String odeljenje) {
-		Odeljenje = odeljenje;
+		this.odeljenje = odeljenje;
 	}
 
 	public String getImePredmeta() {

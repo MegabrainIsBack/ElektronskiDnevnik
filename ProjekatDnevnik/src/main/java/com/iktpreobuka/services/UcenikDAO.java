@@ -16,4 +16,6 @@ public interface UcenikDAO {
 
 	ResponseEntity<?> ocjeneIzJednogPredmetaDAO(Integer idUcenika, String imeP);
 
+	Boolean dozvolaPristupa(Integer idUcenika, Korisnik korisnik);
+
 }

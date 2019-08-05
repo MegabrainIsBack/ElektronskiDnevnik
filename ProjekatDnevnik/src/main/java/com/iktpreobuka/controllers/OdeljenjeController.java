@@ -49,6 +49,7 @@ public class OdeljenjeController {
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.POST, value="/dodajOdeljenje")
 	public	ResponseEntity<?> dodajOdeljenje(@Valid @RequestBody Odeljenje novoOdeljenje, BindingResult result) {
+		logger.info("Dodaj novo odeljenje - proces zapocet.");
 		Odeljenje odeljenje = new Odeljenje();
 		odeljenje.setIme(novoOdeljenje.getIme());
 		odeljenje.setGodina(novoOdeljenje.getGodina());
@@ -63,8 +64,9 @@ public class OdeljenjeController {
 			}
 		
 		odeljenjeRepository.save(odeljenje);
-		logger.info("Predmet sacuvan");
+		logger.info("Novo odeljenje uspjesno dodano.");
 		
+		logger.info("Dodaj predmete koje novo odeljenje slusa - proces zapocet.");
 		Iterable<Predmet> predmeti=predmetRepository.findAll();
 		for(int i=0; i<((ArrayList<Predmet>) predmeti).size();i++) {
 		Predmet predmet=((ArrayList<Predmet>) predmeti).get(i);
@@ -73,9 +75,9 @@ public class OdeljenjeController {
 			onp.setPredmet(predmet);
 			onp.setOdeljenje(odeljenje);
 			onpRepository.save(onp);
-			logger.info("Podaci o vezi odeljenja i predmeta sacuvani.");
 		}
 		}
+		logger.info("Predmeti koje odeljenje slusa uspjesno dodani.");
 		
 		return new ResponseEntity<>(odeljenje, HttpStatus.OK);
 	}
@@ -84,6 +86,7 @@ public class OdeljenjeController {
 	@RequestMapping(method= RequestMethod.GET, value="/pribaviSve")
 	public Iterable<Odeljenje> svaOdeljenja() {
 		Iterable<Odeljenje> odeljenja = odeljenjeRepository.findAll();
+		logger.info("Pribavljanje svih odeljenja uspjesno");
 		return odeljenja;
 	}
 	
@@ -91,15 +94,18 @@ public class OdeljenjeController {
 	@RequestMapping(method= RequestMethod.GET, value="/poImenu/{godina}/{imeOdeljenja}")
 	public Odeljenje poImenu(@PathVariable Integer godina,@PathVariable String imeOdeljenja ) {
 		Odeljenje odeljenje=odeljenjeRepository.getByGodinaAndIme(godina, imeOdeljenja);
+		logger.info("Pribavljanje odeljenja "+godina+imeOdeljenja+" uspjesno");
 		return odeljenje;
 	}
 	
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method= RequestMethod.DELETE, value="/obrisiOdeljenje/{godina}/{imeOdeljenja}")
 	public	Odeljenje obrisiOdeljenje(@PathVariable Integer godina, @PathVariable String imeOdeljenja) {
+		logger.info("Proces deaktivacije odeljenja "+godina+imeOdeljenja+" - zapocet.");
 		Odeljenje odeljenje=odeljenjeRepository.getByGodinaAndIme(godina, imeOdeljenja);
 		odeljenje.setAktivan(false);
 		odeljenjeRepository.save(odeljenje);
+		logger.info("Odeljenje "+godina+imeOdeljenja+" deaktivirano");
 		return  odeljenje;
 	}
 

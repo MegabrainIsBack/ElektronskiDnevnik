@@ -131,14 +131,6 @@ public class NastavnikController {
 				nastavnikRepository.save(nastavnik);
 				logger.info("Nastavnik sacuvan");
 				
-				/*Uloga uloga=new Uloga();
-				uloga=ulogaRepository.getByIme(Role.ROLE_TEACHER);
-				
-				KU ku=new KU();
-				ku.setKorisnik(nastavnik);
-				ku.setUloga(uloga);
-				kuRepository.save(ku);*/
-				
 				s.close();
 			}
 			
@@ -183,26 +175,22 @@ public class NastavnikController {
 		nastavnikRepository.save(nastavnik);
 		logger.info("Nastavnik sacuvan");
 		
-		/*Uloga uloga=new Uloga();
-		uloga=ulogaRepository.getByIme(Role.ROLE_TEACHER);
-		
-		KU ku=new KU();
-		ku.setKorisnik(nastavnik);
-		ku.setUloga(uloga);
-		kuRepository.save(ku);*/
-		
 		return new ResponseEntity<>(nastavnik, HttpStatus.OK);
 	}
 	
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.PUT, value="/dodajNastavnikaOdeljenju")
 	public	ResponseEntity<?> dodajNastavnikaOdeljenju(@Valid @RequestBody NastavnikZaOdeljenje noviNastavnik, BindingResult result) {
+		logger.info("Proces dodjele nastavnika odjeljenju - zapocet.");
 		String jmbg=noviNastavnik.getJmbg();
 		Nastavnik nastavnik = nastavnikRepository.getByJmbg(jmbg);
+		logger.info("Nastavnik koji se dodaje: "+ nastavnik.getIme()+" "+nastavnik.getPrezime());
 		Predmet predmet=predmetRepository.getByIme(noviNastavnik.getPredmet());
+		logger.info("Predmet koji ce nastavnik predavati: "+ noviNastavnik.getPredmet());
 		String imeO=noviNastavnik.getOdeljenje();
 		Integer godina=noviNastavnik.getGodina();
 		Odeljenje odeljenje=odeljenjeRepository.getByGodinaAndIme(godina, imeO);
+		logger.info("Odeljenje kojem ce nastavnik predavati: "+ noviNastavnik.getGodina()+noviNastavnik.getOdeljenje());
 		ONP onp=onpRepository.getByPredmetAndOdeljenje(predmet,odeljenje);
 		onp.setNastavnik(nastavnik);
 		if(result.hasErrors()) {
@@ -220,15 +208,15 @@ public class NastavnikController {
 	@RequestMapping(method= RequestMethod.GET, value="/pribaviSve")
 	public Iterable<Nastavnik> sviNastavnici() {
 		Iterable<Nastavnik> nastavnici = nastavnikRepository.findAll();
+		logger.info("Pribavljanje svih nastavnika uspjesno.");
 		return nastavnici;
 	}
 	
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method= RequestMethod.GET, value="/poId/{id}")
-	public Nastavnik nastavnikPoId(@PathVariable Integer id, Principal principal) {
-		String ulogovaniKorisnik = principal.getName();
-		logger.info("UlogovaniKorisnik: " +ulogovaniKorisnik);
+	public Nastavnik nastavnikPoId(@PathVariable Integer id) {
 		Nastavnik nastavnik = nastavnikRepository.getById(id);
+		logger.info("Pribavljanje nastavnika po id uspjesno.");
 		return nastavnik;
 	}
 
@@ -237,6 +225,7 @@ public class NastavnikController {
 	public List<Nastavnik> poOdeljenju(@PathVariable Integer razred, @PathVariable String odeljenje ) {
 		Odeljenje odeljenjeT=odeljenjeRepository.getByGodinaAndIme(razred,odeljenje);
 		List<Nastavnik> nastavnici=nastavnikRepository.nastavnikPoOdeljenju(odeljenjeT);
+		logger.info("Pribavljanje nastavnika koji predaju odeljenju "+odeljenjeT.getGodina()+odeljenjeT.getIme()+" uspjesno.");
 		return nastavnici;
 	}
 	
@@ -245,6 +234,7 @@ public class NastavnikController {
 	public List<Nastavnik> poPredmetu(@PathVariable String predmetIme ) {
 		Predmet predmet=predmetRepository.getByIme(predmetIme);
 		List<Nastavnik> nastavnici=nastavnikRepository.nastavnikPoPredmetu(predmet);
+		logger.info("Pribavljanje nastavnika koji predaju predmet: "+predmetIme+" - uspjesno.");
 		return nastavnici;
 	}
 	
@@ -252,6 +242,7 @@ public class NastavnikController {
 	@RequestMapping(method = RequestMethod.PUT, value="/izmjeniNastavnika/{id}")
 	public	ResponseEntity<?> izmjeniNastavnika(@Valid @PathVariable Integer id,@RequestBody Nastavnik noviNastavnik, BindingResult result) {
 		Nastavnik nastavnik= nastavnikRepository.getById(id);
+		logger.info("Proces izmjene podataka o postojecem nastavniku id: "+id+" - zapocet");
 		nastavnik.setIme(noviNastavnik.getIme());
 		nastavnik.setPrezime(noviNastavnik.getPrezime());
 		nastavnik.setUsername(noviNastavnik.getUsername());
@@ -263,7 +254,7 @@ public class NastavnikController {
 			}
 		
 		nastavnikRepository.save(nastavnik);
-		logger.info("Sacuvane izmjene.");
+		logger.info("Izmjene sacuvane");
 		
 		return new ResponseEntity<>(nastavnik, HttpStatus.OK);
 	}
@@ -271,9 +262,11 @@ public class NastavnikController {
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method= RequestMethod.DELETE, value="/obrisiNastavnika/{id}")
 	public	Nastavnik obrisiNastavnika(@PathVariable Integer id) {
+		logger.info("Proces deaktivacije nastavnika id: "+id+" - zapocet.");
 		Nastavnik nastavnik=nastavnikRepository.getById(id);
 		nastavnik.setAktivan(false);
 		nastavnikRepository.save(nastavnik);
+		logger.info("Nastavnik id: "+id+" deaktiviran.");
 		return  nastavnik;
 	}
 
