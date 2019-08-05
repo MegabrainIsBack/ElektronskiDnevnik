@@ -1,4 +1,4 @@
-package com.iktpreobuka.entities.dto;
+package com.iktpreobuka.entities.dto.ucenik;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;

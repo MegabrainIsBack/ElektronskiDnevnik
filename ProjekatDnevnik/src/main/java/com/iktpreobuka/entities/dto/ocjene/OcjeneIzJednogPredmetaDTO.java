@@ -1,4 +1,4 @@
-package com.iktpreobuka.entities.dto.ucenik;
+package com.iktpreobuka.entities.dto.ocjene;
 
 import java.util.ArrayList;
 

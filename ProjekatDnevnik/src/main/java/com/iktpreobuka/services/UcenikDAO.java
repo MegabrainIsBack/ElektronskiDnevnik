@@ -18,4 +18,6 @@ public interface UcenikDAO {
 
 	Boolean dozvolaPristupa(Integer idUcenika, Korisnik korisnik);
 
+	Boolean dozvolaPristupaRoditelj(Integer idUcenika, Korisnik korisnik);
+
 }

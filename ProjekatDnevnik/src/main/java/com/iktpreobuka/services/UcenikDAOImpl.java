@@ -17,8 +17,8 @@ import com.iktpreobuka.entities.Korisnik;
 import com.iktpreobuka.entities.Ocjena;
 import com.iktpreobuka.entities.Predmet;
 import com.iktpreobuka.entities.Ucenik;
-import com.iktpreobuka.entities.dto.ucenik.OcjeneIzJednogPredmetaDTO;
-import com.iktpreobuka.entities.dto.ucenik.OcjeneIzSvihPredmetaDTO;
+import com.iktpreobuka.entities.dto.ocjene.OcjeneIzJednogPredmetaDTO;
+import com.iktpreobuka.entities.dto.ocjene.OcjeneIzSvihPredmetaDTO;
 import com.iktpreobuka.repositories.KURepository;
 import com.iktpreobuka.repositories.KorisnikRepository;
 import com.iktpreobuka.repositories.MajkaRepository;
@@ -117,8 +117,7 @@ public class UcenikDAOImpl implements UcenikDAO{
 		Boolean dozvolaPristupa=false;
 		String uloga =korisnik.getOsnovnaUloga();
 		Boolean temp=false;
-		if (uloga.equals("ROLE_ADMIN") || uloga.equals("ROLE_TEACHER") 
-				|| uloga.equals("ROLE_PARENT")) {
+		if (uloga.equals("ROLE_ADMIN")) {
 			temp=true;	
 		}
 		if((korisnik.getId()==idUcenika) || temp) {
@@ -127,8 +126,28 @@ public class UcenikDAOImpl implements UcenikDAO{
 		}
 		return dozvolaPristupa;
 		}
-
 	
-	}
+	@Override
+	public Boolean dozvolaPristupaRoditelj(Integer idUcenika, Korisnik korisnik) {
+		Boolean dozvolaPristupa=false;
+		String uloga =korisnik.getOsnovnaUloga();
+		Boolean temp=false;
+		if (uloga.equals("ROLE_ADMIN")) {
+			temp=true;	
+		}
+		Ucenik ucenik =ucenikRepository.getById(idUcenika);
+		Integer idOca =ucenik.getTata().getId();
+		Integer idMajke =ucenik.getMama().getId();
+		Integer idKorisnika=korisnik.getId();
+		if ((idOca==idKorisnika || idMajke==idKorisnika) || temp) {
+			dozvolaPristupa=true;
+			logger.info("Pristup podacima o uceniku dozvoljen.");
+		}
+		return dozvolaPristupa;
+		}
+		
+		
+	
+}
 
 

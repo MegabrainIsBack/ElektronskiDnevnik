@@ -31,7 +31,7 @@ import com.iktpreobuka.entities.Odeljenje;
 import com.iktpreobuka.entities.RoditeljMajka;
 import com.iktpreobuka.entities.RoditeljOtac;
 import com.iktpreobuka.entities.Ucenik;
-import com.iktpreobuka.entities.dto.UcenikBasicDTO;
+import com.iktpreobuka.entities.dto.ucenik.UcenikBasicDTO;
 import com.iktpreobuka.repositories.KorisnikRepository;
 import com.iktpreobuka.repositories.MajkaRepository;
 import com.iktpreobuka.repositories.OdeljenjeRepository;
@@ -163,7 +163,8 @@ public class UcenikController {
 				logger.info("Zapoceto dodavanje placeholder podataka za oca");
 				otac.setJmbg(pinO);
 				otac.setUsername(pinO);
-				otac.setPassword(pinO);
+				String kodiraniPasswordO=Encryption.getPassEncoded(pinO);
+				otac.setPassword(kodiraniPasswordO);
 				otac.setEmail(pinO+"place@holder.com");
 				logger.info("Zavrseno dodavanje placeholder podataka za oca");
 				
@@ -187,7 +188,8 @@ public class UcenikController {
 				logger.info("Zapoceto dodavanje placeholder podataka za majku");
 				majka.setJmbg(pinM);
 				majka.setUsername(pinM);
-				majka.setPassword(pinM);
+				String kodiraniPasswordM=Encryption.getPassEncoded(pinM);
+				majka.setPassword(kodiraniPasswordM);
 				majka.setEmail(pinM+"place@holder.com");
 				logger.info("Zavrseno dodavanje placeholder podataka za majku");
 				
@@ -267,7 +269,8 @@ public class UcenikController {
 		logger.info("Zapoceto dodavanje placeholder podataka za oca");
 		otac.setJmbg(pinO);
 		otac.setUsername(pinO);
-		otac.setPassword(pinO);
+		String kodiraniPasswordO=Encryption.getPassEncoded(pinO);
+		otac.setPassword(kodiraniPasswordO);
 		otac.setEmail(pinO+"place@holder.com");
 		logger.info("Zavrseno dodavanje placeholder podataka za oca");
 		otac.setPin(PINGenerator.PGenerator("roditelj"));
@@ -285,7 +288,8 @@ public class UcenikController {
 		logger.info("Zapoceto dodavanje placeholder podataka za majku.");
 		majka.setJmbg(pinM);
 		majka.setUsername(pinM);
-		majka.setPassword(pinM);
+		String kodiraniPasswordM=Encryption.getPassEncoded(pinM);
+		majka.setPassword(kodiraniPasswordM);
 		majka.setEmail(pinM+"place@holder.com");
 		logger.info("Zavrseno dodavanje placeholder podataka za majku.");
 		majka.setPin(PINGenerator.PGenerator("roditelj"));
@@ -417,22 +421,26 @@ public class UcenikController {
 	public ResponseEntity<?> ocjeneIzPredmeta(@PathVariable Integer idUcenika, 
 			@PathVariable String imeP, Principal principal) {
 		Korisnik korisnik=ulogovaniKorisnikDAO.ulogovaniKorisnik(principal);
+		logger.info("Ulogovani korisnik Id: " +korisnik.getId());
 		if(!(ucenikDAO.dozvolaPristupa(idUcenika, korisnik))) {
 			logger.info("Pokusaj neautorizovanog pristupa - Id Korisnika: " +korisnik.getId());
 			return new ResponseEntity<>("Neautorizovani pristup", HttpStatus.UNAUTHORIZED);
 		}
 		ResponseEntity<?> ocjene = ucenikDAO.ocjeneIzJednogPredmetaDAO(idUcenika, imeP);
+		logger.info("Pribavljanje ocjena ucenika id: "+idUcenika+"iz predmeta: "+imeP+" uspjesno.");
 		return ocjene;
 	}
 	
 	@RequestMapping (method=RequestMethod.GET, value="/{idUcenika}/OcjeneIzSvihPredmeta")
 	public ResponseEntity<?> ocjeneIzSvihPredmeta(@PathVariable Integer idUcenika, Principal principal){
 		Korisnik korisnik=ulogovaniKorisnikDAO.ulogovaniKorisnik(principal);
+		logger.info("Ulogovani korisnik Id: " +korisnik.getId());
 		if(!(ucenikDAO.dozvolaPristupa(idUcenika, korisnik))) {
 			logger.info("Pokusaj neautorizovanog pristupa - Id Korisnika: " +korisnik.getId());
 			return new ResponseEntity<>("Neautorizovani pristup", HttpStatus.UNAUTHORIZED);
 		}
 		ResponseEntity<?> ocjene = ucenikDAO.ocjeneIzSvihPredmetaDAO(idUcenika);
+		logger.info("Pribavljanje ocjena ucenika id: "+idUcenika+" iz svih predmeta uspjesno.");
 		return ocjene;
 		}
 }

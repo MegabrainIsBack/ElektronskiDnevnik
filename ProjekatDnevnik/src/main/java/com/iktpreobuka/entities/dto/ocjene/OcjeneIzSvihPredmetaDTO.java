@@ -1,11 +1,15 @@
-package com.iktpreobuka.entities.dto.ucenik;
+package com.iktpreobuka.entities.dto.ocjene;
 
 import java.util.ArrayList;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class OcjeneIzSvihPredmetaDTO {
 	
+	@JsonProperty("Predmet")
 	private String imePredmeta;
 	
+	@JsonProperty("Ocjene")
 	private ArrayList<Integer> ocjene;
 
 	public OcjeneIzSvihPredmetaDTO() {
