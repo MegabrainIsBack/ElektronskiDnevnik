@@ -1,4 +1,4 @@
-package com.iktpreobuka.controllers;
+package com.iktpreobuka.controllers.Admin;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
@@ -15,8 +15,8 @@ import com.iktpreobuka.repositories.UcenikRepository;
 import com.iktpreobuka.security.util.Encryption;
 
 @RestController
-@RequestMapping(value= "/Majka")
-public class MajkaController {
+@RequestMapping(value= "/majka")
+public class MajkaCrudController {
 	
 	@Autowired
 	UcenikRepository ucenikRepository;

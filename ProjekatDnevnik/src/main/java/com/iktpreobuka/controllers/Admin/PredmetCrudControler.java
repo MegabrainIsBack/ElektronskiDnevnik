@@ -1,4 +1,4 @@
-package com.iktpreobuka.controllers;
+package com.iktpreobuka.controllers.Admin;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -32,7 +32,7 @@ import com.iktpreobuka.repositories.PredmetRepository;
 
 @RestController
 @RequestMapping(value= "/predmet")
-public class PredmetControler {
+public class PredmetCrudControler {
 	
 	@Autowired
 	PredmetRepository predmetRepository;

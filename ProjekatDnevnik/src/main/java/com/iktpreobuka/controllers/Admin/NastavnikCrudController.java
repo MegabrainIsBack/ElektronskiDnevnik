@@ -1,9 +1,8 @@
-package com.iktpreobuka.controllers;
+package com.iktpreobuka.controllers.Admin;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -25,26 +24,21 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.iktpreobuka.JoinTables.KU;
 import com.iktpreobuka.JoinTables.ONP;
 import com.iktpreobuka.controllers.utilities.PINGenerator;
 import com.iktpreobuka.entities.Nastavnik;
 import com.iktpreobuka.entities.Odeljenje;
 import com.iktpreobuka.entities.Predmet;
-import com.iktpreobuka.entities.Uloga;
 import com.iktpreobuka.entities.dto.NastavnikZaOdeljenje;
-import com.iktpreobuka.enums.Role;
-import com.iktpreobuka.repositories.KURepository;
 import com.iktpreobuka.repositories.NastavnikRepository;
 import com.iktpreobuka.repositories.ONPRepository;
 import com.iktpreobuka.repositories.OdeljenjeRepository;
 import com.iktpreobuka.repositories.PredmetRepository;
-import com.iktpreobuka.repositories.UlogaRepository;
 import com.iktpreobuka.security.util.Encryption;
 
 @RestController
 @RequestMapping(value= "/nastavnik")
-public class NastavnikController {
+public class NastavnikCrudController {
 	
 	private final Logger logger = (Logger) LoggerFactory.getLogger(this.getClass());
 	
@@ -59,12 +53,6 @@ public class NastavnikController {
 	
 	@Autowired
 	ONPRepository onpRepository;
-	
-	@Autowired
-	UlogaRepository ulogaRepository;
-	
-	@Autowired
-	KURepository kuRepository;
 	
 	private String createErrorMessage(BindingResult result) {
 		return result.getAllErrors().stream().map(ObjectError::getDefaultMessage)

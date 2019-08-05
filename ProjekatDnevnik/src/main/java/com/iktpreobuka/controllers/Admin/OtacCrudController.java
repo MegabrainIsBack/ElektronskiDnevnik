@@ -1,4 +1,4 @@
-package com.iktpreobuka.controllers;
+package com.iktpreobuka.controllers.Admin;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
@@ -16,7 +16,7 @@ import com.iktpreobuka.security.util.Encryption;
 
 @RestController
 @RequestMapping(value= "/otac")
-public class OtacController {
+public class OtacCrudController {
 	
 	@Autowired
 	UcenikRepository ucenikRepository;

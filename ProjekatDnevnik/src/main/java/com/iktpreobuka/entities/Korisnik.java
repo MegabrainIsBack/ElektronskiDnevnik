@@ -17,8 +17,6 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.iktpreobuka.JoinTables.KU;
-import com.iktpreobuka.enums.Role;
 
 
 @Entity
@@ -65,18 +63,6 @@ public class Korisnik {
 	
 	@Column(name="PIN", unique=true)
 	private String pin;
-	
-	@OneToMany(mappedBy = "korisnik",
-		    cascade = CascadeType.ALL,fetch = FetchType.LAZY)
-			private List<KU> ku= new ArrayList<KU>();
-	
-	public List<KU> getKu() {
-		return ku;
-	}
-
-	public void setKu(List<KU> ku) {
-		this.ku = ku;
-	}
 
 	public Korisnik() {
 		

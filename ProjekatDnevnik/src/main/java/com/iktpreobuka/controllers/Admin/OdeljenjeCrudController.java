@@ -1,4 +1,4 @@
-package com.iktpreobuka.controllers;
+package com.iktpreobuka.controllers.Admin;
 
 import java.util.ArrayList;
 import java.util.stream.Collectors;
@@ -28,7 +28,7 @@ import com.iktpreobuka.repositories.PredmetRepository;
 
 @RestController
 @RequestMapping(value= "/odeljenje")
-public class OdeljenjeController {
+public class OdeljenjeCrudController {
 	
 	private String createErrorMessage(BindingResult result) {
 		return result.getAllErrors().stream().map(ObjectError::getDefaultMessage)

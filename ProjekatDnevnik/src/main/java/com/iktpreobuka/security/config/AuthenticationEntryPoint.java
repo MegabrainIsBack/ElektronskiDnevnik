@@ -19,7 +19,6 @@ public class AuthenticationEntryPoint extends BasicAuthenticationEntryPoint {
 		super.afterPropertiesSet();
 	}
 	
-	//@Override
 	public void commence(HttpServletRequest request,
 	HttpServletResponse response, AuthenticationException
 	authEx) throws IOException, ServletException {

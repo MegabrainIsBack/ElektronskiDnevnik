@@ -20,7 +20,6 @@ import com.iktpreobuka.entities.Ocjena;
 import com.iktpreobuka.entities.Predmet;
 import com.iktpreobuka.entities.Ucenik;
 import com.iktpreobuka.repositories.KorisnikRepository;
-import com.iktpreobuka.repositories.ONPRepository;
 import com.iktpreobuka.repositories.OcjenaRepository;
 import com.iktpreobuka.repositories.PredmetRepository;
 import com.iktpreobuka.repositories.UPORepository;
@@ -30,7 +29,7 @@ import com.iktpreobuka.services.NastavnikDAO;
 
 @RestController
 @RequestMapping(value= "/ocjena")
-public class OcjenaController {
+public class OcjenivanjeController {
 	private final Logger logger = (Logger) LoggerFactory.getLogger(this.getClass());
 	
 	@Autowired

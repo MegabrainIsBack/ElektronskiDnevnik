@@ -19,14 +19,12 @@ import com.iktpreobuka.entities.Predmet;
 import com.iktpreobuka.entities.Ucenik;
 import com.iktpreobuka.entities.dto.ocjene.OcjeneIzJednogPredmetaDTO;
 import com.iktpreobuka.entities.dto.ocjene.OcjeneIzSvihPredmetaDTO;
-import com.iktpreobuka.repositories.KURepository;
 import com.iktpreobuka.repositories.KorisnikRepository;
 import com.iktpreobuka.repositories.MajkaRepository;
 import com.iktpreobuka.repositories.OdeljenjeRepository;
 import com.iktpreobuka.repositories.OtacRepository;
 import com.iktpreobuka.repositories.PredmetRepository;
 import com.iktpreobuka.repositories.UcenikRepository;
-import com.iktpreobuka.repositories.UlogaRepository;
 
 @Service
 public class UcenikDAOImpl implements UcenikDAO{
@@ -45,9 +43,6 @@ public class UcenikDAOImpl implements UcenikDAO{
 	OdeljenjeRepository odeljenjeRepository;
 	
 	@Autowired
-	UlogaRepository ulogaRepository;
-	
-	@Autowired
 	PredmetRepository predmetRepository;
 	
 	@Autowired
@@ -55,10 +50,6 @@ public class UcenikDAOImpl implements UcenikDAO{
 	
 	@Autowired
 	private UcenikDAO ucenikDAO;
-	
-	@Autowired
-	KURepository kuRepository;
-	
 	
 	@PersistenceContext
 	private EntityManager em;
