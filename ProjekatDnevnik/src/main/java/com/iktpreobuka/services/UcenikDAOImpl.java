@@ -1,7 +1,10 @@
 package com.iktpreobuka.services;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -13,6 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
+import com.iktpreobuka.controllers.utilities.BrojcanaOcjenaITimestamp;
 import com.iktpreobuka.entities.Korisnik;
 import com.iktpreobuka.entities.Ocjena;
 import com.iktpreobuka.entities.Predmet;
@@ -25,6 +30,8 @@ import com.iktpreobuka.repositories.OdeljenjeRepository;
 import com.iktpreobuka.repositories.OtacRepository;
 import com.iktpreobuka.repositories.PredmetRepository;
 import com.iktpreobuka.repositories.UcenikRepository;
+
+import javassist.compiler.ast.Pair;
 
 @Service
 public class UcenikDAOImpl implements UcenikDAO{
@@ -57,7 +64,7 @@ public class UcenikDAOImpl implements UcenikDAO{
 	@PersistenceContext
 	private EntityManager em;
 	
-	@SuppressWarnings("unchecked")
+	/*@SuppressWarnings("unchecked")
 	@Override
 	public ArrayList<Integer> ocjeneIzPredmeta(Predmet predmet, Korisnik ucenik) {
 		String sql = "select ocjena from UPO upo "
@@ -72,7 +79,51 @@ public class UcenikDAOImpl implements UcenikDAO{
 			ocjene.add(ocj.getOcjenaBrojcana());
 		}
 		return ocjene;
+		}*/
+	
+	
+	@Override
+	public ArrayList<BrojcanaOcjenaITimestamp> ocjeneIzPredmetaSaTimestamp(Predmet predmet, Korisnik ucenik) {
+		String sql1 = "select ocjena from UPO upo "
+				+ "where upo.predmet=:predmet and upo.ucenik=:ucenik";
+		Query query1 = em.createQuery(sql1);
+		query1.setParameter("ucenik", ucenik);
+		query1.setParameter("predmet", predmet);
+		String sql2 = "select timestamp from UPO upo "
+				+ "where upo.predmet=:predmet and upo.ucenik=:ucenik";
+		Query query2 = em.createQuery(sql2);
+		query2.setParameter("ucenik", ucenik);
+		query2.setParameter("predmet", predmet);
+		@SuppressWarnings("unchecked")
+		ArrayList<Ocjena> resultO = (ArrayList<Ocjena>) query1.getResultList();
+		@SuppressWarnings("unchecked")
+		ArrayList<Timestamp> resultT=(ArrayList<Timestamp>) query2.getResultList();
+		@SuppressWarnings("rawtypes")
+		ArrayList<BrojcanaOcjenaITimestamp> pairs =new ArrayList<>();
+		for (Integer i=0;i<resultO.size();i++) {
+			BrojcanaOcjenaITimestamp boIt=new BrojcanaOcjenaITimestamp();
+			boIt.setOcjenaBrojcana(resultO.get(i).getOcjenaBrojcana());
+			boIt.setTimestamp(resultT.get(i));
+			pairs.add(boIt);
+			
 		}
+		return pairs;
+		}
+	
+	@Override
+	public OcjeneIzJednogPredmetaDTO  ocjeneIzJednogPredmetaDAOSaTimestamp(Integer idUcenika, String imeP){
+		logger.info("Pristup citanju ocjena iz predmeta "+imeP +" dozvoljen.");
+		Ucenik ucenik=ucenikRepository.getById(idUcenika);
+		OcjeneIzJednogPredmetaDTO oIP=new OcjeneIzJednogPredmetaDTO();
+		oIP.setImeIPrezime(ucenik.getIme()+" "+ucenik.getPrezime());
+		oIP.setOdeljenje(((Ucenik) ucenik).getOdeljenje());
+		oIP.setImePredmeta(imeP);
+		Predmet predmet=predmetRepository.getByIme(imeP);
+		ArrayList<BrojcanaOcjenaITimestamp> ocjene=(ucenikDAO.ocjeneIzPredmetaSaTimestamp(predmet,ucenik));
+		oIP.setOcjenaIDatum(ocjene);
+		logger.info("Citanje ocjena uspjesno zavrseno");
+		return oIP;
+	}
 	
 	
 	@Override
@@ -85,14 +136,14 @@ public class UcenikDAOImpl implements UcenikDAO{
 		for(Predmet pred: predmeti) {
 			OcjeneIzSvihPredmetaDTO oIP=new OcjeneIzSvihPredmetaDTO();
 			oIP.setImePredmeta(pred.getIme());
-			oIP.setOcjene(ucenikDAO.ocjeneIzPredmeta(pred,ucenik));
+			oIP.setOcjenaIDatum(ucenikDAO.ocjeneIzPredmetaSaTimestamp(pred,ucenik));
 			ocjene.add(oIP);
 		}
 		logger.info("Citanje ocjena uspjesno zavrseno");
 		return new ResponseEntity<>(ocjene, HttpStatus.OK);
 		}
 	
-	@Override
+	/*@Override
 	public OcjeneIzJednogPredmetaDTO  ocjeneIzJednogPredmetaDAO(Integer idUcenika, String imeP){
 		logger.info("Pristup citanju ocjena iz predmeta "+imeP +" dozvoljen.");
 		Ucenik ucenik=ucenikRepository.getById(idUcenika);
@@ -104,7 +155,7 @@ public class UcenikDAOImpl implements UcenikDAO{
 		oIP.setOcjene(ucenikDAO.ocjeneIzPredmeta(predmet,ucenik));
 		logger.info("Citanje ocjena uspjesno zavrseno");
 		return oIP;
-	}
+	}*/
 	
 	@Override
 	public Boolean dozvolaPristupa(Integer idUcenika, Korisnik korisnik) {

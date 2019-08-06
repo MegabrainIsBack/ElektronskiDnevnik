@@ -1,16 +1,20 @@
 package com.iktpreobuka.entities.dto.ocjene;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.iktpreobuka.controllers.utilities.BrojcanaOcjenaITimestamp;
 
+@JsonPropertyOrder({"Predmet"})
 public class OcjeneIzSvihPredmetaDTO {
 	
 	@JsonProperty("Predmet")
 	private String imePredmeta;
 	
-	@JsonProperty("Ocjene")
-	private ArrayList<Integer> ocjene;
+	
+	private List<BrojcanaOcjenaITimestamp> OcjenaIDatum;
 
 	public OcjeneIzSvihPredmetaDTO() {
 		super();
@@ -24,12 +28,12 @@ public class OcjeneIzSvihPredmetaDTO {
 		this.imePredmeta = imePredmeta;
 	}
 
-	public ArrayList<Integer> getOcjene() {
-		return ocjene;
+	public List<BrojcanaOcjenaITimestamp> getOcjenaIDatum() {
+		return OcjenaIDatum;
 	}
 
-	public void setOcjene(ArrayList<Integer> ocjene) {
-		this.ocjene = ocjene;
+	public void setOcjenaIDatum(List<BrojcanaOcjenaITimestamp> ocjenaIDatum) {
+		OcjenaIDatum = ocjenaIDatum;
 	}
 
 }

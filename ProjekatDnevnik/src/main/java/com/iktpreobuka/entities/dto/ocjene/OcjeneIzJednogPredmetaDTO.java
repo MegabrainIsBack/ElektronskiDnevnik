@@ -1,12 +1,15 @@
 package com.iktpreobuka.entities.dto.ocjene;
 
 import java.util.ArrayList;
+import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonRootName;
+import com.iktpreobuka.controllers.utilities.BrojcanaOcjenaITimestamp;
 
-@JsonPropertyOrder({"Ime i prezime","Odeljenje","Predmet","Ocjene"})
+@JsonPropertyOrder({"Ime i prezime","Odeljenje","Predmet","Ocjena:Datum ocjenjivanja"})
 @JsonRootName(value = "Ocjene ucenika")
 public class OcjeneIzJednogPredmetaDTO {
 	
@@ -19,8 +22,15 @@ public class OcjeneIzJednogPredmetaDTO {
 	@JsonProperty ("Predmet")
 	private String imePredmeta;
 	
-	@JsonProperty ("Ocjene")
-	private ArrayList<Integer> ocjene;
+	private List<BrojcanaOcjenaITimestamp> OcjenaIDatum;
+
+	public List<BrojcanaOcjenaITimestamp> getOcjenaIDatum() {
+		return OcjenaIDatum;
+	}
+
+	public void setOcjenaIDatum(List<BrojcanaOcjenaITimestamp> ocjenaIDatum) {
+		OcjenaIDatum = ocjenaIDatum;
+	}
 
 	public OcjeneIzJednogPredmetaDTO() {
 		super();
@@ -50,14 +60,5 @@ public class OcjeneIzJednogPredmetaDTO {
 		this.imePredmeta = imePredmeta;
 	}
 
-	public ArrayList<Integer> getOcjene() {
-		return ocjene;
-	}
-
-	public void setOcjene(ArrayList<Integer> ocjene) {
-		this.ocjene = ocjene;
-	}
 	
-	
-
 }

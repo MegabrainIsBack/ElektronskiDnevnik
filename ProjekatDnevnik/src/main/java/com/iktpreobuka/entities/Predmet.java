@@ -111,22 +111,5 @@ public class Predmet {
 	public void setAktivan(Boolean aktivan) {
 		this.aktivan = aktivan;
 	}
-
-	/*public List<NPVezna> getNpVeza() {
-		return npVeza;
-	}
-
-	public void setNpVeza(List<NPVezna> npVeza) {
-		this.npVeza = npVeza;
-	}
-
-	public List<OPVezna> getOpVeza() {
-		return opVeza;
-	}
-
-	public void setOpVeza(List<OPVezna> opVeza) {
-		this.opVeza = opVeza;
-	}*/
-
 	
 }

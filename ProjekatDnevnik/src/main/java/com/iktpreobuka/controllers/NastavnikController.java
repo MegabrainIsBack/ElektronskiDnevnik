@@ -14,10 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.iktpreobuka.JoinTables.ONP;
 import com.iktpreobuka.entities.Korisnik;
-import com.iktpreobuka.entities.Odeljenje;
-import com.iktpreobuka.entities.Predmet;
 import com.iktpreobuka.entities.Ucenik;
 import com.iktpreobuka.entities.dto.ocjene.OcjeneIzJednogPredmetaDTO;
 import com.iktpreobuka.repositories.NastavnikRepository;
@@ -64,7 +61,7 @@ private final Logger logger = (Logger) LoggerFactory.getLogger(this.getClass());
 			logger.warn("Pokusaj neautorizovanog pristupa - Id Korisnika: " +korisnik.getId());
 			return new ResponseEntity<>("Neautorizovani pristup", HttpStatus.UNAUTHORIZED);
 		}
-		OcjeneIzJednogPredmetaDTO ocjene = ucenikDAO.ocjeneIzJednogPredmetaDAO(idUcenika, imeP);
+		OcjeneIzJednogPredmetaDTO ocjene = ucenikDAO.ocjeneIzJednogPredmetaDAOSaTimestamp(idUcenika, imeP);
 		logger.info("Pribavljanje ocjena ucenika id: "+idUcenika+"iz predmeta: "+imeP+" uspjesno.");
 		return new ResponseEntity<>(ocjene, HttpStatus.OK);
 	}

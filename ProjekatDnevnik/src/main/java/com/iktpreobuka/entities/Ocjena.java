@@ -1,5 +1,6 @@
 package com.iktpreobuka.entities;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,6 +13,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 
@@ -33,6 +35,13 @@ public class Ocjena {
 	private Integer ocjenaBrojcana;
 	
 	private String ocjenaOpisna;
+	
+	@Transient
+	@Column(name="DatumOcjenjivanja")
+	/*@JsonFormat(
+		      shape = JsonFormat.Shape.STRING,
+		      pattern = "dd-MM-yyyy")*/
+	private Timestamp timestamp;
 	
 	@OneToMany(mappedBy = "ocjena",
 		    cascade = CascadeType.ALL,fetch = FetchType.LAZY)
@@ -72,6 +81,14 @@ public class Ocjena {
 
 	public void setOcjenaOpisna(String ocjenaOpisna) {
 		this.ocjenaOpisna = ocjenaOpisna;
+	}
+
+	public Timestamp getTimestamp() {
+		return timestamp;
+	}
+
+	public void setTimestamp(Timestamp timestamp) {
+		this.timestamp = timestamp;
 	}
 
 }

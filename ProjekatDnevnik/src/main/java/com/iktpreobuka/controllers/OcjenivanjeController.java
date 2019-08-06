@@ -1,6 +1,7 @@
 package com.iktpreobuka.controllers;
 
 import java.security.Principal;
+import java.sql.Timestamp;
 
 import javax.validation.Valid;
 
@@ -75,17 +76,25 @@ public class OcjenivanjeController {
 			return new ResponseEntity<>("Samo nastavnik koji predaje predmet odeljenju kojem ucenik pripada moze unijeti ocjenu.", HttpStatus.BAD_REQUEST);
 		}
 		logger.info("Nastavnik koji vrsi ocjenjivanje: "+korisnik.getIme()+" "+korisnik.getPrezime());
-		Ocjena ocjena = ocjenaRepository.getByIdOcjene(ocj);
+		Ocjena ocjena = new Ocjena();
+		Timestamp timestamp =new Timestamp(System.currentTimeMillis());
+		logger.info("Timestamp:"+timestamp);
+		ocjena.setOcjenaBrojcana(ocj);
+		ocjena.setOcjenaOpisna(ocjenaRepository.getByIdOcjene(ocj).getOcjenaOpisna());
+		ocjena.setTimestamp(timestamp);
+		ocjenaRepository.save(ocjena);
 		UPO upo=new UPO();
 		upo.setUcenik(ucenik);
 		upo.setPredmet(predmet);
 		upo.setOcjena(ocjena);
+		upo.setTimestamp(timestamp);
+		
 		upoRepository.save(upo);
 		logger.info("Proces ocjenjivanja uspjesno zavrsen");
 		logger.info("Zapocet proces slanja emaila roditeljima.");
-		String poruka="Ucenik "+ucenik.getIme()+" "+ucenik.getPrezime()+
-				" dobio je ocjenu "+ocjena.getOcjenaOpisna()+" "
-				+ ocjena.getOcjenaBrojcana()+" iz predmeta "+imePredmeta+"\nNastavnik: "+korisnik.getIme()+" "+korisnik.getPrezime();
+		String poruka=("Ucenik "+ucenik.getIme()+" "+ucenik.getPrezime()+
+				" dobio je ocjenu ("+ocjena.getOcjenaOpisna()+") "
+				+ ocjena.getOcjenaBrojcana()+" iz predmeta "+imePredmeta+"\nNastavnik: "+korisnik.getIme()+" "+korisnik.getPrezime()+"\nDatum upisa ocjene: "+ocjena.getTimestamp());
 		String tataEmail=ucenik.getTata().getEmail();
 		emailService.posaljiEmail(tataEmail, poruka);
 		String mamaEmail=ucenik.getMama().getEmail();

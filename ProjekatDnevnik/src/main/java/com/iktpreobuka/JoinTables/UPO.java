@@ -1,5 +1,7 @@
 package com.iktpreobuka.JoinTables;
 
+import java.sql.Timestamp;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -10,6 +12,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.iktpreobuka.entities.Ocjena;
 import com.iktpreobuka.entities.Predmet;
@@ -38,6 +41,12 @@ public class UPO {
 	@ManyToOne(cascade = CascadeType.ALL, fetch=FetchType.LAZY)
     @JoinColumn(name = "IdOcjene")
     private Ocjena ocjena;
+	
+	@Column(name="DatumOcjenjivanja")
+	/*@JsonFormat(
+		      shape = JsonFormat.Shape.STRING,
+		      pattern = "dd-MM-yyyy")*/
+	private Timestamp timestamp;
 
 	public UPO() {
 		
@@ -73,5 +82,13 @@ public class UPO {
 
 	public void setOcjena(Ocjena ocjena) {
 		this.ocjena = ocjena;
+	}
+
+	public Timestamp getTimestamp() {
+		return timestamp;
+	}
+
+	public void setTimestamp(Timestamp timestamp) {
+		this.timestamp = timestamp;
 	}
 }
