@@ -23,7 +23,4 @@ public interface OdeljenjeRepository extends CrudRepository<Odeljenje, Integer>{
 	
 	@Query("select distinct ime from Odeljenje o where o.ime=:imeP")
 	String isIme(String imeP);
-	
-	
-
 }

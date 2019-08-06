@@ -35,4 +35,6 @@ public interface NastavnikRepository extends CrudRepository<Nastavnik, Integer> 
 	@Query("select odeljenje from ONP onp where onp.nastavnik=:nastavnik and onp.predmet=:predmet")
 	List<Odeljenje> odeljenja (Predmet predmet, Korisnik nastavnik);
 
+	Nastavnik getByUsername(String name);
+
 }

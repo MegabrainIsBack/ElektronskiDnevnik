@@ -20,7 +20,7 @@ import com.iktpreobuka.entities.Ocjena;
 import com.iktpreobuka.entities.Predmet;
 import com.iktpreobuka.entities.Ucenik;
 import com.iktpreobuka.repositories.KorisnikRepository;
-import com.iktpreobuka.repositories.OcjenaRepository;
+import com.iktpreobuka.repositories.OcjenjivanjeRepository;
 import com.iktpreobuka.repositories.PredmetRepository;
 import com.iktpreobuka.repositories.UPORepository;
 import com.iktpreobuka.repositories.UcenikRepository;
@@ -28,7 +28,7 @@ import com.iktpreobuka.services.EmailService;
 import com.iktpreobuka.services.NastavnikDAO;
 
 @RestController
-@RequestMapping(value= "/ocjena")
+@RequestMapping(value= "/ocjenjivanje")
 public class OcjenivanjeController {
 	private final Logger logger = (Logger) LoggerFactory.getLogger(this.getClass());
 	
@@ -39,7 +39,7 @@ public class OcjenivanjeController {
 	PredmetRepository predmetRepository;
 	
 	@Autowired
-	OcjenaRepository ocjenaRepository;
+	OcjenjivanjeRepository ocjenaRepository;
 	
 	@Autowired
 	KorisnikRepository korisnikRepository;
@@ -66,6 +66,7 @@ public class OcjenivanjeController {
 			return new ResponseEntity<>("Samo nastavnik koji predaje predmet odeljenju kojem ucenik pripada moze unijeti ocjenu.", HttpStatus.BAD_REQUEST);
 		}
 		Ucenik ucenik=ucenikRepository.getById(id);
+		System.out.println(ucenik);
 		logger.info("Ucenik koji se ocjenjuje: "+ucenik.getIme()+" "+ucenik.getPrezime());
 		Predmet predmet=predmetRepository.getByIme(imePredmeta);
 		logger.info("Predmet iz kojeg se daje ocjena: "+ imePredmeta);
@@ -84,14 +85,14 @@ public class OcjenivanjeController {
 		logger.info("Zapocet proces slanja emaila roditeljima.");
 		String poruka="Ucenik "+ucenik.getIme()+" "+ucenik.getPrezime()+
 				" dobio je ocjenu "+ocjena.getOcjenaOpisna()+" "
-				+ ocjena.getOcjenaBrojcana()+" iz predmeta "+imePredmeta;
+				+ ocjena.getOcjenaBrojcana()+" iz predmeta "+imePredmeta+"\nNastavnik: "+korisnik.getIme()+" "+korisnik.getPrezime();
 		String tataEmail=ucenik.getTata().getEmail();
 		emailService.posaljiEmail(tataEmail, poruka);
 		String mamaEmail=ucenik.getMama().getEmail();
 		emailService.posaljiEmail(mamaEmail, poruka);
 		logger.info("Proces slanja emaila roditeljima uspjesno zavrsen.");
 		
-		return new ResponseEntity<>(poruka+"\nEmail poslan na adresu roditelja.", HttpStatus.OK);
+		return new ResponseEntity<>(poruka+"\n\nEmail poslan na adresu roditelja.", HttpStatus.OK);
 	}
 	
 }

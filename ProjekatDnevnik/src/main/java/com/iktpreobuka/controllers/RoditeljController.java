@@ -19,6 +19,7 @@ import com.iktpreobuka.entities.Korisnik;
 import com.iktpreobuka.entities.Nastavnik;
 import com.iktpreobuka.entities.Odeljenje;
 import com.iktpreobuka.entities.Ucenik;
+import com.iktpreobuka.entities.dto.ocjene.OcjeneIzJednogPredmetaDTO;
 import com.iktpreobuka.entities.dto.ucenik.UcenikZaRoditeljaBasicDTO;
 import com.iktpreobuka.repositories.NastavnikRepository;
 import com.iktpreobuka.repositories.OdeljenjeRepository;
@@ -52,7 +53,7 @@ public class RoditeljController {
 		Korisnik korisnik=ulogovaniKorisnikDAO.ulogovaniKorisnik(principal);
 		logger.info("Ulogovani korisnik Id: " +korisnik.getId());
 		if(!(ucenikDAO.dozvolaPristupaRoditelj(idUcenika, korisnik))) {
-			logger.info("Pokusaj neautorizovanog pristupa - Id Korisnika: " +korisnik.getId());
+			logger.warn("Pokusaj neautorizovanog pristupa - Id Korisnika: " +korisnik.getId());
 			return new ResponseEntity<>("Neautorizovani pristup", HttpStatus.UNAUTHORIZED);
 		}
 		Ucenik ucenik=ucenikRepository.getById(idUcenika);
@@ -85,12 +86,12 @@ public class RoditeljController {
 		Korisnik korisnik=ulogovaniKorisnikDAO.ulogovaniKorisnik(principal);
 		logger.info("Ulogovani korisnik Id: " +korisnik.getId());
 		if(!(ucenikDAO.dozvolaPristupaRoditelj(idUcenika, korisnik))) {
-			logger.info("Pokusaj neautorizovanog pristupa - Id Korisnika: " +korisnik.getId());
+			logger.warn("Pokusaj neautorizovanog pristupa - Id Korisnika: " +korisnik.getId());
 			return new ResponseEntity<>("Neautorizovani pristup", HttpStatus.UNAUTHORIZED);
 		}
-		ResponseEntity<?> ocjene = ucenikDAO.ocjeneIzJednogPredmetaDAO(idUcenika, imeP);
+		OcjeneIzJednogPredmetaDTO ocjene = ucenikDAO.ocjeneIzJednogPredmetaDAO(idUcenika, imeP);
 		logger.info("Pribavljanje ocjena ucenika id: "+idUcenika+"iz predmeta: "+imeP+" uspjesno.");
-		return ocjene;
+		return new ResponseEntity<>(ocjene, HttpStatus.OK);
 	}
 	
 	@RequestMapping (method=RequestMethod.GET, value="/{idUcenika}/OcjeneIzSvihPredmeta")
@@ -98,7 +99,7 @@ public class RoditeljController {
 		Korisnik korisnik=ulogovaniKorisnikDAO.ulogovaniKorisnik(principal);
 		logger.info("Ulogovani korisnik Id: " +korisnik.getId());
 		if(!(ucenikDAO.dozvolaPristupaRoditelj(idUcenika, korisnik))) {
-			logger.info("Pokusaj neautorizovanog pristupa - Id Korisnika: " +korisnik.getId());
+			logger.warn("Pokusaj neautorizovanog pristupa - Id Korisnika: " +korisnik.getId());
 			return new ResponseEntity<>("Neautorizovani pristup", HttpStatus.UNAUTHORIZED);
 		}
 		ResponseEntity<?> ocjene = ucenikDAO.ocjeneIzSvihPredmetaDAO(idUcenika);

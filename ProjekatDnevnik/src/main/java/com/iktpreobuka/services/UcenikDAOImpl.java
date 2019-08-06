@@ -51,6 +51,9 @@ public class UcenikDAOImpl implements UcenikDAO{
 	@Autowired
 	private UcenikDAO ucenikDAO;
 	
+	@Autowired
+	private NastavnikDAO nastavnikDAO;
+	
 	@PersistenceContext
 	private EntityManager em;
 	
@@ -90,7 +93,7 @@ public class UcenikDAOImpl implements UcenikDAO{
 		}
 	
 	@Override
-	public ResponseEntity<?> ocjeneIzJednogPredmetaDAO(Integer idUcenika, String imeP){
+	public OcjeneIzJednogPredmetaDTO  ocjeneIzJednogPredmetaDAO(Integer idUcenika, String imeP){
 		logger.info("Pristup citanju ocjena iz predmeta "+imeP +" dozvoljen.");
 		Ucenik ucenik=ucenikRepository.getById(idUcenika);
 		OcjeneIzJednogPredmetaDTO oIP=new OcjeneIzJednogPredmetaDTO();
@@ -100,7 +103,7 @@ public class UcenikDAOImpl implements UcenikDAO{
 		Predmet predmet=predmetRepository.getByIme(imeP);
 		oIP.setOcjene(ucenikDAO.ocjeneIzPredmeta(predmet,ucenik));
 		logger.info("Citanje ocjena uspjesno zavrseno");
-		return new ResponseEntity<>(oIP, HttpStatus.OK);
+		return oIP;
 	}
 	
 	@Override
@@ -137,8 +140,24 @@ public class UcenikDAOImpl implements UcenikDAO{
 		return dozvolaPristupa;
 		}
 		
+	@Override
+	public Boolean dozvolaPristupaNastavnik(Integer idUcenika, Korisnik korisnik, String imePredmeta) {
+		Boolean dozvolaPristupa=false;
+		String uloga =korisnik.getOsnovnaUloga();
+		Boolean temp=false;
+		if (uloga.equals("ROLE_ADMIN")) {
+			temp=true;	
+		}
+		Ucenik ucenik=ucenikRepository.getById(idUcenika);
+		Predmet predmet=predmetRepository.getByIme(imePredmeta);
+		Boolean provjera=nastavnikDAO.provjera(predmet, korisnik, ucenik);
 		
-	
+		if (provjera || temp) {
+			dozvolaPristupa=true;
+			logger.info("Pristup podacima o uceniku dozvoljen.");
+		}
+		return dozvolaPristupa;
+	}
 }
 
 

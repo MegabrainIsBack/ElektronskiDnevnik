@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 
 import com.iktpreobuka.entities.Korisnik;
 import com.iktpreobuka.entities.Predmet;
+import com.iktpreobuka.entities.dto.ocjene.OcjeneIzJednogPredmetaDTO;
 
 
 public interface UcenikDAO {
@@ -14,10 +15,12 @@ public interface UcenikDAO {
 
 	ResponseEntity<?> ocjeneIzSvihPredmetaDAO(Integer idUcenika);
 
-	ResponseEntity<?> ocjeneIzJednogPredmetaDAO(Integer idUcenika, String imeP);
+	OcjeneIzJednogPredmetaDTO ocjeneIzJednogPredmetaDAO(Integer idUcenika, String imeP);
 
 	Boolean dozvolaPristupa(Integer idUcenika, Korisnik korisnik);
 
 	Boolean dozvolaPristupaRoditelj(Integer idUcenika, Korisnik korisnik);
+
+	Boolean dozvolaPristupaNastavnik(Integer idUcenika, Korisnik korisnik, String imePredmeta);
 
 }

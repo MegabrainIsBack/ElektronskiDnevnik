@@ -4,7 +4,7 @@ import org.springframework.data.repository.CrudRepository;
 
 import com.iktpreobuka.entities.Ocjena;
 
-public interface OcjenaRepository extends CrudRepository <Ocjena, Integer>{
+public interface OcjenjivanjeRepository extends CrudRepository <Ocjena, Integer>{
 
 	Ocjena getByIdOcjene(Integer ocj);
 
