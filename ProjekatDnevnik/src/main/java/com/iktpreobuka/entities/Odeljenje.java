@@ -11,7 +11,10 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -28,8 +31,11 @@ public class Odeljenje {
 	
 	@NotNull(message = "Morate unijeti razred.")
 	@Column(name="Razred")
+	@Min(value=1, message="Godina mora biti izmedju 1 i 8.")
+	@Max(value=8, message="Godina mora biti izmedju 1 i 8.")
 	private Integer godina;
 	
+	@Size(min=1, max=1, message = "Ime odeljenja sastoji se od jednog slova.")
 	@NotNull(message = "Morate unijeti odeljenje.")
 	@Column(name="Odeljenje")
 	private String ime;

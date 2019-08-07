@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.iktpreobuka.JoinTables.ONP;
 import com.iktpreobuka.entities.Odeljenje;
 import com.iktpreobuka.entities.Predmet;
+import com.iktpreobuka.entities.dto.DodajOdeljenjeDTO;
 import com.iktpreobuka.repositories.ONPRepository;
 import com.iktpreobuka.repositories.OdeljenjeRepository;
 import com.iktpreobuka.repositories.PredmetRepository;
@@ -48,7 +49,7 @@ public class OdeljenjeCrudController {
 	
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.POST, value="/dodajOdeljenje")
-	public	ResponseEntity<?> dodajOdeljenje(@Valid @RequestBody Odeljenje novoOdeljenje, BindingResult result) {
+	public	ResponseEntity<?> dodajOdeljenje(@Valid @RequestBody DodajOdeljenjeDTO novoOdeljenje, BindingResult result) {
 		logger.info("Dodaj novo odeljenje - proces zapocet.");
 		Odeljenje odeljenje = new Odeljenje();
 		odeljenje.setIme(novoOdeljenje.getIme());
@@ -56,10 +57,12 @@ public class OdeljenjeCrudController {
 		
 		if(novoOdeljenje.getIme().equals(odeljenjeRepository.isIme(novoOdeljenje.getIme()))
 				&& novoOdeljenje.getGodina()==odeljenjeRepository.isGodina(novoOdeljenje.getGodina())){
-			return new ResponseEntity<>("Odeljenje vec postoji", HttpStatus.BAD_REQUEST);
+			logger.warn("Odeljenje vec postoji.");
+			return new ResponseEntity<>("Odeljenje vec postoji.", HttpStatus.BAD_REQUEST);
 		}
 		
 		if(result.hasErrors()) {
+			logger.error("Greska: "+createErrorMessage(result));
 			return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
 			}
 		
@@ -92,10 +95,24 @@ public class OdeljenjeCrudController {
 	
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method= RequestMethod.GET, value="/poImenu/{godina}/{imeOdeljenja}")
-	public Odeljenje poImenu(@PathVariable Integer godina,@PathVariable String imeOdeljenja ) {
-		Odeljenje odeljenje=odeljenjeRepository.getByGodinaAndIme(godina, imeOdeljenja);
-		logger.info("Pribavljanje odeljenja "+godina+imeOdeljenja+" uspjesno");
-		return odeljenje;
+	public ResponseEntity<?> OdeljenjepoImenu(@PathVariable Integer godina,@PathVariable String imeOdeljenja ) {
+		try {
+			Odeljenje odeljenje = odeljenjeRepository.getByGodinaAndIme(godina, imeOdeljenja);
+			if (!(odeljenje.getId()==null)) {
+				// ako je korisnik pronadjen vratiti 200
+				logger.info("Pribavljanje odeljenja " + godina + imeOdeljenja + " uspjesno");
+						return new ResponseEntity<>(odeljenje, HttpStatus.OK);
+							}
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		} catch (NullPointerException e) {
+			logger.info("Nepostojece odeljenje");
+			return new ResponseEntity<>("Nepostojece odeljenje",HttpStatus.NOT_FOUND);
+		}
+		
+		catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 	
 	@Secured("ROLE_ADMIN")
