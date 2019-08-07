@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.iktpreobuka.controllers.utilities.PINGenerator;
+import com.iktpreobuka.entities.Nastavnik;
 import com.iktpreobuka.entities.Odeljenje;
 import com.iktpreobuka.entities.RoditeljMajka;
 import com.iktpreobuka.entities.RoditeljOtac;
@@ -322,19 +323,33 @@ public class UcenikCrudController {
 	
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method= RequestMethod.GET, value="/poId/{id}")
-	public UcenikBasicDTO poId(@PathVariable Integer id) {
-		Ucenik ucenik = ucenikRepository.getById(id);
-		UcenikBasicDTO ucenikDTO=new UcenikBasicDTO();
-		Integer idOca=ucenik.getTata().getId();
-		Integer idMajke=ucenik.getMama().getId();
-		ucenikDTO.setId(ucenik.getId());
-		ucenikDTO.setIme(ucenik.getIme());
-		ucenikDTO.setPrezime(ucenik.getPrezime());
-		ucenikDTO.setOdeljenje(ucenik.getOdeljenje());
-		ucenikDTO.setIdOca(idOca);
-		ucenikDTO.setIdMajke(idMajke);
-		logger.info("Pribavljanje ucenika po id uspjesno.");
-		return ucenikDTO;
+	public ResponseEntity<?> poId(@PathVariable Integer id) {
+		try {
+			Ucenik ucenik = ucenikRepository.getById(id);
+			if (!(ucenik.getId()==null)) {
+				UcenikBasicDTO ucenikDTO=new UcenikBasicDTO();
+				Integer idOca=ucenik.getTata().getId();
+				Integer idMajke=ucenik.getMama().getId();
+				ucenikDTO.setId(ucenik.getId());
+				ucenikDTO.setIme(ucenik.getIme());
+				ucenikDTO.setPrezime(ucenik.getPrezime());
+				ucenikDTO.setOdeljenje(ucenik.getOdeljenje());
+				ucenikDTO.setIdOca(idOca);
+				ucenikDTO.setIdMajke(idMajke);
+				logger.info("Pribavljanje ucenika uspjesno");
+						return new ResponseEntity<>(ucenik, HttpStatus.OK);
+							}
+			logger.info("Nepostojeci ucenik.");
+			return new ResponseEntity<>("Nepostojeci ucenik.",HttpStatus.NOT_FOUND);
+			} catch (NullPointerException e) {
+				logger.info("Nepostojeci ucenik.");
+				return new ResponseEntity<>("Nepostojeci ucenik.",HttpStatus.NOT_FOUND);
+			}
+			
+			catch (Exception e) {
+				e.printStackTrace();
+				return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+			}
 	}
 	
 	@Secured("ROLE_ADMIN")
@@ -366,26 +381,40 @@ public class UcenikCrudController {
 	
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method= RequestMethod.GET, value="/poOdeljenju/{odeljenjeI}")
-	public List<UcenikBasicDTO> poOdeljenju(@PathVariable String odeljenjeI ) {
-		Integer godinaO= Character.getNumericValue(odeljenjeI.charAt(0));
-		String imeO=Character.toString(odeljenjeI.charAt(1));
-		Odeljenje odeljenje = odeljenjeRepository.getByGodinaAndIme(godinaO,imeO);
-		List<Ucenik> ucenici=ucenikRepository.getByOdeljenjeU(odeljenje);
-		ArrayList <UcenikBasicDTO> uceniciDTO= new ArrayList<UcenikBasicDTO>();
-		for(Ucenik ucenik: ucenici) {
-			UcenikBasicDTO ucenikDTO=new UcenikBasicDTO();
-			Integer idOca=ucenik.getTata().getId();
-			Integer idMajke=ucenik.getMama().getId();
-			ucenikDTO.setId(ucenik.getId());
-			ucenikDTO.setIme(ucenik.getIme());
-			ucenikDTO.setPrezime(ucenik.getPrezime());
-			ucenikDTO.setOdeljenje(ucenik.getOdeljenje());
-			ucenikDTO.setIdOca(idOca);
-			ucenikDTO.setIdMajke(idMajke);
-			uceniciDTO.add(ucenikDTO);
-		}
-		logger.info("Pribavljanje ucenika odeljenja: "+godinaO+imeO+" uspjesno.");
-		return uceniciDTO;
+	public ResponseEntity<?> poOdeljenju(@PathVariable String odeljenjeI ) {
+		try {
+			Integer godinaO= Character.getNumericValue(odeljenjeI.charAt(0));
+			String imeO=Character.toString(odeljenjeI.charAt(1));
+			Odeljenje odeljenje = odeljenjeRepository.getByGodinaAndIme(godinaO,imeO);
+			if (!(odeljenje.getId()==null)) {
+				List<Ucenik> ucenici=ucenikRepository.getByOdeljenjeU(odeljenje);
+				ArrayList <UcenikBasicDTO> uceniciDTO= new ArrayList<UcenikBasicDTO>();
+				for(Ucenik ucenik: ucenici) {
+					UcenikBasicDTO ucenikDTO=new UcenikBasicDTO();
+					Integer idOca=ucenik.getTata().getId();
+					Integer idMajke=ucenik.getMama().getId();
+					ucenikDTO.setId(ucenik.getId());
+					ucenikDTO.setIme(ucenik.getIme());
+					ucenikDTO.setPrezime(ucenik.getPrezime());
+					ucenikDTO.setOdeljenje(ucenik.getOdeljenje());
+					ucenikDTO.setIdOca(idOca);
+					ucenikDTO.setIdMajke(idMajke);
+					uceniciDTO.add(ucenikDTO);
+				}
+				logger.info("Pribavljanje ucenika odeljenja: "+godinaO+imeO+" uspjesno.");
+						return new ResponseEntity<>(uceniciDTO, HttpStatus.OK);
+							}
+			logger.info("Nepostojece odeljenje.");
+			return new ResponseEntity<>("Nepostojece odeljenje.",HttpStatus.NOT_FOUND);
+			} catch (NullPointerException e) {
+				logger.info("Nepostojece odeljenje.");
+				return new ResponseEntity<>("Nepostojece odeljenje.",HttpStatus.NOT_FOUND);
+			}
+			
+			catch (Exception e) {
+				e.printStackTrace();
+				return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+			}
 	}
 	
 	@Secured("ROLE_ADMIN")

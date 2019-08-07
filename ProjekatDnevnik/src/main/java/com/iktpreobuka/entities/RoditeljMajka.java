@@ -13,7 +13,6 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "maminaDjeca"})
-//@DiscriminatorValue("Majka")
 public class RoditeljMajka extends Korisnik{
 	
 	@JsonIgnore

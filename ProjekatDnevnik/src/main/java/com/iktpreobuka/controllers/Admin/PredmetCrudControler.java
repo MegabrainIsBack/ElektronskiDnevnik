@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.iktpreobuka.JoinTables.ONP;
+import com.iktpreobuka.entities.Nastavnik;
 import com.iktpreobuka.entities.Odeljenje;
 import com.iktpreobuka.entities.Predmet;
 import com.iktpreobuka.repositories.ONPRepository;
@@ -158,14 +159,30 @@ public class PredmetCrudControler {
 	@RequestMapping(method= RequestMethod.GET, value="/pribaviSve")
 	public Iterable<Predmet> sviPredmeti() {
 		Iterable<Predmet> predmeti = predmetRepository.findAll();
+		logger.info("Pribavljanje svih nastavnika uspjesno.");
 		return predmeti;
 	}
 	
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method= RequestMethod.GET, value="/poImenu/{predmetIme}")
-	public Predmet poImenu(@PathVariable String predmetIme ) {
-		Predmet predmet=predmetRepository.getByIme(predmetIme);
-		return predmet;
+	public ResponseEntity<?> poImenu(@PathVariable String predmetIme ) {
+		try {
+			Predmet predmet=predmetRepository.getByIme(predmetIme);
+			if (!(predmet.getIdPredmeta()==null)) {
+				logger.info("Pribavljanje predmeta uspjesno");
+						return new ResponseEntity<>(predmet, HttpStatus.OK);
+							}
+			logger.info("Nepostojeci predmet.");
+			return new ResponseEntity<>("Nepostojeci predmet.",HttpStatus.NOT_FOUND);
+			} catch (NullPointerException e) {
+				logger.info("Nepostojeci predmet.");
+				return new ResponseEntity<>("Nepostojeci predmet.",HttpStatus.NOT_FOUND);
+			}
+			
+			catch (Exception e) {
+				e.printStackTrace();
+				return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+			}
 	}
 	
 	@Secured("ROLE_ADMIN")
@@ -194,9 +211,11 @@ public class PredmetCrudControler {
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method= RequestMethod.DELETE, value="/obrisiPredmet/{imePredmeta}")
 	public	Predmet obrisiPredmet(@PathVariable String imePredmeta) {
+		logger.info("Proces predmeta id: "+imePredmeta+" - zapocet.");
 		Predmet predmet= predmetRepository.getByIme(imePredmeta);
 		predmet.setAktivan(false);
 		predmetRepository.save(predmet);
+		logger.info("Predmet "+imePredmeta+" deaktiviran.");
 		return  predmet;
 	}
 	

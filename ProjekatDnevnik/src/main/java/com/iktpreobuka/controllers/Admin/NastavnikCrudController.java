@@ -29,7 +29,7 @@ import com.iktpreobuka.controllers.utilities.PINGenerator;
 import com.iktpreobuka.entities.Nastavnik;
 import com.iktpreobuka.entities.Odeljenje;
 import com.iktpreobuka.entities.Predmet;
-import com.iktpreobuka.entities.dto.NastavnikZaOdeljenje;
+import com.iktpreobuka.entities.dto.NastavnikZaOdeljenjeDTO;
 import com.iktpreobuka.repositories.NastavnikRepository;
 import com.iktpreobuka.repositories.ONPRepository;
 import com.iktpreobuka.repositories.OdeljenjeRepository;
@@ -168,7 +168,7 @@ public class NastavnikCrudController {
 	
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.PUT, value="/dodajNastavnikaOdeljenju")
-	public	ResponseEntity<?> dodajNastavnikaOdeljenju(@Valid @RequestBody NastavnikZaOdeljenje noviNastavnik, BindingResult result) {
+	public	ResponseEntity<?> dodajNastavnikaOdeljenju(@Valid @RequestBody NastavnikZaOdeljenjeDTO noviNastavnik, BindingResult result) {
 		logger.info("Proces dodjele nastavnika odjeljenju - zapocet.");
 		String jmbg=noviNastavnik.getJmbg();
 		Nastavnik nastavnik = nastavnikRepository.getByJmbg(jmbg);
@@ -202,28 +202,73 @@ public class NastavnikCrudController {
 	
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method= RequestMethod.GET, value="/poId/{id}")
-	public Nastavnik nastavnikPoId(@PathVariable Integer id) {
+	public ResponseEntity<?> nastavnikPoId(@PathVariable Integer id) {
+		try {
 		Nastavnik nastavnik = nastavnikRepository.getById(id);
-		logger.info("Pribavljanje nastavnika po id uspjesno.");
-		return nastavnik;
+		if (!(nastavnik.getId()==null)) {
+			logger.info("Pribavljanje nastavnika uspjesno");
+					return new ResponseEntity<>(nastavnik, HttpStatus.OK);
+						}
+		return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		} catch (NullPointerException e) {
+			logger.info("Nepostojeci nastavnik.");
+			return new ResponseEntity<>("Nepostojeci nastavnik.",HttpStatus.NOT_FOUND);
+		}
+		
+		catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method= RequestMethod.GET, value="/poOdeljenju/{razred}/{odeljenje}")
-	public List<Nastavnik> poOdeljenju(@PathVariable Integer razred, @PathVariable String odeljenje ) {
+	public ResponseEntity<?> poOdeljenju(@PathVariable Integer razred, @PathVariable String odeljenje ) {
+		try {
 		Odeljenje odeljenjeT=odeljenjeRepository.getByGodinaAndIme(razred,odeljenje);
-		List<Nastavnik> nastavnici=nastavnikRepository.nastavnikPoOdeljenju(odeljenjeT);
-		logger.info("Pribavljanje nastavnika koji predaju odeljenju "+odeljenjeT.getGodina()+odeljenjeT.getIme()+" uspjesno.");
-		return nastavnici;
+		if (!(odeljenjeT.getId()==null)) {
+			logger.info("Pribavljanje odeljenja uspjesno");
+			List<Nastavnik> nastavnici=nastavnikRepository.nastavnikPoOdeljenju(odeljenjeT);
+			logger.info("Pribavljanje nastavnika koji predaju odeljenju "+odeljenjeT.getGodina()+odeljenjeT.getIme()+" uspjesno.");
+			return new ResponseEntity<>(nastavnici,HttpStatus.OK);				
+		}
+		logger.info("Nepostojece odeljenje.");
+		return new ResponseEntity<>("Nepostojece odeljenje.",HttpStatus.NOT_FOUND);
+		
+		} catch (NullPointerException e) {
+			logger.info("Nepostojece odeljenje.");
+			return new ResponseEntity<>("Nepostojece odeljenje.",HttpStatus.NOT_FOUND);
+		}
+		
+		catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 	
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method= RequestMethod.GET, value="/poPredmetu/{predmetIme}")
-	public List<Nastavnik> poPredmetu(@PathVariable String predmetIme ) {
-		Predmet predmet=predmetRepository.getByIme(predmetIme);
-		List<Nastavnik> nastavnici=nastavnikRepository.nastavnikPoPredmetu(predmet);
-		logger.info("Pribavljanje nastavnika koji predaju predmet: "+predmetIme+" - uspjesno.");
-		return nastavnici;
+	public ResponseEntity<?> poPredmetu(@PathVariable String predmetIme ) {
+		try {
+			Predmet predmet=predmetRepository.getByIme(predmetIme);
+			if (!(predmet.getIdPredmeta()==null)) {
+				logger.info("Pribavljanje predmeta uspjesno");
+				List<Nastavnik> nastavnici=nastavnikRepository.nastavnikPoPredmetu(predmet);
+				logger.info("Pribavljanje nastavnika koji predaju predmet: "+predmetIme+" - uspjesno.");
+				return new ResponseEntity<>(nastavnici,HttpStatus.OK);	
+			}
+			logger.info("Nepostojeci predmet.");
+			return new ResponseEntity<>("Nepostojeci predmet.",HttpStatus.NOT_FOUND);
+			
+			} catch (NullPointerException e) {
+				logger.info("Nepostojeci predmet.");
+				return new ResponseEntity<>("Nepostojeci predmet.",HttpStatus.NOT_FOUND);
+			}
+			
+			catch (Exception e) {
+				e.printStackTrace();
+				return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+			}
 	}
 	
 	@Secured("ROLE_ADMIN")
@@ -242,7 +287,7 @@ public class NastavnikCrudController {
 			}
 		
 		nastavnikRepository.save(nastavnik);
-		logger.info("Izmjene sacuvane");
+		logger.info("Izmjene podataka o postojecem nastavniku id: "+id+" sacuvane");
 		
 		return new ResponseEntity<>(nastavnik, HttpStatus.OK);
 	}

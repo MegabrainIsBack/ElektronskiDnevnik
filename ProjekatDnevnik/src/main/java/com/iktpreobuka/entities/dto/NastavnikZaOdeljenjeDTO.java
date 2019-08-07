@@ -4,7 +4,7 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class NastavnikZaOdeljenje {
+public class NastavnikZaOdeljenjeDTO {
 	
 	@NotNull(message = "Morate unijeti JMBG.")
 	@JsonProperty("JMBG")
@@ -22,7 +22,7 @@ public class NastavnikZaOdeljenje {
 	@JsonProperty("Odeljenje")
 	private String odeljenje;
 	
-	public NastavnikZaOdeljenje(){
+	public NastavnikZaOdeljenjeDTO(){
 		
 	}
 
