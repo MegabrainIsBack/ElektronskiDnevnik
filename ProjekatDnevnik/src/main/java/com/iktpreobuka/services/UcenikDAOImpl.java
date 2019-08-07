@@ -2,9 +2,8 @@ package com.iktpreobuka.services;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Calendar;
 import java.util.List;
-import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -30,8 +29,6 @@ import com.iktpreobuka.repositories.OdeljenjeRepository;
 import com.iktpreobuka.repositories.OtacRepository;
 import com.iktpreobuka.repositories.PredmetRepository;
 import com.iktpreobuka.repositories.UcenikRepository;
-
-import javassist.compiler.ast.Pair;
 
 @Service
 public class UcenikDAOImpl implements UcenikDAO{
@@ -98,12 +95,16 @@ public class UcenikDAOImpl implements UcenikDAO{
 		ArrayList<Ocjena> resultO = (ArrayList<Ocjena>) query1.getResultList();
 		@SuppressWarnings("unchecked")
 		ArrayList<Timestamp> resultT=(ArrayList<Timestamp>) query2.getResultList();
-		@SuppressWarnings("rawtypes")
 		ArrayList<BrojcanaOcjenaITimestamp> pairs =new ArrayList<>();
 		for (Integer i=0;i<resultO.size();i++) {
 			BrojcanaOcjenaITimestamp boIt=new BrojcanaOcjenaITimestamp();
 			boIt.setOcjenaBrojcana(resultO.get(i).getOcjenaBrojcana());
-			boIt.setTimestamp(resultT.get(i));
+			Timestamp tempT=resultT.get(i);
+			Calendar cal = Calendar.getInstance();
+		    cal.setTimeInMillis(tempT.getTime());
+		    cal.add(Calendar.HOUR,2);
+		    tempT = new Timestamp(cal.getTime().getTime());
+			boIt.setTimestamp(tempT);
 			pairs.add(boIt);
 			
 		}

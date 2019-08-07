@@ -80,7 +80,7 @@ private final Logger logger = (Logger) LoggerFactory.getLogger(this.getClass());
 			logger.warn("Pokusaj neautorizovanog pristupa - Id Korisnika: " +korisnik.getId());
 			return new ResponseEntity<>("Neautorizovani pristup", HttpStatus.UNAUTHORIZED);
 		}
-		OcjeneIzJednogPredmetaDTO ocjene = ucenikDAO.ocjeneIzJednogPredmetaDAO(idUcenika, imePredmeta);
+		OcjeneIzJednogPredmetaDTO ocjene = ucenikDAO.ocjeneIzJednogPredmetaDAOSaTimestamp(idUcenika, imePredmeta);
 		ocjeneL.add(ocjene);
 		}
 		logger.info("Uspjesno zavrseno PribaviOcjeneIzPredmetaZaOdeljenje");

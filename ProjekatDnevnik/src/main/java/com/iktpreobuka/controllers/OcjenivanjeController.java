@@ -27,6 +27,8 @@ import com.iktpreobuka.repositories.UPORepository;
 import com.iktpreobuka.repositories.UcenikRepository;
 import com.iktpreobuka.services.EmailService;
 import com.iktpreobuka.services.NastavnikDAO;
+import com.iktpreobuka.services.UcenikDAO;
+import com.iktpreobuka.services.UlogovaniKorisnikDAO;
 
 @RestController
 @RequestMapping(value= "/ocjenjivanje")
@@ -40,7 +42,7 @@ public class OcjenivanjeController {
 	PredmetRepository predmetRepository;
 	
 	@Autowired
-	OcjenjivanjeRepository ocjenaRepository;
+	OcjenjivanjeRepository ocjenjivanjeRepository;
 	
 	@Autowired
 	KorisnikRepository korisnikRepository;
@@ -50,6 +52,12 @@ public class OcjenivanjeController {
 	
 	@Autowired
 	private NastavnikDAO nastavnikDAO;
+	
+	@Autowired
+	private UlogovaniKorisnikDAO ulogovaniKorisnikDAO;
+	
+	@Autowired
+	private UcenikDAO ucenikDAO;
 	
 	@Autowired
 	private EmailService emailService;
@@ -67,7 +75,6 @@ public class OcjenivanjeController {
 			return new ResponseEntity<>("Samo nastavnik koji predaje predmet odeljenju kojem ucenik pripada moze unijeti ocjenu.", HttpStatus.BAD_REQUEST);
 		}
 		Ucenik ucenik=ucenikRepository.getById(id);
-		System.out.println(ucenik);
 		logger.info("Ucenik koji se ocjenjuje: "+ucenik.getIme()+" "+ucenik.getPrezime());
 		Predmet predmet=predmetRepository.getByIme(imePredmeta);
 		logger.info("Predmet iz kojeg se daje ocjena: "+ imePredmeta);
@@ -80,9 +87,8 @@ public class OcjenivanjeController {
 		Timestamp timestamp =new Timestamp(System.currentTimeMillis());
 		logger.info("Timestamp:"+timestamp);
 		ocjena.setOcjenaBrojcana(ocj);
-		ocjena.setOcjenaOpisna(ocjenaRepository.getByIdOcjene(ocj).getOcjenaOpisna());
+		ocjena.setOcjenaOpisna(ocjenjivanjeRepository.getByIdOcjene(ocj).getOcjenaOpisna());
 		ocjena.setTimestamp(timestamp);
-		ocjenaRepository.save(ocjena);
 		UPO upo=new UPO();
 		upo.setUcenik(ucenik);
 		upo.setPredmet(predmet);
@@ -93,8 +99,8 @@ public class OcjenivanjeController {
 		logger.info("Proces ocjenjivanja uspjesno zavrsen");
 		logger.info("Zapocet proces slanja emaila roditeljima.");
 		String poruka=("Ucenik "+ucenik.getIme()+" "+ucenik.getPrezime()+
-				" dobio je ocjenu ("+ocjena.getOcjenaOpisna()+") "
-				+ ocjena.getOcjenaBrojcana()+" iz predmeta "+imePredmeta+"\nNastavnik: "+korisnik.getIme()+" "+korisnik.getPrezime()+"\nDatum upisa ocjene: "+ocjena.getTimestamp());
+				" dobio je ocjenu "+ocjena.getOcjenaOpisna()+" ("
+				+ ocjena.getOcjenaBrojcana()+") iz predmeta "+imePredmeta+"\nNastavnik: "+korisnik.getIme()+" "+korisnik.getPrezime()+"\nDatum upisa ocjene: "+ocjena.getTimestamp());
 		String tataEmail=ucenik.getTata().getEmail();
 		emailService.posaljiEmail(tataEmail, poruka);
 		String mamaEmail=ucenik.getMama().getEmail();
@@ -102,6 +108,90 @@ public class OcjenivanjeController {
 		logger.info("Proces slanja emaila roditeljima uspjesno zavrsen.");
 		
 		return new ResponseEntity<>(poruka+"\n\nEmail poslan na adresu roditelja.", HttpStatus.OK);
+	}
+	
+	@RequestMapping(method = RequestMethod.PUT, value="/izmjeniOcjenu/{datumOcjene}/Ucenika/{id}/izPredmeta/{imePredmeta}/ocjenom/{novaOcjena}")
+	public ResponseEntity<?> izmjeniOcjenu(@Valid @PathVariable String datumOcjene, 
+			@PathVariable Integer id, @PathVariable String imePredmeta, 
+			@PathVariable Integer novaOcjena, Principal principal){
+		logger.info("Zapocet proces izmjene ocjene.");
+		String ulogovaniKorisnik =principal.getName();
+		logger.info("Ulogovani korisnik: "+ulogovaniKorisnik);
+		Korisnik korisnik = korisnikRepository.getByUsername(ulogovaniKorisnik);
+		if (!(korisnik.getOsnovnaUloga().equals("ROLE_TEACHER"))) {
+			logger.info("Ocjenjivanje nije dozvoljeno - Ulogovani korisnik nije nastavnik.");
+			return new ResponseEntity<>("Samo nastavnik koji predaje predmet odeljenju kojem ucenik pripada moze izmjeniti ocjenu.", HttpStatus.BAD_REQUEST);
+		}
+		
+		Ucenik ucenik=ucenikRepository.getById(id);
+		logger.info("Ucenik: "+ucenik.getIme());
+		Predmet predmet=predmetRepository.getByIme(imePredmeta);
+		logger.info("Predmet: "+predmet.getIme());
+		if (!(nastavnikDAO.provjera(predmet, korisnik, ucenik))) {
+			logger.info("Ocjenjivanje nije dozvoljeno - Nastavnik ne predaje dati predmet ili ne predaje datom uceniku");
+			return new ResponseEntity<>("Samo nastavnik koji predaje predmet odeljenju kojem ucenik pripada moze izmjeniti ocjenu.", HttpStatus.BAD_REQUEST);
+		}
+		logger.info("Timestamp: "+Timestamp.valueOf(datumOcjene));
+		UPO staraOcjenaUPO=upoRepository.getByTimestampAndUcenikAndPredmet(Timestamp.valueOf(datumOcjene),ucenik, predmet);
+		logger.info("StaraOcjenaUPO: "+staraOcjenaUPO);
+		Ocjena staraOcjena=staraOcjenaUPO.getOcjena();
+		staraOcjena.setOcjenaBrojcana(novaOcjena);
+		String ocOpis=ocjenjivanjeRepository.getByIdOcjene(novaOcjena).getOcjenaOpisna();
+		staraOcjena.setOcjenaOpisna(ocOpis);
+		staraOcjenaUPO.setOcjena(staraOcjena);
+		upoRepository.save(staraOcjenaUPO);
+		String poruka=("Uceniku "+ucenik.getIme()+" "+ucenik.getPrezime()+
+				" izmjenjena ocjena iz predmeta "+imePredmeta+"\nNastavnik: "+korisnik.getIme()+" "+korisnik.getPrezime()+"\nDatum upisa ocjene: "+staraOcjena.getTimestamp());
+		String tataEmail=ucenik.getTata().getEmail();
+		emailService.posaljiEmail(tataEmail, poruka);
+		String mamaEmail=ucenik.getMama().getEmail();
+		emailService.posaljiEmail(mamaEmail, poruka);
+		logger.info("Proces slanja emaila roditeljima uspjesno zavrsen.");
+		Korisnik admin=korisnikRepository.getByOsnovnaUloga("ROLE_ADMIN");
+		String adminEmail=admin.getEmail();		
+		emailService.posaljiEmail(adminEmail, poruka);
+		logger.info("Obavjestenje poslano adminu.");
+		logger.info("Ocjena izmjenjena: "+poruka);
+		return new ResponseEntity<>(staraOcjena, HttpStatus.OK);
+	}
+	
+	@RequestMapping(method = RequestMethod.DELETE, value="/izbrisiOcjenu/{datumOcjene}/Ucenika/{id}/izPredmeta/{imePredmeta}")
+	public ResponseEntity<?> izbrisiOcjenu(@Valid @PathVariable String datumOcjene, 
+			@PathVariable Integer id, @PathVariable String imePredmeta, Principal principal){
+		
+		logger.info("Zapocet proces brisanja ocjene.");
+		String ulogovaniKorisnik =principal.getName();
+		logger.info("Ulogovani korisnik: "+ulogovaniKorisnik);
+		Korisnik korisnik = korisnikRepository.getByUsername(ulogovaniKorisnik);
+		if (!(korisnik.getOsnovnaUloga().equals("ROLE_TEACHER"))) {
+			logger.info("Ocjenjivanje nije dozvoljeno - Ulogovani korisnik nije nastavnik.");
+			return new ResponseEntity<>("Samo nastavnik koji predaje predmet odeljenju kojem ucenik pripada moze izbrisat ocjenu.", HttpStatus.BAD_REQUEST);
+		}
+		
+		Ucenik ucenik=ucenikRepository.getById(id);
+		Predmet predmet=predmetRepository.getByIme(imePredmeta);
+		if (!(nastavnikDAO.provjera(predmet, korisnik, ucenik))) {
+			logger.info("Ocjenjivanje nije dozvoljeno - Nastavnik ne predaje dati predmet ili ne predaje datom uceniku");
+			return new ResponseEntity<>("Samo nastavnik koji predaje predmet odeljenju kojem ucenik pripada moze izbrisati ocjenu.", HttpStatus.BAD_REQUEST);
+		}
+		
+		UPO staraOcjenaUPO=upoRepository.getByTimestampAndUcenikAndPredmet(Timestamp.valueOf(datumOcjene),ucenik, predmet);
+		upoRepository.delete(staraOcjenaUPO);
+		
+		String poruka=("Uceniku "+ucenik.getIme()+" "+ucenik.getPrezime()+
+				" izbrisana ocjena iz predmeta "+imePredmeta+"\nNastavnik: "+korisnik.getIme()+" "+korisnik.getPrezime()+"\nDatum upisa ocjene: "+staraOcjenaUPO.getTimestamp());
+		String tataEmail=ucenik.getTata().getEmail();
+		emailService.posaljiEmail(tataEmail, poruka);
+		String mamaEmail=ucenik.getMama().getEmail();
+		emailService.posaljiEmail(mamaEmail, poruka);
+		logger.info("Proces slanja emaila roditeljima uspjesno zavrsen.");
+		Korisnik admin=korisnikRepository.getByOsnovnaUloga("ROLE_ADMIN");
+		String adminEmail=admin.getEmail();		
+		emailService.posaljiEmail(adminEmail, poruka);
+		logger.info("Obavjestenje poslano adminu.");
+		logger.info("Ocjena izbrisana: "+poruka);
+		return new ResponseEntity<>(poruka, HttpStatus.OK);
+		
 	}
 	
 }

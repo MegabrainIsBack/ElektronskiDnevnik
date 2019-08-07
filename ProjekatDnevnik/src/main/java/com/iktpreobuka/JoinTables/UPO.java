@@ -28,17 +28,17 @@ public class UPO {
 	private Integer idUPO;
 	
 	@JsonIgnore
-	@ManyToOne(cascade = CascadeType.ALL, fetch=FetchType.LAZY)
+	@ManyToOne(cascade = CascadeType.PERSIST, fetch=FetchType.LAZY)
     @JoinColumn(name = "IdUcenika")
     private Ucenik ucenik;
 	
 	@JsonIgnore
-	@ManyToOne(cascade = CascadeType.ALL, fetch=FetchType.LAZY)
+	@ManyToOne(cascade = CascadeType.PERSIST, fetch=FetchType.LAZY)
     @JoinColumn(name = "IdPredmeta")
     private Predmet predmet;
 	
 	@JsonIgnore
-	@ManyToOne(cascade = CascadeType.ALL, fetch=FetchType.LAZY)
+	@ManyToOne(cascade = CascadeType.PERSIST, fetch=FetchType.LAZY)
     @JoinColumn(name = "IdOcjene")
     private Ocjena ocjena;
 	

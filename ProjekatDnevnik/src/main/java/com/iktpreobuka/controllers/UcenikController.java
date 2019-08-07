@@ -63,7 +63,7 @@ public class UcenikController {
 			logger.warn("Pokusaj neautorizovanog pristupa - Id Korisnika: " +korisnik.getId());
 			return new ResponseEntity<>("Neautorizovani pristup", HttpStatus.UNAUTHORIZED);
 		}
-		OcjeneIzJednogPredmetaDTO ocjene = ucenikDAO.ocjeneIzJednogPredmetaDAO(idUcenika, imeP);
+		OcjeneIzJednogPredmetaDTO ocjene = ucenikDAO.ocjeneIzJednogPredmetaDAOSaTimestamp(idUcenika, imeP);
 		logger.info("Pribavljanje ocjena ucenika id: "+idUcenika+"iz predmeta: "+imeP+" uspjesno.");
 		return new ResponseEntity<>(ocjene, HttpStatus.OK);
 	}

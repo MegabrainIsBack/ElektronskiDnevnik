@@ -12,7 +12,7 @@ public class BrojcanaOcjenaITimestamp {
 	
 	@JsonFormat(
     shape = JsonFormat.Shape.STRING,
-    pattern = "dd-MM-yyyy")
+    pattern = "yyyy-MM-dd HH:mm:ss")
 	@JsonProperty("Datum unosa ocjene")
 	private Timestamp timestamp;
 

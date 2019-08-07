@@ -13,10 +13,10 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.iktpreobuka.JoinTables.UPO;
 
@@ -36,15 +36,13 @@ public class Ocjena {
 	
 	private String ocjenaOpisna;
 	
-	@Transient
-	@Column(name="DatumOcjenjivanja")
-	/*@JsonFormat(
+	@JsonFormat(
 		      shape = JsonFormat.Shape.STRING,
-		      pattern = "dd-MM-yyyy")*/
+		      pattern = "dd-MM-yyyy")
 	private Timestamp timestamp;
 	
 	@OneToMany(mappedBy = "ocjena",
-		    cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+		    cascade = CascadeType.PERSIST,fetch = FetchType.LAZY)
 	private List<UPO> upo= new ArrayList<UPO>();
 	
 	public List<UPO> getUpo() {
