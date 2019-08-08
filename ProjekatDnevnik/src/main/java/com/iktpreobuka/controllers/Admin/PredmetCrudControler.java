@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
@@ -24,12 +25,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.iktpreobuka.JoinTables.ONP;
-import com.iktpreobuka.entities.Nastavnik;
 import com.iktpreobuka.entities.Odeljenje;
 import com.iktpreobuka.entities.Predmet;
+import com.iktpreobuka.entities.dto.PredmetBasicDTO;
 import com.iktpreobuka.repositories.ONPRepository;
 import com.iktpreobuka.repositories.OdeljenjeRepository;
 import com.iktpreobuka.repositories.PredmetRepository;
+import com.iktpreobuka.services.PredmetDAO;
 
 @RestController
 @RequestMapping(value= "/predmet")
@@ -43,6 +45,9 @@ public class PredmetCrudControler {
 	
 	@Autowired
 	OdeljenjeRepository odeljenjeRepository;
+	
+	@Autowired
+	PredmetDAO predmetDAO;
 	
 	private String createErrorMessage(BindingResult result) {
 		return result.getAllErrors().stream().map(ObjectError::getDefaultMessage)
@@ -90,16 +95,14 @@ public class PredmetCrudControler {
 			
 			Iterable<Odeljenje> odeljenja=odeljenjeRepository.findAll();
 			for(int i=0; i<((ArrayList<Odeljenje>) odeljenja).size();i++) {
-			Odeljenje odeljenje=((ArrayList<Odeljenje>) odeljenja).get(i);
-			if(s3<=odeljenje.getGodina()) {
-			ONP onp = new ONP();
-			onp.setPredmet(predmet);
-			onp.setOdeljenje(odeljenje);
-			onpRepository.save(onp);
-			
-			onpRepository.save(onp);
-			logger.info("Podaci o vezi odeljenja i predmeta sacuvani.");
-			}
+					Odeljenje odeljenje=((ArrayList<Odeljenje>) odeljenja).get(i);
+					if(s3<=odeljenje.getGodina()) {
+						ONP onp = new ONP();
+						onp.setPredmet(predmet);
+						onp.setOdeljenje(odeljenje);
+						onpRepository.save(onp);
+						logger.info("Podaci o vezi odeljenja i predmeta sacuvani.");
+					}
 			}
 			
 			s.close();
@@ -144,33 +147,38 @@ public class PredmetCrudControler {
 		
 		Iterable<Odeljenje> odeljenja=odeljenjeRepository.getByGodina(noviPredmet.getGodina());
 		for(int i=0; i<((ArrayList<Odeljenje>) odeljenja).size();i++) {
-		Odeljenje odeljenje=((ArrayList<Odeljenje>) odeljenja).get(i);
-		ONP onp = new ONP();
-		onp.setPredmet(predmet);
-		onp.setOdeljenje(odeljenje);
-		onpRepository.save(onp);
-		logger.info("Podaci o vezi odeljenja i predmeta sacuvani.");
+			Odeljenje odeljenje=((ArrayList<Odeljenje>) odeljenja).get(i);
+			ONP onp = new ONP();
+			onp.setPredmet(predmet);
+			onp.setOdeljenje(odeljenje);
+			onpRepository.save(onp);
 		}
-		
+		logger.info("Podaci o vezi odeljenja i predmeta sacuvani.");
 		return new ResponseEntity<>(predmet, HttpStatus.OK);
 	}
 	
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method= RequestMethod.GET, value="/pribaviSve")
-	public Iterable<Predmet> sviPredmeti() {
+	public Iterable<PredmetBasicDTO> sviPredmeti() {
+		logger.info("Pribavljanje liste svih predmeta zapoceto.");
 		Iterable<Predmet> predmeti = predmetRepository.findAll();
-		logger.info("Pribavljanje svih nastavnika uspjesno.");
-		return predmeti;
+		List<PredmetBasicDTO> pbDTOList=new ArrayList<PredmetBasicDTO>();
+		for (Predmet predmet:predmeti) {
+			pbDTOList.add(predmetDAO.loadPBDTO(predmet));
+		}
+		logger.info("Pribavljanje svih predmeta uspjesno.");
+		return pbDTOList;
 	}
 	
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method= RequestMethod.GET, value="/poImenu/{predmetIme}")
 	public ResponseEntity<?> poImenu(@PathVariable String predmetIme ) {
+		logger.info("Pribavljanje predmeta po imenu zapoceto.");
 		try {
 			Predmet predmet=predmetRepository.getByIme(predmetIme);
 			if (!(predmet.getIdPredmeta()==null)) {
 				logger.info("Pribavljanje predmeta uspjesno");
-						return new ResponseEntity<>(predmet, HttpStatus.OK);
+						return new ResponseEntity<>(predmetDAO.loadPBDTO(predmet), HttpStatus.OK);
 							}
 			logger.info("Nepostojeci predmet.");
 			return new ResponseEntity<>("Nepostojeci predmet.",HttpStatus.NOT_FOUND);
@@ -187,14 +195,26 @@ public class PredmetCrudControler {
 	
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method= RequestMethod.GET, value="/poRazredu/{godina}")
-	public Iterable<Predmet> poOdeljenju(@PathVariable Integer godina) {
+	public ResponseEntity<?> poOdeljenju(@PathVariable Integer godina) {
+		logger.info("Pribavljanje predmeta po razredu zapoceto.");
+		if(godina<1 || godina>8) {
+			return new ResponseEntity<>("Razred mora biti izmedju 1 i 8.", HttpStatus.BAD_REQUEST);
+		}
 		Iterable<Predmet> predmeti =predmetRepository.predmetiPoRazredu(godina);
-		return predmeti;
-	}
+		List<PredmetBasicDTO> pbDTOList=new ArrayList<PredmetBasicDTO>();
+		for (Predmet predmet:predmeti) {
+			pbDTOList.add(predmetDAO.loadPBDTO(predmet));
+		}
+		logger.info("Pribavljanje predmeta po razredu uspjesno.");
+		return new ResponseEntity<>(pbDTOList, HttpStatus.OK);
+		}
+	
 	
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.PUT, value="/izmjeniPredmet/{imePredmeta}")
 	public	ResponseEntity<?> izmjeniPredmet(@Valid @PathVariable String imePredmeta,@RequestBody Predmet noviPredmet, BindingResult result) {
+		logger.info("Proces izmjene predmeta zapocet.");
+		try {
 		Predmet predmet= predmetRepository.getByIme(imePredmeta);
 		predmet.setCasovaNedeljno(noviPredmet.getCasovaNedeljno());
 		predmet.setAktivan(noviPredmet.getAktivan());
@@ -206,17 +226,25 @@ public class PredmetCrudControler {
 		logger.info("Sacuvane izmjene.");
 		
 		return new ResponseEntity<>(predmet, HttpStatus.OK);
+		}
+	catch (Exception e) {
+		return new ResponseEntity<>("Provjerite body zahtjeva ili ime predmeta. (Ili si, pak, zaribao nesto drugo. Jos gore. Puno gore. MUHAHAHAHA!!!!).",HttpStatus.INTERNAL_SERVER_ERROR);
+	}
 	}
 	
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method= RequestMethod.DELETE, value="/obrisiPredmet/{imePredmeta}")
-	public	Predmet obrisiPredmet(@PathVariable String imePredmeta) {
+	public	ResponseEntity<?> obrisiPredmet(@PathVariable String imePredmeta) {
 		logger.info("Proces predmeta id: "+imePredmeta+" - zapocet.");
 		Predmet predmet= predmetRepository.getByIme(imePredmeta);
+		if ((predmet==null)) {
+			logger.error("Predmet " +imePredmeta +" ne postoji.");
+					return new ResponseEntity<>("Predmet " +imePredmeta +" ne postoji.", HttpStatus.BAD_REQUEST);
+						}
 		predmet.setAktivan(false);
 		predmetRepository.save(predmet);
 		logger.info("Predmet "+imePredmeta+" deaktiviran.");
-		return  predmet;
+		return new ResponseEntity<>("Predmet " +imePredmeta +" deaktiviran.", HttpStatus.OK);
 	}
 	
 	

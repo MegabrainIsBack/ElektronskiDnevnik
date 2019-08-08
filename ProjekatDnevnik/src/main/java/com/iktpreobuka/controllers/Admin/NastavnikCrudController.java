@@ -29,6 +29,7 @@ import com.iktpreobuka.controllers.utilities.PINGenerator;
 import com.iktpreobuka.entities.Nastavnik;
 import com.iktpreobuka.entities.Odeljenje;
 import com.iktpreobuka.entities.Predmet;
+import com.iktpreobuka.entities.dto.NastavnikAdminViewDTO;
 import com.iktpreobuka.entities.dto.NastavnikZaOdeljenjeDTO;
 import com.iktpreobuka.repositories.NastavnikRepository;
 import com.iktpreobuka.repositories.ONPRepository;
@@ -143,6 +144,8 @@ public class NastavnikCrudController {
 		if (nastavnikRepository.existsByJmbg(noviNastavnik.getJmbg())) {
 			return new ResponseEntity<>("Nastavnik vec postoji", HttpStatus.BAD_REQUEST);
 		}
+		try {
+		logger.info("Zapoceto dodavanje novog nastavnika.");
 		Nastavnik nastavnik = new Nastavnik();
 		nastavnik.setIme(noviNastavnik.getIme());
 		nastavnik.setPrezime(noviNastavnik.getPrezime());
@@ -152,7 +155,7 @@ public class NastavnikCrudController {
 		nastavnik.setPassword(kodiraniPassword);
 		nastavnik.setEmail(noviNastavnik.getEmail());
 		nastavnik.setOsnovnaUloga("ROLE_TEACHER");
-		
+		nastavnik.setImePredmeta(noviNastavnik.getImePredmeta());
 		String user="nastavnik";
 		nastavnik.setPin(PINGenerator.PGenerator(user));
 		
@@ -164,14 +167,23 @@ public class NastavnikCrudController {
 		logger.info("Nastavnik sacuvan");
 		
 		return new ResponseEntity<>(nastavnik, HttpStatus.OK);
+		}
+		catch (Exception e) {
+			logger.error("Greska u obradi zahtjeva.");
+			return new ResponseEntity<>("Provjerite body zahtjeva. (Ili si, pak, zaribao nesto drugo. Jos gore. Puno gore. MUHAHAHAHA!!!!).",HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 	
 	@Secured("ROLE_ADMIN")
-	@RequestMapping(method = RequestMethod.PUT, value="/dodajNastavnikaOdeljenju")
-	public	ResponseEntity<?> dodajNastavnikaOdeljenju(@Valid @RequestBody NastavnikZaOdeljenjeDTO noviNastavnik, BindingResult result) {
+	@RequestMapping(method = RequestMethod.PUT, value="/dodajNastavnikaOdeljenju/{id}")
+	public	ResponseEntity<?> dodajNastavnikaOdeljenju(@Valid @RequestBody NastavnikZaOdeljenjeDTO noviNastavnik, 
+			@PathVariable Integer id, BindingResult result) {
+		try {
 		logger.info("Proces dodjele nastavnika odjeljenju - zapocet.");
-		String jmbg=noviNastavnik.getJmbg();
-		Nastavnik nastavnik = nastavnikRepository.getByJmbg(jmbg);
+		Nastavnik nastavnik = nastavnikRepository.getById(id);
+		if (!(nastavnik.getImePredmeta().equals(noviNastavnik.getPredmet()))) {
+			return new ResponseEntity<>("Nastavnik nije strucan za predavanje datog predmeta", HttpStatus.BAD_REQUEST);
+		}
 		logger.info("Nastavnik koji se dodaje: "+ nastavnik.getIme()+" "+nastavnik.getPrezime());
 		Predmet predmet=predmetRepository.getByIme(noviNastavnik.getPredmet());
 		logger.info("Predmet koji ce nastavnik predavati: "+ noviNastavnik.getPredmet());
@@ -187,28 +199,75 @@ public class NastavnikCrudController {
 		
 		onpRepository.save(onp);
 		logger.info("Nastavnik dodan odeljenju");
-		
 		return new ResponseEntity<>(onp, HttpStatus.OK);
+		}
+		catch (Exception e) {
+			logger.error("Greska u obradi zahtjeva.");
+			return new ResponseEntity<>("Provjerite body zahtjeva ili id nastavnika. (Ili si, pak, zaribao nesto drugo. Jos gore. Puno gore. MUHAHAHAHA!!!!).",HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		
+		
 	}
 	
 	
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method= RequestMethod.GET, value="/pribaviSve")
-	public Iterable<Nastavnik> sviNastavnici() {
+	public ResponseEntity<?> sviNastavnici() {
 		Iterable<Nastavnik> nastavnici = nastavnikRepository.findAll();
-		logger.info("Pribavljanje svih nastavnika uspjesno.");
-		return nastavnici;
-	}
+		List<NastavnikAdminViewDTO> navList= new ArrayList<NastavnikAdminViewDTO>();
+		for(Nastavnik nastavnik:nastavnici) {
+			NastavnikAdminViewDTO navDTO= new NastavnikAdminViewDTO();
+				navDTO.setIme(nastavnik.getIme());
+				navDTO.setPrezime(nastavnik.getPrezime());
+				navDTO.setJmbg(nastavnik.getJmbg());
+				navDTO.setUsername(nastavnik.getUsername());
+				navDTO.setEmail(nastavnik.getEmail());
+				navDTO.setOsnovnaUloga(nastavnik.getOsnovnaUloga());
+				navDTO.setImePredmeta(nastavnik.getImePredmeta());
+				navDTO.setAktivan(nastavnik.getAktivan());
+				List<Odeljenje> odeljenja =odeljenjeRepository.odeljenjaKojimaPredajeNastavnik(nastavnik);
+				List<String> odeljenja$= new ArrayList<>();
+				for(Odeljenje od:odeljenja) {
+					Integer god=od.getGodina();
+					String ime=od.getIme();
+					String odeljenje$=god+ime;
+					odeljenja$.add(odeljenje$);
+				}
+				navDTO.setOdeljenja(odeljenja$);
+				navList.add(navDTO);
+			}
+			logger.info("Pribavljanje nastavnika uspjesno");
+			return new ResponseEntity<>(navList, HttpStatus.OK);
+		}
+			
 	
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method= RequestMethod.GET, value="/poId/{id}")
 	public ResponseEntity<?> nastavnikPoId(@PathVariable Integer id) {
 		try {
 		Nastavnik nastavnik = nastavnikRepository.getById(id);
+		NastavnikAdminViewDTO navDTO= new NastavnikAdminViewDTO();
 		if (!(nastavnik.getId()==null)) {
+			navDTO.setIme(nastavnik.getIme());
+			navDTO.setPrezime(nastavnik.getPrezime());
+			navDTO.setJmbg(nastavnik.getJmbg());
+			navDTO.setUsername(nastavnik.getUsername());
+			navDTO.setEmail(nastavnik.getEmail());
+			navDTO.setOsnovnaUloga(nastavnik.getOsnovnaUloga());
+			navDTO.setImePredmeta(nastavnik.getImePredmeta());
+			navDTO.setAktivan(nastavnik.getAktivan());
+			List<Odeljenje> odeljenja =odeljenjeRepository.odeljenjaKojimaPredajeNastavnik(nastavnik);
+			List<String> odeljenja$= new ArrayList<>();
+			for(Odeljenje od:odeljenja) {
+				Integer god=od.getGodina();
+				String ime=od.getIme();
+				String odeljenje$=god+ime;
+				odeljenja$.add(odeljenje$);
+			}
+			navDTO.setOdeljenja(odeljenja$);
 			logger.info("Pribavljanje nastavnika uspjesno");
-					return new ResponseEntity<>(nastavnik, HttpStatus.OK);
-						}
+			return new ResponseEntity<>(navDTO, HttpStatus.OK);
+			}
 		return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		} catch (NullPointerException e) {
 			logger.info("Nepostojeci nastavnik.");
@@ -229,8 +288,30 @@ public class NastavnikCrudController {
 		if (!(odeljenjeT.getId()==null)) {
 			logger.info("Pribavljanje odeljenja uspjesno");
 			List<Nastavnik> nastavnici=nastavnikRepository.nastavnikPoOdeljenju(odeljenjeT);
+			List<NastavnikAdminViewDTO> navList= new ArrayList<NastavnikAdminViewDTO>();
+			for(Nastavnik nastavnik:nastavnici) {
+				NastavnikAdminViewDTO navDTO= new NastavnikAdminViewDTO();
+					navDTO.setIme(nastavnik.getIme());
+					navDTO.setPrezime(nastavnik.getPrezime());
+					navDTO.setJmbg(nastavnik.getJmbg());
+					navDTO.setUsername(nastavnik.getUsername());
+					navDTO.setEmail(nastavnik.getEmail());
+					navDTO.setOsnovnaUloga(nastavnik.getOsnovnaUloga());
+					navDTO.setImePredmeta(nastavnik.getImePredmeta());
+					navDTO.setAktivan(nastavnik.getAktivan());
+					List<Odeljenje> odeljenja =odeljenjeRepository.odeljenjaKojimaPredajeNastavnik(nastavnik);
+					List<String> odeljenja$= new ArrayList<>();
+					for(Odeljenje od:odeljenja) {
+						Integer god=od.getGodina();
+						String ime=od.getIme();
+						String odeljenje$=god+ime;
+						odeljenja$.add(odeljenje$);
+					}
+					navDTO.setOdeljenja(odeljenja$);
+					navList.add(navDTO);
+				}
 			logger.info("Pribavljanje nastavnika koji predaju odeljenju "+odeljenjeT.getGodina()+odeljenjeT.getIme()+" uspjesno.");
-			return new ResponseEntity<>(nastavnici,HttpStatus.OK);				
+			return new ResponseEntity<>(navList,HttpStatus.OK);				
 		}
 		logger.info("Nepostojece odeljenje.");
 		return new ResponseEntity<>("Nepostojece odeljenje.",HttpStatus.NOT_FOUND);
@@ -254,8 +335,30 @@ public class NastavnikCrudController {
 			if (!(predmet.getIdPredmeta()==null)) {
 				logger.info("Pribavljanje predmeta uspjesno");
 				List<Nastavnik> nastavnici=nastavnikRepository.nastavnikPoPredmetu(predmet);
+				List<NastavnikAdminViewDTO> navList= new ArrayList<NastavnikAdminViewDTO>();
+				for(Nastavnik nastavnik:nastavnici) {
+					NastavnikAdminViewDTO navDTO= new NastavnikAdminViewDTO();
+						navDTO.setIme(nastavnik.getIme());
+						navDTO.setPrezime(nastavnik.getPrezime());
+						navDTO.setJmbg(nastavnik.getJmbg());
+						navDTO.setUsername(nastavnik.getUsername());
+						navDTO.setEmail(nastavnik.getEmail());
+						navDTO.setOsnovnaUloga(nastavnik.getOsnovnaUloga());
+						navDTO.setImePredmeta(nastavnik.getImePredmeta());
+						navDTO.setAktivan(nastavnik.getAktivan());
+						List<Odeljenje> odeljenja =odeljenjeRepository.odeljenjaKojimaPredajeNastavnik(nastavnik);
+						List<String> odeljenja$= new ArrayList<>();
+						for(Odeljenje od:odeljenja) {
+							Integer god=od.getGodina();
+							String ime=od.getIme();
+							String odeljenje$=god+ime;
+							odeljenja$.add(odeljenje$);
+						}
+						navDTO.setOdeljenja(odeljenja$);
+						navList.add(navDTO);
+						}
 				logger.info("Pribavljanje nastavnika koji predaju predmet: "+predmetIme+" - uspjesno.");
-				return new ResponseEntity<>(nastavnici,HttpStatus.OK);	
+				return new ResponseEntity<>(navList,HttpStatus.OK);	
 			}
 			logger.info("Nepostojeci predmet.");
 			return new ResponseEntity<>("Nepostojeci predmet.",HttpStatus.NOT_FOUND);
@@ -274,6 +377,7 @@ public class NastavnikCrudController {
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.PUT, value="/izmjeniNastavnika/{id}")
 	public	ResponseEntity<?> izmjeniNastavnika(@Valid @PathVariable Integer id,@RequestBody Nastavnik noviNastavnik, BindingResult result) {
+		try {
 		Nastavnik nastavnik= nastavnikRepository.getById(id);
 		logger.info("Proces izmjene podataka o postojecem nastavniku id: "+id+" - zapocet");
 		nastavnik.setIme(noviNastavnik.getIme());
@@ -281,7 +385,7 @@ public class NastavnikCrudController {
 		nastavnik.setUsername(noviNastavnik.getUsername());
 		nastavnik.setPassword(noviNastavnik.getPassword());
 		nastavnik.setEmail(noviNastavnik.getEmail());
-		
+		nastavnik.setImePredmeta(noviNastavnik.getImePredmeta());
 		if(result.hasErrors()) {
 			return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
 			}
@@ -290,17 +394,25 @@ public class NastavnikCrudController {
 		logger.info("Izmjene podataka o postojecem nastavniku id: "+id+" sacuvane");
 		
 		return new ResponseEntity<>(nastavnik, HttpStatus.OK);
+		}
+		catch (Exception e) {
+			return new ResponseEntity<>("Provjerite body zahtjeva ili ime predmeta. (Ili si, pak, zaribao nesto drugo. Jos gore. Puno gore. MUHAHAHAHA!!!!).",HttpStatus.BAD_REQUEST);
+		}
 	}
 	
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method= RequestMethod.DELETE, value="/obrisiNastavnika/{id}")
-	public	Nastavnik obrisiNastavnika(@PathVariable Integer id) {
+	public	ResponseEntity<?> obrisiNastavnika(@PathVariable Integer id) {
 		logger.info("Proces deaktivacije nastavnika id: "+id+" - zapocet.");
 		Nastavnik nastavnik=nastavnikRepository.getById(id);
+		if ((nastavnik==null)) {
+			logger.error("Nepostojeci nastavnik.");
+					return new ResponseEntity<>("Nepostojeci nastavnik.", HttpStatus.BAD_REQUEST);
+						}
 		nastavnik.setAktivan(false);
 		nastavnikRepository.save(nastavnik);
 		logger.info("Nastavnik id: "+id+" deaktiviran.");
-		return  nastavnik;
-	}
+		return new ResponseEntity<>(nastavnik, HttpStatus.OK);
 
+	}
 }

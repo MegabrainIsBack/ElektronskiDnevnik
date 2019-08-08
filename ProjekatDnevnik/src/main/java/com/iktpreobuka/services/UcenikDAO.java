@@ -1,14 +1,11 @@
 package com.iktpreobuka.services;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
 
-import org.springframework.data.util.Pair;
 import org.springframework.http.ResponseEntity;
 
 import com.iktpreobuka.controllers.utilities.BrojcanaOcjenaITimestamp;
 import com.iktpreobuka.entities.Korisnik;
-import com.iktpreobuka.entities.Ocjena;
 import com.iktpreobuka.entities.Predmet;
 import com.iktpreobuka.entities.dto.ocjene.OcjeneIzJednogPredmetaDTO;
 

@@ -1,5 +1,7 @@
 package com.iktpreobuka.controllers.Admin;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -17,10 +19,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.iktpreobuka.entities.RoditeljMajka;
+import com.iktpreobuka.entities.RoditeljOtac;
 import com.iktpreobuka.entities.Ucenik;
+import com.iktpreobuka.entities.dto.RoditeljAdminViewDTO;
 import com.iktpreobuka.repositories.MajkaRepository;
 import com.iktpreobuka.repositories.UcenikRepository;
 import com.iktpreobuka.security.util.Encryption;
+import com.iktpreobuka.services.RoditeljDAO;
 
 @RestController
 @RequestMapping(value= "/majka")
@@ -39,33 +44,33 @@ public class MajkaCrudController {
 	@Autowired
 	MajkaRepository majkaRepository;
 	
+	@Autowired
+	RoditeljDAO roditeljDAO;
+	
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.PUT, value="/izmjeniMajku/{idDjeteta}")
 	public	ResponseEntity<?> izmjeniMajku(@PathVariable Integer idDjeteta, @RequestBody RoditeljMajka novaMajka,BindingResult result) {
-		logger.info("Izmjeni podatke o majci - proces zapocet.");
-		/*if(majkaRepository.existsByJmbg(novaMajka.getJmbg())) {
-			RoditeljMajka postojecaMajka=majkaRepository.getByJmbg(novaMajka.getJmbg());
-			Ucenik ucenik=ucenikRepository.getById(idDjeteta);
-			postojecaMajka.dodajDijete(ucenik);
-			return postojecaMajka;
-		}*/
-		
-		Ucenik ucenik= ucenikRepository.getById(idDjeteta);
-		logger.info("Ucenik: "+ucenik.getId());
-		RoditeljMajka majka=ucenik.getMama();
-		logger.info("Majka: "+majka.getId());
-		majka.setIme(novaMajka.getIme());
-		majka.setPrezime(novaMajka.getPrezime());
-		majka.setUsername(novaMajka.getUsername());
-		String kodiraniPassword=Encryption.getPassEncoded(novaMajka.getPassword());
-		majka.setPassword(kodiraniPassword);
-		majka.setEmail(novaMajka.getEmail());
-		majka.setJmbg(novaMajka.getJmbg());
-		
-		if(result.hasErrors()) {
-			logger.error("Greska: "+createErrorMessage(result));
-			return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
+		try {
+			logger.info("Izmjeni podatke o majci - proces zapocet.");
+			Ucenik ucenik= ucenikRepository.getById(idDjeteta);
+			if (ucenik==null) {
+				return new ResponseEntity<>("Nepostojeci ucenik", HttpStatus.BAD_REQUEST);
 			}
+			logger.info("Ucenik: "+ucenik.getId());
+			RoditeljMajka majka=ucenik.getMama();
+			logger.info("Majka: "+majka.getId());
+			majka.setIme(novaMajka.getIme());
+			majka.setPrezime(novaMajka.getPrezime());
+			majka.setUsername(novaMajka.getUsername());
+			String kodiraniPassword=Encryption.getPassEncoded(novaMajka.getPassword());
+			majka.setPassword(kodiraniPassword);
+			majka.setEmail(novaMajka.getEmail());
+			majka.setJmbg(novaMajka.getJmbg());
+			
+			if(result.hasErrors()) {
+				logger.error("Greska: "+createErrorMessage(result));
+				return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
+				}
 		
 		majkaRepository.save(majka);
 		ucenik.setImeMajke(novaMajka.getIme());
@@ -73,14 +78,22 @@ public class MajkaCrudController {
 		ucenikRepository.save(ucenik);
 		logger.info("Izmjeni podatke o majci - proces zavrsen.");
 		return new ResponseEntity<>(majka, HttpStatus.OK);
+		}
+		catch (Exception e) {
+		return new ResponseEntity<>("Provjerite body zahtjeva ili id ucenika. (Ili si, pak, zaribao nesto drugo. Jos gore. Puno gore. MUHAHAHAHA!!!!).",HttpStatus.BAD_REQUEST);
+		}
 	}
 	
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method= RequestMethod.GET, value="/pribaviSve")
-	public Iterable<RoditeljMajka> sveMajke() {
+	public List<RoditeljAdminViewDTO> sveMajke() {
 		Iterable<RoditeljMajka> majke = majkaRepository.findAll();
+		List<RoditeljAdminViewDTO> ravList= new ArrayList<RoditeljAdminViewDTO>();
+		for(RoditeljMajka majka :majke) {
+			ravList.add(roditeljDAO.loadravDTO(majka));
+		}
 		logger.info("Pribavljanje svih majki uspjesno");
-		return majke;
+		return ravList;
 	}
 	
 	@Secured("ROLE_ADMIN")
@@ -89,8 +102,9 @@ public class MajkaCrudController {
 		try {
 		RoditeljMajka majka = majkaRepository.getById(id);
 		if (!(majka.getId()==null)) {
+			RoditeljAdminViewDTO majkaDTO=roditeljDAO.loadravDTO(majka);
 			logger.info("Pribavljanje majke uspjesno");
-					return new ResponseEntity<>(majka, HttpStatus.OK);
+					return new ResponseEntity<>(majkaDTO, HttpStatus.OK);
 						}
 		return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		} catch (NullPointerException e) {
@@ -106,12 +120,17 @@ public class MajkaCrudController {
 	
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method= RequestMethod.DELETE, value="/obrisiMajku/{id}")
-	public	RoditeljMajka obrisiMajku(@PathVariable Integer id) {
+	public	ResponseEntity<?> obrisiMajku(@PathVariable Integer id) {
 		logger.info("Proces deaktivacije majke - zapocet.");
 		RoditeljMajka majka=majkaRepository.getById(id);
+		if ((majka==null)) {
+			logger.error("Nepostojeca majka.");
+					return new ResponseEntity<>("Nepostojeca majka.", HttpStatus.BAD_REQUEST);
+						}
 		majka.setAktivan(false);
 		majkaRepository.save(majka);
 		logger.info("Proces deaktivacije majke - zavrsen.");
-		return  majka;
+		return new ResponseEntity<>(majka, HttpStatus.OK);
+
 	}
 }

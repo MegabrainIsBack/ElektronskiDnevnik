@@ -1,5 +1,9 @@
 package com.iktpreobuka.entities.dto.ucenik;
 
+import javax.persistence.Column;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonRootName;
@@ -26,6 +30,39 @@ public class UcenikBasicDTO {
 	@JsonProperty ("Id majke")
 	private Integer idMajke;
 	
+	@JsonProperty ("JMBG")
+	private String jmbg;
+	
+	@JsonProperty ("Korisnicko ime")
+	private String username;
+	
+	@JsonProperty ("Email")
+	private String email;
+	
+	public String getJmbg() {
+		return jmbg;
+	}
+
+	public void setJmbg(String jmbg) {
+		this.jmbg = jmbg;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
 	public UcenikBasicDTO() {
 		
 	}

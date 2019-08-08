@@ -18,7 +18,7 @@ public class RoditeljOtac extends Korisnik{
 	
 	
 	@JsonIgnore
-	@JsonManagedReference
+	//@JsonManagedReference
 	@OneToMany(mappedBy="tata", fetch=FetchType.LAZY, cascade=CascadeType.REFRESH)
 	private List<Ucenik> tatinaDjeca= new ArrayList<Ucenik>();
 	

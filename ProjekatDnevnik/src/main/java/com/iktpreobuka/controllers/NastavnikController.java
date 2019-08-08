@@ -61,9 +61,26 @@ private final Logger logger = (Logger) LoggerFactory.getLogger(this.getClass());
 			logger.warn("Pokusaj neautorizovanog pristupa - Id Korisnika: " +korisnik.getId());
 			return new ResponseEntity<>("Neautorizovani pristup", HttpStatus.UNAUTHORIZED);
 		}
-		OcjeneIzJednogPredmetaDTO ocjene = ucenikDAO.ocjeneIzJednogPredmetaDAOSaTimestamp(idUcenika, imeP);
-		logger.info("Pribavljanje ocjena ucenika id: "+idUcenika+"iz predmeta: "+imeP+" uspjesno.");
-		return new ResponseEntity<>(ocjene, HttpStatus.OK);
+		
+		try {
+			OcjeneIzJednogPredmetaDTO ocjene = ucenikDAO.ocjeneIzJednogPredmetaDAOSaTimestamp(idUcenika, imeP);
+			if (!(ocjene.getOdeljenje().equals(null))) {
+				logger.info("Pribavljanje ocjena ucenika id: "+idUcenika+"iz predmeta: "+imeP+" uspjesno.");
+				return new ResponseEntity<>(ocjene, HttpStatus.OK);
+							}
+			logger.info("Nepostojeci ucenik ili odeljenje");
+			return new ResponseEntity<>("Nepostojeci ucenik ili odeljenje",HttpStatus.NOT_FOUND);
+			} catch (NullPointerException e) {
+				logger.info("Nepostojeci ucenik ili odeljenje");
+				return new ResponseEntity<>("Nepostojeci ucenik ili odeljenje",HttpStatus.NOT_FOUND);
+			}
+			
+			catch (Exception e) {
+				e.printStackTrace();
+				return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+			}
+		
+		
 	}
 	
 	@RequestMapping (method=RequestMethod.GET, value="/OcjeneSvihUcenikaOdeljenja/{odeljenje}/IzPredmeta/{imePredmeta}")
@@ -80,11 +97,26 @@ private final Logger logger = (Logger) LoggerFactory.getLogger(this.getClass());
 			logger.warn("Pokusaj neautorizovanog pristupa - Id Korisnika: " +korisnik.getId());
 			return new ResponseEntity<>("Neautorizovani pristup", HttpStatus.UNAUTHORIZED);
 		}
-		OcjeneIzJednogPredmetaDTO ocjene = ucenikDAO.ocjeneIzJednogPredmetaDAOSaTimestamp(idUcenika, imePredmeta);
-		ocjeneL.add(ocjene);
+		try {
+			OcjeneIzJednogPredmetaDTO ocjene = ucenikDAO.ocjeneIzJednogPredmetaDAOSaTimestamp(idUcenika, imePredmeta);
+			if (!(ocjene.getOdeljenje().equals(null))) {
+				ocjeneL.add(ocjene);
+				logger.info("Uspjesno zavrseno PribaviOcjeneIzPredmetaZaOdeljenje");
+				return new ResponseEntity<>(ocjeneL, HttpStatus.OK);
+							}
+			logger.info("Nepostojeci ucenik ili odeljenje");
+			return new ResponseEntity<>("Nepostojeci ucenik ili odeljenje",HttpStatus.NOT_FOUND);
+			} catch (NullPointerException e) {
+				logger.info("Nepostojeci ucenik ili odeljenje");
+				return new ResponseEntity<>("Nepostojeci ucenik ili odeljenje",HttpStatus.NOT_FOUND);
+			}
+			
+			catch (Exception e) {
+				e.printStackTrace();
+				return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+			}
 		}
-		logger.info("Uspjesno zavrseno PribaviOcjeneIzPredmetaZaOdeljenje");
-		return new ResponseEntity<>(ocjeneL, HttpStatus.OK);
+		return null;//<-WTF???
 	}
 	
 }

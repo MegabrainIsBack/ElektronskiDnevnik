@@ -1,6 +1,7 @@
 package com.iktpreobuka.controllers.Admin;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.validation.Valid;
@@ -23,9 +24,11 @@ import com.iktpreobuka.JoinTables.ONP;
 import com.iktpreobuka.entities.Odeljenje;
 import com.iktpreobuka.entities.Predmet;
 import com.iktpreobuka.entities.dto.DodajOdeljenjeDTO;
+import com.iktpreobuka.entities.dto.OdeljenjeBasicDTO;
 import com.iktpreobuka.repositories.ONPRepository;
 import com.iktpreobuka.repositories.OdeljenjeRepository;
 import com.iktpreobuka.repositories.PredmetRepository;
+import com.iktpreobuka.services.OdeljenjeDAO;
 
 @RestController
 @RequestMapping(value= "/odeljenje")
@@ -47,11 +50,18 @@ public class OdeljenjeCrudController {
 	@Autowired
 	ONPRepository onpRepository;
 	
+	@Autowired
+	OdeljenjeDAO odeljenjeDAO;
+	
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.POST, value="/dodajOdeljenje")
 	public	ResponseEntity<?> dodajOdeljenje(@Valid @RequestBody DodajOdeljenjeDTO novoOdeljenje, BindingResult result) {
 		logger.info("Dodaj novo odeljenje - proces zapocet.");
+		
 		Odeljenje odeljenje = new Odeljenje();
+		if (!(novoOdeljenje.getIme() instanceof String)) {
+			return new ResponseEntity<>("Morate da uneste ime odeljenja. \nIme odeljenja mora biti jedno slovo.", HttpStatus.BAD_REQUEST);
+		}
 		odeljenje.setIme(novoOdeljenje.getIme());
 		odeljenje.setGodina(novoOdeljenje.getGodina());
 		
@@ -87,21 +97,24 @@ public class OdeljenjeCrudController {
 	
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method= RequestMethod.GET, value="/pribaviSve")
-	public Iterable<Odeljenje> svaOdeljenja() {
+	public List<OdeljenjeBasicDTO> svaOdeljenja() {
 		Iterable<Odeljenje> odeljenja = odeljenjeRepository.findAll();
+		List<OdeljenjeBasicDTO> obDTOlist= new ArrayList<OdeljenjeBasicDTO>();
+		for(Odeljenje od:odeljenja) {
+			obDTOlist.add(odeljenjeDAO.loadOB(od));
+		}
 		logger.info("Pribavljanje svih odeljenja uspjesno");
-		return odeljenja;
+		return obDTOlist;
 	}
 	
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method= RequestMethod.GET, value="/poImenu/{godina}/{imeOdeljenja}")
-	public ResponseEntity<?> OdeljenjepoImenu(@PathVariable Integer godina,@PathVariable String imeOdeljenja ) {
+	public ResponseEntity<?> odeljenjePoImenu(@PathVariable Integer godina,@PathVariable String imeOdeljenja ) {
 		try {
 			Odeljenje odeljenje = odeljenjeRepository.getByGodinaAndIme(godina, imeOdeljenja);
 			if (!(odeljenje.getId()==null)) {
-				// ako je korisnik pronadjen vratiti 200
 				logger.info("Pribavljanje odeljenja " + godina + imeOdeljenja + " uspjesno");
-						return new ResponseEntity<>(odeljenje, HttpStatus.OK);
+						return new ResponseEntity<>(odeljenjeDAO.loadOB(odeljenje), HttpStatus.OK);
 							}
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		} catch (NullPointerException e) {
@@ -117,13 +130,17 @@ public class OdeljenjeCrudController {
 	
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method= RequestMethod.DELETE, value="/obrisiOdeljenje/{godina}/{imeOdeljenja}")
-	public	Odeljenje obrisiOdeljenje(@PathVariable Integer godina, @PathVariable String imeOdeljenja) {
+	public	ResponseEntity<?> obrisiOdeljenje(@PathVariable Integer godina, @PathVariable String imeOdeljenja) {
 		logger.info("Proces deaktivacije odeljenja "+godina+imeOdeljenja+" - zapocet.");
 		Odeljenje odeljenje=odeljenjeRepository.getByGodinaAndIme(godina, imeOdeljenja);
+		if ((odeljenje==null)) {
+			logger.info("Odeljenje " + godina + imeOdeljenja + " ne postoji.");
+					return new ResponseEntity<>("Odeljenje " + godina + imeOdeljenja + " ne postoji.", HttpStatus.BAD_REQUEST);
+						}
 		odeljenje.setAktivan(false);
 		odeljenjeRepository.save(odeljenje);
 		logger.info("Odeljenje "+godina+imeOdeljenja+" deaktivirano");
-		return  odeljenje;
+		return new ResponseEntity<>("Odeljenje " + godina + imeOdeljenja + " deaktivirano.", HttpStatus.OK);
 	}
 
 }

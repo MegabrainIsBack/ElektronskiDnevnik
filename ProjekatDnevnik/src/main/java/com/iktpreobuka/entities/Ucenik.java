@@ -35,12 +35,12 @@ public class Ucenik extends Korisnik {
 	}
 
 
-	@JsonBackReference
+	//@JsonBackReference
 	@ManyToOne(cascade=CascadeType.REFRESH, fetch=FetchType.LAZY)
 	@JoinColumn(name="IdOca")
 	private RoditeljOtac tata;
 	
-	@JsonBackReference
+	//@JsonBackReference
 	@ManyToOne(cascade=CascadeType.REFRESH, fetch=FetchType.LAZY)
 	@JoinColumn(name="IdMajke")
 	private RoditeljMajka mama;

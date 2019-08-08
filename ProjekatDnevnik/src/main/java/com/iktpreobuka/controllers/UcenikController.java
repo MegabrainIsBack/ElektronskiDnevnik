@@ -63,9 +63,23 @@ public class UcenikController {
 			logger.warn("Pokusaj neautorizovanog pristupa - Id Korisnika: " +korisnik.getId());
 			return new ResponseEntity<>("Neautorizovani pristup", HttpStatus.UNAUTHORIZED);
 		}
-		OcjeneIzJednogPredmetaDTO ocjene = ucenikDAO.ocjeneIzJednogPredmetaDAOSaTimestamp(idUcenika, imeP);
-		logger.info("Pribavljanje ocjena ucenika id: "+idUcenika+"iz predmeta: "+imeP+" uspjesno.");
-		return new ResponseEntity<>(ocjene, HttpStatus.OK);
+		try {
+			OcjeneIzJednogPredmetaDTO ocjene = ucenikDAO.ocjeneIzJednogPredmetaDAOSaTimestamp(idUcenika, imeP);
+			if (!(ocjene.getOdeljenje().equals(null))) {
+				logger.info("Pribavljanje ocjena ucenika id: "+idUcenika+"iz predmeta: "+imeP+" uspjesno.");
+				return new ResponseEntity<>(ocjene, HttpStatus.OK);
+							}
+			logger.info("Nepostojeci ucenik ili predmet.");
+			return new ResponseEntity<>("Nepostojeci ucenik ili predmet.",HttpStatus.NOT_FOUND);
+			} catch (NullPointerException e) {
+				logger.info("Nepostojeci ucenik ili predmet.");
+				return new ResponseEntity<>("Nepostojeci ucenik ili predmet.",HttpStatus.NOT_FOUND);
+			}
+			
+			catch (Exception e) {
+				e.printStackTrace();
+				return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+			}
 	}
 	
 	@RequestMapping (method=RequestMethod.GET, value="/{idUcenika}/OcjeneIzSvihPredmeta")
@@ -76,9 +90,24 @@ public class UcenikController {
 			logger.warn("Pokusaj neautorizovanog pristupa - Id Korisnika: " +korisnik.getId());
 			return new ResponseEntity<>("Neautorizovani pristup", HttpStatus.UNAUTHORIZED);
 		}
-		ResponseEntity<?> ocjene = ucenikDAO.ocjeneIzSvihPredmetaDAO(idUcenika);
-		logger.info("Pribavljanje ocjena ucenika id: "+idUcenika+" iz svih predmeta uspjesno.");
-		return ocjene;
+		
+		try {
+			ResponseEntity<?> ocjene = ucenikDAO.ocjeneIzSvihPredmetaDAO(idUcenika);
+			if(!(ucenikDAO.dozvolaPristupa(idUcenika, korisnik))) {
+				logger.info("Pribavljanje ocjena ucenika id: "+idUcenika+" iz svih predmeta uspjesno.");
+				return new ResponseEntity<>(ocjene, HttpStatus.OK);
+							}
+			logger.info("Nepostojeci ucenik.");
+			return new ResponseEntity<>("Nepostojeci ucenik.",HttpStatus.NOT_FOUND);
+			} catch (NullPointerException e) {
+				logger.info("Nepostojeci ucenik.");
+				return new ResponseEntity<>("Nepostojeci ucenik.",HttpStatus.NOT_FOUND);
+			}
+			
+			catch (Exception e) {
+				e.printStackTrace();
+				return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+			}
 		}
 
 }

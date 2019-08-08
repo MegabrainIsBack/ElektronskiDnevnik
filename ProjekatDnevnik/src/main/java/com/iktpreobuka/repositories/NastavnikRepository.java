@@ -12,10 +12,6 @@ import com.iktpreobuka.entities.Predmet;
 
 public interface NastavnikRepository extends CrudRepository<Nastavnik, Integer> {
 
-	
-
-	Nastavnik getByPin(String pin);
-
 	Nastavnik getById(Integer id);
 
 	Iterable<Nastavnik> getByImePredmeta(String predmetIme);
@@ -27,6 +23,9 @@ public interface NastavnikRepository extends CrudRepository<Nastavnik, Integer> 
 	
 	@Query("select n from Nastavnik n join n.onp np where np.odeljenje=:odeljenjeT")
 	List<Nastavnik> nastavnikPoOdeljenju(Odeljenje odeljenjeT);
+	
+	@Query("select n from Nastavnik n join n.onp np where np.odeljenje=:odeljenjeT and np.predmet=:predmet")
+	Nastavnik nastavnikZaPredmetIOdeljenje(Predmet predmet,Odeljenje odeljenjeT);
 
 	Nastavnik getByJmbg(String jmbg);
 

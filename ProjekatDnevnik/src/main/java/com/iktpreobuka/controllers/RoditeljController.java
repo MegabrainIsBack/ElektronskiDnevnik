@@ -56,28 +56,43 @@ public class RoditeljController {
 			logger.warn("Pokusaj neautorizovanog pristupa - Id Korisnika: " +korisnik.getId());
 			return new ResponseEntity<>("Neautorizovani pristup", HttpStatus.UNAUTHORIZED);
 		}
-		Ucenik ucenik=ucenikRepository.getById(idUcenika);
-		UcenikZaRoditeljaBasicDTO uzrDTO= new UcenikZaRoditeljaBasicDTO();
-		uzrDTO.setIme(ucenik.getIme());
-		uzrDTO.setPrezime(ucenik.getPrezime());
-		uzrDTO.setOdeljenje(ucenik.getOdeljenje());
-		Integer godinaO= Character.getNumericValue(ucenik.getOdeljenje().charAt(0));
-		String imeO=Character.toString(ucenik.getOdeljenje().charAt(1));
-		Odeljenje odeljenje= odeljenjeRepository.getByGodinaAndIme(godinaO, imeO);
-		logger.info("Pribavljeni podaci o uceniku");
-		Map<String,String> uzrDTOmap= new HashMap<String,String>();
-		List<Nastavnik> nastavnici=nastavnikRepository.nastavnikPoOdeljenju(odeljenje);
-		for(Nastavnik nastavnik: nastavnici) {
-			String nstI=nastavnik.getIme();
-			String nstP=nastavnik.getPrezime();
-			String nst= nstI+" "+ nstP;
-			String pred=nastavnik.getImePredmeta();
-			uzrDTOmap.put(pred,nst);
+		
+		try {
+			Ucenik ucenik=ucenikRepository.getById(idUcenika);
+			UcenikZaRoditeljaBasicDTO uzrDTO= new UcenikZaRoditeljaBasicDTO();
+			if (!(ucenik.getId()==null)) {
+				uzrDTO.setIme(ucenik.getIme());
+				uzrDTO.setPrezime(ucenik.getPrezime());
+				uzrDTO.setOdeljenje(ucenik.getOdeljenje());
+				Integer godinaO= Character.getNumericValue(ucenik.getOdeljenje().charAt(0));
+				String imeO=Character.toString(ucenik.getOdeljenje().charAt(1));
+				Odeljenje odeljenje= odeljenjeRepository.getByGodinaAndIme(godinaO, imeO);
+				logger.info("Pribavljeni podaci o uceniku");
+				Map<String,String> uzrDTOmap= new HashMap<String,String>();
+				List<Nastavnik> nastavnici=nastavnikRepository.nastavnikPoOdeljenju(odeljenje);
+				for(Nastavnik nastavnik: nastavnici) {
+					String nstI=nastavnik.getIme();
+					String nstP=nastavnik.getPrezime();
+					String nst= nstI+" "+ nstP;
+					String pred=nastavnik.getImePredmeta();
+					uzrDTOmap.put(pred,nst);
+					
+				}
+				uzrDTO.setPredmetNastavnik(uzrDTOmap);
+				logger.info("Opste informacije o uceniku uspjesno pribavljene");
+				return new ResponseEntity<>(uzrDTO, HttpStatus.OK);
+							}
+			logger.info("Nepostojeci ucenik.");
+			return new ResponseEntity<>("Nepostojeci ucenik.",HttpStatus.NOT_FOUND);
+			} catch (NullPointerException e) {
+				logger.info("Nepostojeci ucenik.");
+				return new ResponseEntity<>("Nepostojeci ucenik.",HttpStatus.NOT_FOUND);
+			}
 			
-		}
-		uzrDTO.setPredmetNastavnik(uzrDTOmap);
-		logger.info("Opste informacije o uceniku uspjesno pribavljene");
-		return new ResponseEntity<>(uzrDTO, HttpStatus.OK);
+			catch (Exception e) {
+				e.printStackTrace();
+				return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+			}
 	}
 	
 	@RequestMapping (method=RequestMethod.GET, value="/{idUcenika}/OcjeneIzPredmeta/{imeP}")
@@ -89,9 +104,24 @@ public class RoditeljController {
 			logger.warn("Pokusaj neautorizovanog pristupa - Id Korisnika: " +korisnik.getId());
 			return new ResponseEntity<>("Neautorizovani pristup", HttpStatus.UNAUTHORIZED);
 		}
-		OcjeneIzJednogPredmetaDTO ocjene = ucenikDAO.ocjeneIzJednogPredmetaDAOSaTimestamp(idUcenika, imeP);
-		logger.info("Pribavljanje ocjena ucenika id: "+idUcenika+"iz predmeta: "+imeP+" uspjesno.");
-		return new ResponseEntity<>(ocjene, HttpStatus.OK);
+		
+		try {
+			OcjeneIzJednogPredmetaDTO ocjene = ucenikDAO.ocjeneIzJednogPredmetaDAOSaTimestamp(idUcenika, imeP);
+			if (!(ocjene.getOdeljenje()==null)) {
+				logger.info("Pribavljanje ocjena ucenika id: "+idUcenika+"iz predmeta: "+imeP+" uspjesno.");
+				return new ResponseEntity<>(ocjene, HttpStatus.OK);
+							}
+			logger.info("Nepostojeci ucenik ili predmet.");
+			return new ResponseEntity<>("Nepostojeci ucenik ili predmet.",HttpStatus.NOT_FOUND);
+			} catch (NullPointerException e) {
+				logger.info("Nepostojeci ucenik ili predmet.");
+				return new ResponseEntity<>("Nepostojeci ucenik ili predmet.",HttpStatus.NOT_FOUND);
+			}
+			
+			catch (Exception e) {
+				e.printStackTrace();
+				return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+			}
 	}
 	
 	@RequestMapping (method=RequestMethod.GET, value="/{idUcenika}/OcjeneIzSvihPredmeta")
@@ -102,9 +132,25 @@ public class RoditeljController {
 			logger.warn("Pokusaj neautorizovanog pristupa - Id Korisnika: " +korisnik.getId());
 			return new ResponseEntity<>("Neautorizovani pristup", HttpStatus.UNAUTHORIZED);
 		}
-		ResponseEntity<?> ocjene = ucenikDAO.ocjeneIzSvihPredmetaDAO(idUcenika);
-		logger.info("Pribavljanje ocjena ucenika id: "+idUcenika+" iz svih predmeta uspjesno.");
-		return ocjene;
+		
+		try {
+			
+			ResponseEntity<?> ocjene = ucenikDAO.ocjeneIzSvihPredmetaDAO(idUcenika);			
+			if(!(ucenikDAO.dozvolaPristupaRoditelj(idUcenika, korisnik))) {
+				logger.info("Pribavljanje ocjena ucenika id: "+idUcenika+" iz svih predmeta uspjesno.");
+				return new ResponseEntity<>(ocjene, HttpStatus.OK);
+							}
+			logger.info("Nepostojeci ucenik.");
+			return new ResponseEntity<>("Nepostojeci ucenik.",HttpStatus.NOT_FOUND);
+			} catch (NullPointerException e) {
+				logger.info("Nepostojeci ucenik.");
+				return new ResponseEntity<>("Nepostojeci ucenik.",HttpStatus.NOT_FOUND);
+			}
+			
+			catch (Exception e) {
+				e.printStackTrace();
+				return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+			}
 		}
 
 }

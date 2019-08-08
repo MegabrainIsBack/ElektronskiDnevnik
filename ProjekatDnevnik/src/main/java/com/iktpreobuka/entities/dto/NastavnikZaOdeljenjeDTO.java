@@ -6,9 +6,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class NastavnikZaOdeljenjeDTO {
 	
-	@NotNull(message = "Morate unijeti JMBG.")
-	@JsonProperty("JMBG")
-	private String jmbg;
 	
 	@NotNull(message = "Morate unijeti predmet.")
 	@JsonProperty("Predmet")
@@ -50,13 +47,6 @@ public class NastavnikZaOdeljenjeDTO {
 		this.odeljenje = odeljenje;
 	}
 
-	public String getJmbg() {
-		return jmbg;
-	}
-
-	public void setJmbg(String jmbg) {
-		this.jmbg = jmbg;
-	}
 
 	
 

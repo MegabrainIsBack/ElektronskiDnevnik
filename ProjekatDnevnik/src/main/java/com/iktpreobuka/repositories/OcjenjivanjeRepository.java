@@ -2,8 +2,6 @@ package com.iktpreobuka.repositories;
 
 import java.sql.Timestamp;
 
-import javax.validation.Valid;
-
 import org.springframework.data.repository.CrudRepository;
 
 import com.iktpreobuka.entities.Ocjena;

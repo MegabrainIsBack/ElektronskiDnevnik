@@ -1,5 +1,7 @@
 package com.iktpreobuka.controllers.Admin;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -16,11 +18,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.iktpreobuka.entities.Nastavnik;
 import com.iktpreobuka.entities.RoditeljOtac;
 import com.iktpreobuka.entities.Ucenik;
+import com.iktpreobuka.entities.dto.NastavnikAdminViewDTO;
+import com.iktpreobuka.entities.dto.RoditeljAdminViewDTO;
 import com.iktpreobuka.repositories.OtacRepository;
 import com.iktpreobuka.repositories.UcenikRepository;
 import com.iktpreobuka.security.util.Encryption;
+import com.iktpreobuka.services.RoditeljDAO;
 
 @RestController
 @RequestMapping(value= "/otac")
@@ -39,18 +45,18 @@ public class OtacCrudController {
 	@Autowired
 	OtacRepository otacRepository;
 	
+	@Autowired
+	RoditeljDAO roditeljDAO;
+	
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.PUT, value="/izmjeniOca/{idDjeteta}")
 	public	ResponseEntity<?> izmjeniOca(@PathVariable Integer idDjeteta, @RequestBody RoditeljOtac noviOtac, BindingResult result) {
-		
-		/*if(otacRepository.existsByJmbg(noviOtac.getJmbg())) {
-			RoditeljOtac postojeciOtac=otacRepository.getByJmbg(noviOtac.getJmbg());
-			Ucenik ucenik=ucenikRepository.getById(idDjeteta);
-			postojeciOtac.dodajDijete(ucenik);
-			return postojeciOtac;
-		}*/
+		try {
 		logger.info("Izmjeni podatke o ocu - proces zapocet.");
 		Ucenik ucenik= ucenikRepository.getById(idDjeteta);
+		if (ucenik==null) {
+			return new ResponseEntity<>("Nepostojeci ucenik", HttpStatus.BAD_REQUEST);
+		}
 		logger.info("Ucenik: "+ucenik.getId());
 		RoditeljOtac otac=ucenik.getTata();
 		logger.info("Otac: "+otac.getId());
@@ -73,13 +79,21 @@ public class OtacCrudController {
 		logger.info("Izmjeni podatke o ocu - proces zavrsen.");
 		return new ResponseEntity<>(otac, HttpStatus.OK);
 		}
+		catch (Exception e) {
+		return new ResponseEntity<>("Provjerite body zahtjeva ili id ucenika. (Ili si, pak, zaribao nesto drugo. Jos gore. Puno gore. MUHAHAHAHA!!!!).",HttpStatus.BAD_REQUEST);
+		}
+		}
 
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method= RequestMethod.GET, value="/pribaviSve")
-	public Iterable<RoditeljOtac> sviOcevi() {
+	public List<RoditeljAdminViewDTO> sviOcevi() {
 		Iterable<RoditeljOtac> ocevi = otacRepository.findAll();
-		logger.info("Pribavljanje svih majki uspjesno");
-		return ocevi;
+		List<RoditeljAdminViewDTO> ravList= new ArrayList<RoditeljAdminViewDTO>();
+		for(RoditeljOtac otac :ocevi) {
+			ravList.add(roditeljDAO.loadravDTO(otac));
+		}
+		logger.info("Pribavljanje svih oceva uspjesno");
+		return ravList;
 	}
 	
 	@Secured("ROLE_ADMIN")
@@ -89,8 +103,9 @@ public class OtacCrudController {
 		RoditeljOtac otac = otacRepository.getById(id);
 		otac.getTatinaDjeca();
 		if (!(otac.getId()==null)) {
+			RoditeljAdminViewDTO otacDTO=roditeljDAO.loadravDTO(otac);
 			logger.info("Pribavljanje oca uspjesno");
-					return new ResponseEntity<>(otac, HttpStatus.OK);
+					return new ResponseEntity<>(otacDTO, HttpStatus.OK);
 						}
 		return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		} catch (NullPointerException e) {
@@ -106,12 +121,16 @@ public class OtacCrudController {
 	
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method= RequestMethod.DELETE, value="/obrisiOca/{id}")
-	public	RoditeljOtac obrisiOca(@PathVariable Integer id) {
+	public	ResponseEntity<?> obrisiOca(@PathVariable Integer id) {
 		logger.info("Proces deaktivacije oca - zapocet.");
 		RoditeljOtac otac=otacRepository.getById(id);
+		if ((otac==null)) {
+			logger.error("Nepostojeca majka.");
+					return new ResponseEntity<>("Nepostojeca majka.", HttpStatus.BAD_REQUEST);
+						}
 		otac.setAktivan(false);
 		otacRepository.save(otac);
 		logger.info("Proces deaktivacije oca - zavrsen.");
-		return  otac;
+		return new ResponseEntity<>(otac, HttpStatus.OK);
 	}
 }

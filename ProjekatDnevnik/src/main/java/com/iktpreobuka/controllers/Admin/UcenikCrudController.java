@@ -25,7 +25,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.iktpreobuka.controllers.utilities.PINGenerator;
-import com.iktpreobuka.entities.Nastavnik;
 import com.iktpreobuka.entities.Odeljenje;
 import com.iktpreobuka.entities.RoditeljMajka;
 import com.iktpreobuka.entities.RoditeljOtac;
@@ -225,6 +224,7 @@ public class UcenikCrudController {
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.POST, value="/dodajUcenika")
 	public	ResponseEntity<?> dodajUcenika(@Valid @RequestBody Ucenik noviUcenik, BindingResult result) {
+		try {
 		logger.info("Zapoceto dodavanje novog ucenika.");
 		Ucenik ucenik = new Ucenik();
 		ucenik.setIme(noviUcenik.getIme());
@@ -258,7 +258,7 @@ public class UcenikCrudController {
 		otac.setEmail(pinO+"place@holder.com");
 		logger.info("Zavrseno dodavanje placeholder podataka za oca");
 		otac.setPin(PINGenerator.PGenerator("roditelj"));
-		otac.dodajDijete(noviUcenik);
+		otac.dodajDijete(ucenik);
 		otacRepository.save(otac);
 		logger.info("Podaci o ocu sacuvani.");
 		
@@ -277,7 +277,7 @@ public class UcenikCrudController {
 		majka.setEmail(pinM+"place@holder.com");
 		logger.info("Zavrseno dodavanje placeholder podataka za majku.");
 		majka.setPin(PINGenerator.PGenerator("roditelj"));
-		majka.dodajDijete(noviUcenik);
+		majka.dodajDijete(ucenik);
 		majkaRepository.save(majka);
 		logger.info("Podaci o majci sacuvani.");
 		
@@ -292,17 +292,22 @@ public class UcenikCrudController {
 		logger.info("Ucenik dodan u odeljenje");
 		odeljenjeRepository.save(odeljenje);
 		logger.info("Zavrseno smestanje ucenika u odeljenja.");
-	
+		
 		if(result.hasErrors()) {
 			return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
 			}
-		
 		return new ResponseEntity<>(ucenik, HttpStatus.OK);
+		}
+		catch (Exception e) {
+			logger.error("Greska u obradi zahtjeva.");
+			return new ResponseEntity<>("Provjerite body zahtjeva. (Ili si, pak, zaribao nesto drugo. Jos gore. Puno gore. MUHAHAHAHA!!!!).",HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 	
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method= RequestMethod.GET, value="/pribaviSve")
 	public ArrayList<UcenikBasicDTO> sviUcenici() {
+		logger.info("Pribavljanje liste svih ucenika zapoceto.");
 		Iterable<Ucenik> ucenici = ucenikRepository.findAll();
 		ArrayList <UcenikBasicDTO> uceniciDTO= new ArrayList<UcenikBasicDTO>();
 		for(Ucenik ucenik: ucenici) {
@@ -315,6 +320,9 @@ public class UcenikCrudController {
 			ucenikDTO.setOdeljenje(ucenik.getOdeljenje());
 			ucenikDTO.setIdOca(idOca);
 			ucenikDTO.setIdMajke(idMajke);
+			ucenikDTO.setJmbg(ucenik.getJmbg());
+			ucenikDTO.setUsername(ucenik.getUsername());
+			ucenikDTO.setEmail(ucenik.getEmail());
 			uceniciDTO.add(ucenikDTO);
 		}
 		logger.info("Pribavljanje svih ucenika uspjesno.");
@@ -336,8 +344,11 @@ public class UcenikCrudController {
 				ucenikDTO.setOdeljenje(ucenik.getOdeljenje());
 				ucenikDTO.setIdOca(idOca);
 				ucenikDTO.setIdMajke(idMajke);
+				ucenikDTO.setJmbg(ucenik.getJmbg());
+				ucenikDTO.setUsername(ucenik.getUsername());
+				ucenikDTO.setEmail(ucenik.getEmail());
 				logger.info("Pribavljanje ucenika uspjesno");
-						return new ResponseEntity<>(ucenik, HttpStatus.OK);
+						return new ResponseEntity<>(ucenikDTO, HttpStatus.OK);
 							}
 			logger.info("Nepostojeci ucenik.");
 			return new ResponseEntity<>("Nepostojeci ucenik.",HttpStatus.NOT_FOUND);
@@ -355,7 +366,9 @@ public class UcenikCrudController {
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.PUT, value="/izmjeniUcenika/{id}")
 	public	ResponseEntity<?> izmjeniUcenika(@Valid @PathVariable Integer id,@RequestBody Ucenik noviUcenik, BindingResult result) {
-		Ucenik ucenik= ucenikRepository.getById(id);
+		
+		try {
+			Ucenik ucenik= ucenikRepository.getById(id);
 		logger.info("Proces izmjene podataka o postojecem uceniku id: "+id+" - zapocet");
 		ucenik.setIme(noviUcenik.getIme());
 		ucenik.setPrezime(noviUcenik.getPrezime());
@@ -377,6 +390,10 @@ public class UcenikCrudController {
 		ucenikRepository.save(ucenik);
 		logger.info("Zavrseno smestanje ucenika u odeljenje.");
 		return new ResponseEntity<>(ucenik, HttpStatus.OK);
+		}
+		catch (Exception e) {
+			return new ResponseEntity<>("Provjerite body zahtjeva ili id ucenika. (Ili si, pak, zaribao nesto drugo. Jos gore. Puno gore. MUHAHAHAHA!!!!).",HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 	
 	@Secured("ROLE_ADMIN")
@@ -399,6 +416,9 @@ public class UcenikCrudController {
 					ucenikDTO.setOdeljenje(ucenik.getOdeljenje());
 					ucenikDTO.setIdOca(idOca);
 					ucenikDTO.setIdMajke(idMajke);
+					ucenikDTO.setJmbg(ucenik.getJmbg());
+					ucenikDTO.setUsername(ucenik.getUsername());
+					ucenikDTO.setEmail(ucenik.getEmail());
 					uceniciDTO.add(ucenikDTO);
 				}
 				logger.info("Pribavljanje ucenika odeljenja: "+godinaO+imeO+" uspjesno.");
@@ -419,12 +439,17 @@ public class UcenikCrudController {
 	
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method= RequestMethod.DELETE, value="/obrisiUcenika/{id}")
-	public	Ucenik obrisiNastavnika(@PathVariable Integer id) {
+	public	ResponseEntity<?> obrisiNastavnika(@PathVariable Integer id) {
 		logger.info("Proces deaktivacije ucenika id: "+id+" - zapocet.");
 		Ucenik ucenik=ucenikRepository.getById(id);
+		if ((ucenik==null)) {
+			logger.error("Nepostojeci ucenik.");
+					return new ResponseEntity<>("Nepostojeci ucenik.", HttpStatus.BAD_REQUEST);
+						}
 		ucenik.setAktivan(false);
 		ucenikRepository.save(ucenik);
 		logger.info("Ucenik id: "+id+" deaktiviran.");
-		return  ucenik;
+		return new ResponseEntity<>("Ucenik id: "+id+" deaktiviran.", HttpStatus.OK);
+
 	}
 }
