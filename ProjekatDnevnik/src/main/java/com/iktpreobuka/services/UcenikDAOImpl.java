@@ -12,8 +12,6 @@ import javax.persistence.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.iktpreobuka.controllers.utilities.BrojcanaOcjenaITimestamp;
@@ -128,7 +126,7 @@ public class UcenikDAOImpl implements UcenikDAO{
 	
 	
 	@Override
-	public ResponseEntity<?> ocjeneIzSvihPredmetaDAO(Integer idUcenika){
+	public List<OcjeneIzSvihPredmetaDTO> ocjeneIzSvihPredmetaDAO(Integer idUcenika){
 		logger.info("Pristup citanju ocjena iz svih predmeta dozvoljen.");
 		Ucenik ucenik=ucenikRepository.getById(idUcenika);
 		Integer godina =Character.getNumericValue(ucenik.getOdeljenje().charAt(0));
@@ -141,7 +139,7 @@ public class UcenikDAOImpl implements UcenikDAO{
 			ocjene.add(oIP);
 		}
 		logger.info("Citanje ocjena uspjesno zavrseno");
-		return new ResponseEntity<>(ocjene, HttpStatus.OK);
+		return ocjene;
 		}
 	
 	/*@Override
@@ -197,13 +195,25 @@ public class UcenikDAOImpl implements UcenikDAO{
 		Boolean dozvolaPristupa=false;
 		String uloga =korisnik.getOsnovnaUloga();
 		Boolean temp=false;
+		Ucenik ucenik=ucenikRepository.getById(idUcenika);
+		if (ucenik==null) {
+			logger.error("Nepostojeci ucenik");
+			dozvolaPristupa=false;
+			return dozvolaPristupa;
+		}
+		Predmet predmet=predmetRepository.getByIme(imePredmeta);
+		if(predmet==null) {
+			logger.error("Nepostojeci predmet");
+			dozvolaPristupa=false;
+			return dozvolaPristupa;
+		}
 		if (uloga.equals("ROLE_ADMIN")) {
 			temp=true;	
+			dozvolaPristupa=true;
+			logger.info("Pristup podacima o uceniku dozvoljen.");
+			return dozvolaPristupa;
 		}
-		Ucenik ucenik=ucenikRepository.getById(idUcenika);
-		Predmet predmet=predmetRepository.getByIme(imePredmeta);
 		Boolean provjera=nastavnikDAO.provjera(predmet, korisnik, ucenik);
-		
 		if (provjera || temp) {
 			dozvolaPristupa=true;
 			logger.info("Pristup podacima o uceniku dozvoljen.");

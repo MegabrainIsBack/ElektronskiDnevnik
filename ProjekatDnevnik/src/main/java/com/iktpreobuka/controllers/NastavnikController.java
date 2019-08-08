@@ -57,9 +57,13 @@ private final Logger logger = (Logger) LoggerFactory.getLogger(this.getClass());
 			@PathVariable String imeP, Principal principal) {
 		Korisnik korisnik=ulogovaniKorisnikDAO.ulogovaniKorisnik(principal);
 		logger.info("Ulogovani korisnik Id: " +korisnik.getId());
-		if(!(ucenikDAO.dozvolaPristupaNastavnik(idUcenika, korisnik, imeP))) {
+		if(!(korisnik.getOsnovnaUloga().equals("ROLE_TEACHER") || korisnik.getOsnovnaUloga().equals("ROLE_ADMIN"))) {
 			logger.warn("Pokusaj neautorizovanog pristupa - Id Korisnika: " +korisnik.getId());
 			return new ResponseEntity<>("Neautorizovani pristup", HttpStatus.UNAUTHORIZED);
+		}
+		if(!(ucenikDAO.dozvolaPristupaNastavnik(idUcenika, korisnik, imeP))) {
+			logger.warn("Pokusaj neautorizovanog pristupa - Id Korisnika: " +korisnik.getId());
+			return new ResponseEntity<>("Neautorizovani pristup ili greska u upitu.", HttpStatus.UNAUTHORIZED);
 		}
 		
 		try {
@@ -90,6 +94,10 @@ private final Logger logger = (Logger) LoggerFactory.getLogger(this.getClass());
 		logger.info("Ulogovani korisnik Id: " +korisnik.getId());
 		List<OcjeneIzJednogPredmetaDTO> ocjeneL=new ArrayList<OcjeneIzJednogPredmetaDTO>();
 		ArrayList<Ucenik> ucenici=ucenikRepository.getByOdeljenje(odeljenje);
+		if(ucenici.isEmpty()) {
+			logger.error("Odeljenje ne postoji ili mu nisu dodjeljeni ucenici.");
+			return new ResponseEntity<>("Odeljenje ne postoji ili mu nisu dodjeljeni ucenici.", HttpStatus.BAD_REQUEST);
+		}
 		logger.info("Pribavljeni svi ucenici odeljenja  " +odeljenje);
 		for(Ucenik ucenik: ucenici) {
 		Integer idUcenika=ucenik.getId();
@@ -101,9 +109,8 @@ private final Logger logger = (Logger) LoggerFactory.getLogger(this.getClass());
 			OcjeneIzJednogPredmetaDTO ocjene = ucenikDAO.ocjeneIzJednogPredmetaDAOSaTimestamp(idUcenika, imePredmeta);
 			if (!(ocjene.getOdeljenje().equals(null))) {
 				ocjeneL.add(ocjene);
-				logger.info("Uspjesno zavrseno PribaviOcjeneIzPredmetaZaOdeljenje");
-				return new ResponseEntity<>(ocjeneL, HttpStatus.OK);
-							}
+				continue;
+			}
 			logger.info("Nepostojeci ucenik ili odeljenje");
 			return new ResponseEntity<>("Nepostojeci ucenik ili odeljenje",HttpStatus.NOT_FOUND);
 			} catch (NullPointerException e) {
@@ -116,7 +123,8 @@ private final Logger logger = (Logger) LoggerFactory.getLogger(this.getClass());
 				return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 			}
 		}
-		return null;//<-WTF???
+		logger.info("Uspjesno zavrseno PribaviOcjeneIzPredmetaZaOdeljenje");
+		return new ResponseEntity<>(ocjeneL, HttpStatus.OK);
 	}
 	
 }

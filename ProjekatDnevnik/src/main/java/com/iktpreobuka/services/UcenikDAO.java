@@ -1,18 +1,18 @@
 package com.iktpreobuka.services;
 
 import java.util.ArrayList;
-
-import org.springframework.http.ResponseEntity;
+import java.util.List;
 
 import com.iktpreobuka.controllers.utilities.BrojcanaOcjenaITimestamp;
 import com.iktpreobuka.entities.Korisnik;
 import com.iktpreobuka.entities.Predmet;
 import com.iktpreobuka.entities.dto.ocjene.OcjeneIzJednogPredmetaDTO;
+import com.iktpreobuka.entities.dto.ocjene.OcjeneIzSvihPredmetaDTO;
 
 
 public interface UcenikDAO {
 
-	ResponseEntity<?> ocjeneIzSvihPredmetaDAO(Integer idUcenika);
+	List<OcjeneIzSvihPredmetaDTO> ocjeneIzSvihPredmetaDAO(Integer idUcenika);
 
 	Boolean dozvolaPristupa(Integer idUcenika, Korisnik korisnik);
 

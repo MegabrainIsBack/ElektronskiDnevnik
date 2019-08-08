@@ -1,6 +1,7 @@
 package com.iktpreobuka.controllers;
 
 import java.security.Principal;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.iktpreobuka.entities.Korisnik;
 import com.iktpreobuka.entities.dto.ocjene.OcjeneIzJednogPredmetaDTO;
+import com.iktpreobuka.entities.dto.ocjene.OcjeneIzSvihPredmetaDTO;
 import com.iktpreobuka.repositories.KorisnikRepository;
 import com.iktpreobuka.repositories.MajkaRepository;
 import com.iktpreobuka.repositories.OdeljenjeRepository;
@@ -92,8 +94,8 @@ public class UcenikController {
 		}
 		
 		try {
-			ResponseEntity<?> ocjene = ucenikDAO.ocjeneIzSvihPredmetaDAO(idUcenika);
-			if(!(ucenikDAO.dozvolaPristupa(idUcenika, korisnik))) {
+			List<OcjeneIzSvihPredmetaDTO> ocjene = ucenikDAO.ocjeneIzSvihPredmetaDAO(idUcenika);
+			if((ucenikDAO.dozvolaPristupa(idUcenika, korisnik))) {
 				logger.info("Pribavljanje ocjena ucenika id: "+idUcenika+" iz svih predmeta uspjesno.");
 				return new ResponseEntity<>(ocjene, HttpStatus.OK);
 							}

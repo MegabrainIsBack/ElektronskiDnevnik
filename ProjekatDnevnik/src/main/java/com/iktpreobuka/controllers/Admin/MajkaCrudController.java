@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.iktpreobuka.entities.RoditeljMajka;
-import com.iktpreobuka.entities.RoditeljOtac;
 import com.iktpreobuka.entities.Ucenik;
 import com.iktpreobuka.entities.dto.RoditeljAdminViewDTO;
 import com.iktpreobuka.repositories.MajkaRepository;
