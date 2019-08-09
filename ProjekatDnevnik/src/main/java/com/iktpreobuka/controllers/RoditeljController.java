@@ -20,6 +20,7 @@ import com.iktpreobuka.entities.Nastavnik;
 import com.iktpreobuka.entities.Odeljenje;
 import com.iktpreobuka.entities.Ucenik;
 import com.iktpreobuka.entities.dto.ocjene.OcjeneIzJednogPredmetaDTO;
+import com.iktpreobuka.entities.dto.ocjene.OcjeneIzSvihPredmetaDTO;
 import com.iktpreobuka.entities.dto.ucenik.UcenikZaRoditeljaBasicDTO;
 import com.iktpreobuka.repositories.NastavnikRepository;
 import com.iktpreobuka.repositories.OdeljenjeRepository;
@@ -50,6 +51,7 @@ public class RoditeljController {
 	
 	@RequestMapping(method= RequestMethod.GET, value="/OpsteInformacijeOUceniku/{idUcenika}")
 	public ResponseEntity<?> opsteInformacije(@PathVariable Integer idUcenika, Principal principal) {
+		try {
 		Korisnik korisnik=ulogovaniKorisnikDAO.ulogovaniKorisnik(principal);
 		logger.info("Ulogovani korisnik Id: " +korisnik.getId());
 		if(!(ucenikDAO.dozvolaPristupaRoditelj(idUcenika, korisnik))) {
@@ -57,7 +59,7 @@ public class RoditeljController {
 			return new ResponseEntity<>("Neautorizovani pristup", HttpStatus.UNAUTHORIZED);
 		}
 		
-		try {
+		
 			Ucenik ucenik=ucenikRepository.getById(idUcenika);
 			UcenikZaRoditeljaBasicDTO uzrDTO= new UcenikZaRoditeljaBasicDTO();
 			if (!(ucenik.getId()==null)) {
@@ -98,6 +100,7 @@ public class RoditeljController {
 	@RequestMapping (method=RequestMethod.GET, value="/{idUcenika}/OcjeneIzPredmeta/{imeP}")
 	public ResponseEntity<?> ocjeneIzPredmeta(@PathVariable Integer idUcenika, 
 			@PathVariable String imeP, Principal principal) {
+		try {
 		Korisnik korisnik=ulogovaniKorisnikDAO.ulogovaniKorisnik(principal);
 		logger.info("Ulogovani korisnik Id: " +korisnik.getId());
 		if(!(ucenikDAO.dozvolaPristupaRoditelj(idUcenika, korisnik))) {
@@ -105,7 +108,7 @@ public class RoditeljController {
 			return new ResponseEntity<>("Neautorizovani pristup", HttpStatus.UNAUTHORIZED);
 		}
 		
-		try {
+		
 			OcjeneIzJednogPredmetaDTO ocjene = ucenikDAO.ocjeneIzJednogPredmetaDAOSaTimestamp(idUcenika, imeP);
 			if (!(ocjene.getOdeljenje()==null)) {
 				logger.info("Pribavljanje ocjena ucenika id: "+idUcenika+"iz predmeta: "+imeP+" uspjesno.");
@@ -126,6 +129,7 @@ public class RoditeljController {
 	
 	@RequestMapping (method=RequestMethod.GET, value="/{idUcenika}/OcjeneIzSvihPredmeta")
 	public ResponseEntity<?> ocjeneIzSvihPredmeta(@PathVariable Integer idUcenika, Principal principal){
+		try {
 		Korisnik korisnik=ulogovaniKorisnikDAO.ulogovaniKorisnik(principal);
 		logger.info("Ulogovani korisnik Id: " +korisnik.getId());
 		if(!(ucenikDAO.dozvolaPristupaRoditelj(idUcenika, korisnik))) {
@@ -133,10 +137,10 @@ public class RoditeljController {
 			return new ResponseEntity<>("Neautorizovani pristup", HttpStatus.UNAUTHORIZED);
 		}
 		
-		try {
+	
 			
-			ResponseEntity<?> ocjene = ucenikDAO.ocjeneIzSvihPredmetaDAO(idUcenika);			
-			if(!(ucenikDAO.dozvolaPristupaRoditelj(idUcenika, korisnik))) {
+			List<OcjeneIzSvihPredmetaDTO> ocjene = ucenikDAO.ocjeneIzSvihPredmetaDAO(idUcenika);			
+			if((ucenikDAO.dozvolaPristupaRoditelj(idUcenika, korisnik))) {
 				logger.info("Pribavljanje ocjena ucenika id: "+idUcenika+" iz svih predmeta uspjesno.");
 				return new ResponseEntity<>(ocjene, HttpStatus.OK);
 							}

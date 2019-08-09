@@ -59,6 +59,7 @@ public class OcjenivanjeController {
 	
 	@RequestMapping(method = RequestMethod.POST, value="/oceniUcenika/{id}/izPredmeta/{imePredmeta}/Ocjenom/{ocj}")
 	public ResponseEntity<?> ocjenaIzPredmeta(@Valid @PathVariable Integer id, @PathVariable String imePredmeta, @PathVariable Integer ocj, Principal principal) {
+		try {
 		logger.info("Proces ocjenjivanja zapocet.");
 		String ulogovaniKorisnik =principal.getName();
 		logger.info("Ulogovani korisnik: "+ulogovaniKorisnik);
@@ -67,10 +68,15 @@ public class OcjenivanjeController {
 			logger.warn("Ocjenjivanje nije dozvoljeno - Ulogovani korisnik nije nastavnik.");
 			return new ResponseEntity<>("Samo nastavnik koji predaje predmet odeljenju kojem ucenik pripada moze unijeti ocjenu.", HttpStatus.BAD_REQUEST);
 		}
-		try {
+		
 			Ucenik ucenik=ucenikRepository.getById(id);
 			logger.info("Ucenik koji se ocjenjuje: "+ucenik.getIme()+" "+ucenik.getPrezime());
 			Predmet predmet=predmetRepository.getByIme(imePredmeta);
+			if(predmet==null) {
+				logger.error("Nepostojeci predmet.");
+				return new ResponseEntity<>("Nepostojeci predmet.", HttpStatus.BAD_REQUEST);
+
+			}
 			logger.info("Predmet iz kojeg se daje ocjena: "+ imePredmeta);
 			if (!(nastavnikDAO.provjera(predmet, korisnik, ucenik))) {
 				logger.warn("Ocjenjivanje nije dozvoljeno - Nastavnik ne predaje dati predmet ili ne predaje datom uceniku");
@@ -81,6 +87,11 @@ public class OcjenivanjeController {
 				Ocjena ocjena = new Ocjena();
 				Timestamp timestamp =new Timestamp(System.currentTimeMillis());
 				logger.info("Timestamp:"+timestamp);
+				if(ocj<1 || ocj>5) {
+					logger.error("Nedozvoljena vrijednost ocjene.");
+					return new ResponseEntity<>("Ocjena mora biti u rasponu 1 do 5.", HttpStatus.BAD_REQUEST);
+
+				}
 				ocjena.setOcjenaBrojcana(ocj);
 				ocjena.setOcjenaOpisna(ocjenjivanjeRepository.getByIdOcjene(ocj).getOcjenaOpisna());
 				ocjena.setTimestamp(timestamp);
@@ -126,6 +137,7 @@ public class OcjenivanjeController {
 	public ResponseEntity<?> izmjeniOcjenu(@Valid @PathVariable String datumOcjene, 
 			@PathVariable Integer id, @PathVariable String imePredmeta, 
 			@PathVariable Integer novaOcjena, Principal principal){
+		try {
 		logger.info("Zapocet proces izmjene ocjene.");
 		String ulogovaniKorisnik =principal.getName();
 		logger.info("Ulogovani korisnik: "+ulogovaniKorisnik);
@@ -134,7 +146,7 @@ public class OcjenivanjeController {
 			logger.info("Ocjenjivanje nije dozvoljeno - Ulogovani korisnik nije nastavnik.");
 			return new ResponseEntity<>("Samo nastavnik koji predaje predmet odeljenju kojem ucenik pripada moze izmjeniti ocjenu.", HttpStatus.BAD_REQUEST);
 		}
-		try {
+		
 		Ucenik ucenik=ucenikRepository.getById(id);
 		logger.info("Ucenik: "+ucenik.getIme());
 		Predmet predmet=predmetRepository.getByIme(imePredmeta);
@@ -147,6 +159,11 @@ public class OcjenivanjeController {
 		logger.info("Timestamp: "+Timestamp.valueOf(datumOcjene));
 		UPO staraOcjenaUPO=upoRepository.getByTimestampAndUcenikAndPredmet(Timestamp.valueOf(datumOcjene),ucenik, predmet);
 		logger.info("StaraOcjenaUPO: "+staraOcjenaUPO);
+		if(novaOcjena<1 || novaOcjena>5) {
+			logger.error("Nedozvoljena vrijednost ocjene.");
+			return new ResponseEntity<>("Ocjena mora biti u rasponu 1 do 5.", HttpStatus.BAD_REQUEST);
+
+		}
 		Ocjena staraOcjena=staraOcjenaUPO.getOcjena();
 		staraOcjena.setOcjenaBrojcana(novaOcjena);
 		String ocOpis=ocjenjivanjeRepository.getByIdOcjene(novaOcjena).getOcjenaOpisna();
@@ -167,12 +184,12 @@ public class OcjenivanjeController {
 		logger.info("Ocjena izmjenjena: "+poruka);
 		return new ResponseEntity<>(staraOcjena, HttpStatus.OK);
 		}
-		logger.info("Nepostojeci ucenik ili predmet");
-		return new ResponseEntity<>("Nepostojeci ucenik ili predmet",HttpStatus.NOT_FOUND);
+		logger.error("Nepostojeci ucenik, predmet ili datum ocjenjivanja.");
+		return new ResponseEntity<>("Nepostojeci ucenik, predmet ili datum ocjenjivanja.",HttpStatus.NOT_FOUND);
 		} 
 		catch (NullPointerException e) {
-			logger.info("Nepostojeci ucenik ili predmet");
-			return new ResponseEntity<>("Nepostojeci ucenik ili predmet",HttpStatus.NOT_FOUND);
+			logger.info("Nepostojeci ucenik, predmet ili datum ocjenjivanja.");
+			return new ResponseEntity<>("Nepostojeci ucenik, predmet ili datum ocjenjivanja.",HttpStatus.NOT_FOUND);
 		}
 		
 		catch (Exception e) {
@@ -191,17 +208,27 @@ public class OcjenivanjeController {
 		Korisnik korisnik = korisnikRepository.getByUsername(ulogovaniKorisnik);
 		if (!(korisnik.getOsnovnaUloga().equals("ROLE_TEACHER"))) {
 			logger.info("Ocjenjivanje nije dozvoljeno - Ulogovani korisnik nije nastavnik.");
-			return new ResponseEntity<>("Samo nastavnik koji predaje predmet odeljenju kojem ucenik pripada moze izbrisat ocjenu.", HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<>("Samo nastavnik koji predaje predmet odeljenju kojem ucenik pripada moze izbrisati ocjenu.", HttpStatus.BAD_REQUEST);
 		}
 		
 		Ucenik ucenik=ucenikRepository.getById(id);
+		if(ucenik==null) {
+			logger.error("Nepostojeci ucenik");
+			return new ResponseEntity<>("Nepostojeci ucenik.", HttpStatus.BAD_REQUEST);
+
+		}
 		Predmet predmet=predmetRepository.getByIme(imePredmeta);
-		if ((nastavnikDAO.provjera(predmet, korisnik, ucenik))) {
+		if (!(nastavnikDAO.provjera(predmet, korisnik, ucenik))) {
 			logger.info("Ocjenjivanje nije dozvoljeno - Nastavnik ne predaje dati predmet ili ne predaje datom uceniku");
 			return new ResponseEntity<>("Samo nastavnik koji predaje predmet odeljenju kojem ucenik pripada moze izbrisati ocjenu.", HttpStatus.BAD_REQUEST);
 		}
 		
 		UPO staraOcjenaUPO=upoRepository.getByTimestampAndUcenikAndPredmet(Timestamp.valueOf(datumOcjene),ucenik, predmet);
+		if(staraOcjenaUPO==null) {
+			logger.error("Pogresan datum");
+			return new ResponseEntity<>("Pogresan datum.", HttpStatus.BAD_REQUEST);
+
+		}
 		upoRepository.delete(staraOcjenaUPO);
 		
 		String poruka=("Uceniku "+ucenik.getIme()+" "+ucenik.getPrezime()+

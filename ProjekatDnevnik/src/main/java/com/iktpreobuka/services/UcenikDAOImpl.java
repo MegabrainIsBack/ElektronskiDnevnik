@@ -118,6 +118,10 @@ public class UcenikDAOImpl implements UcenikDAO{
 		oIP.setOdeljenje(((Ucenik) ucenik).getOdeljenje());
 		oIP.setImePredmeta(imeP);
 		Predmet predmet=predmetRepository.getByIme(imeP);
+		if(predmet==null) {
+			logger.error("Nepostojeci predmet.");
+			return null;
+		}
 		ArrayList<BrojcanaOcjenaITimestamp> ocjene=(ucenikDAO.ocjeneIzPredmetaSaTimestamp(predmet,ucenik));
 		oIP.setOcjenaIDatum(ocjene);
 		logger.info("Citanje ocjena uspjesno zavrseno");
